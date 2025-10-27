@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="img/logo.png" type="image/x-icon">
+    <title>Интерактивное звездное небо</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            color: white;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: none; /* Скрываем стандартный курсор */
+        }
+        
+        canvas {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        
+        .message {
+            position: absolute;
+            bottom: 20%;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            z-index: 2;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px rgba(255, 100, 100, 0.7);
+            padding: 0 20px;
+        }
+        
+        .message.show {
+            opacity: 1;
+        }
+        
+        .instructions {
+            position: absolute;
+            bottom: 10%;
+            text-align: center;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 2;
+            max-width: 80%;
+            line-height: 1.5;
+            text-align: center;
+        }
+        
+        .flashlight {
+            position: absolute;
+            pointer-events: none;
+            z-index: 3;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(
+                circle,
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.05) 30%,
+                transparent 70%
+            );
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+            display: none; /* Фонарик выключен по умолчанию */
+        }
+        
+        .flashlight.enabled {
+            display: block; /* Включаем фонарик */
+        }
+        
+        .progress {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1.2rem;
+            z-index: 2;
+            color: rgba(255, 220, 100, 0.9);
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .hint {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1rem;
+            z-index: 2;
+            color: rgba(255, 255, 255, 0.7);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .hint.show {
+            opacity: 1;
+        }
+        
+        .controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .volume-slider {
+            width: 80px;
+            height: 4px;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255, 220, 100, 0.9);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(255, 220, 100, 0.5);
+        }
+        
+        .volume-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: rgba(255, 220, 100, 0.9);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 5px rgba(255, 220, 100, 0.5);
+        }
+        
+        .flashlight-toggle {
+            background: rgba(255, 0, 0, 0.3); /* Красный цвет - фонарик выключен */
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .flashlight-toggle:hover {
+            background: rgba(255, 0, 0, 0.4);
+        }
+        
+        .flashlight-toggle.enabled {
+            background: rgba(255, 255, 255, 0.2); /* Белый цвет - фонарик включен */
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+        }
+        
+        .flashlight-toggle.enabled:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .discovery {
+            position: absolute;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            pointer-events: none;
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+        
+        .discovery.show {
+            opacity: 1;
+        }
+        
+        .discovery img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .discovery-text {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 250px;
+            text-align: center;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+        
+        /* Стили для кастомного курсора */
+        .custom-cursor {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            pointer-events: none;
+            z-index: 10;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease;
+        }
+        
+        .cursor-star {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.4) 70%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.7),
+                        0 0 20px 5px rgba(100, 200, 255, 0.5),
+                        0 0 30px 10px rgba(100, 150, 255, 0.3);
+            animation: pulse 2s infinite alternate;
+        }
+        
+        .cursor-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(100, 200, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: glow 3s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.7),
+                            0 0 20px 5px rgba(100, 200, 255, 0.5),
+                            0 0 30px 10px rgba(100, 150, 255, 0.3);
+            }
+            100% {
+                transform: scale(1.1);
+                box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.8),
+                            0 0 25px 8px rgba(100, 200, 255, 0.6),
+                            0 0 35px 12px rgba(100, 150, 255, 0.4);
+            }
+        }
+        
+        @keyframes glow {
+            0% {
+                opacity: 0.5;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            100% {
+                opacity: 0.8;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starCanvas"></canvas>
+    <div class="flashlight" id="flashlight"></div>
+    
+    <!-- Кастомный курсор -->
+    <div class="custom-cursor" id="customCursor">
+        <div class="cursor-glow"></div>
+        <div class="cursor-star"></div>
+    </div>
+    
+    <div class="progress" id="progress">Созвездие: 0/16</div>
+    <div class="hint" id="hint">Найди следующую звезду для продолжения созвездия</div>
+    <div class="message" id="message">Благодаря тебе, все звезды на моем небе горят ярким пламенем. <p>Спасибо за то, что ты есть, я тебя очень сильно люблю.</p> <p>С Днем Рождения, Касатик❤️</p></div>
+    <div class="instructions">Тут есть что-то интересное, поищи)</div>
+    
+    <div class="controls">
+        <div class="control-group">
+            <div class="volume-control">
+                <span style="color: rgba(255, 220, 100, 0.9);">♪</span>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="0.5">
+            </div>
+        </div>
+        <div class="control-group">
+            <div class="flashlight-toggle" id="flashlightToggle">🔦</div>
+        </div>
+    </div>
+    
+    <!-- Области обнаружения с изображениями и текстом -->
+    <div class="discovery" id="discovery1">
+        <img src="img/constellation1.jpg" alt="Созвездие Ориона">
+    </div>
+    <div class="discovery" id="discovery2">
+        <div class="discovery-text">Когда я смотрю в твои глаза, я как-будто смотрю в космос, в потрясающий и завораживающий</div>
+    </div>
+    <div class="discovery" id="discovery4">
+        <div class="discovery-text">Твоя улыбка - это солнце, сияющее ярче любых звезд и делающее меня счастливым</div>
+    </div>
+    <div class="discovery" id="discovery3">
+        <div class="discovery-text">Ты — самое красивое созвездие в моей галактике</div>
+    </div>
+    
+    <audio id="backgroundMusic" loop autoplay>
+        <!-- Локальный файл музыки -->
+        <source src="audio/space-music.mp3" type="audio/mpeg">
+        Ваш браузер не поддерживает аудио элемент.
+    </audio>
+
+    <script>
+        // Получаем элементы DOM
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+        const flashlight = document.getElementById('flashlight');
+        const customCursor = document.getElementById('customCursor');
+        const message = document.getElementById('message');
+        const progress = document.getElementById('progress');
+        const hint = document.getElementById('hint');
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const flashlightToggle = document.getElementById('flashlightToggle');
+
+        // Устанавливаем размеры canvas
+        function setCanvasSize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        setCanvasSize();
+        window.addEventListener('resize', setCanvasSize);
+
+        // Создаем звезды
+        const stars = [];
+        const specialStars = []; // Особые звезды для созвездия
+        const constellationPoints = []; // Точки созвездия
+        const activatedStars = []; // Активированные звезды созвездия
+        let isConstellationComplete = false;
+        let totalSpecialStars = 16; // Количество звезд в созвездии
+        let nextStarIndex = 0; // Индекс следующей звезды, которую нужно активировать
+        let flashlightEnabled = true; // Фонарик выключен по умолчанию
+        let nextStarPulseTimer = 0; // Таймер для пульсации следующей звезды
+        let isNextStarPulsing = false; // Флаг, указывающий, пульсирует ли следующая звезда
+
+        // Области обнаружения (координаты и элементы)
+        const discoveryAreas = [
+            { x: 100, y: 150, width: 200, height: 200, element: document.getElementById('discovery1') },
+            { x: canvas.width - 300, y: 100, width: 250, height: 150, element: document.getElementById('discovery2') },
+            { x: 200, y: canvas.height - 300, width: 180, height: 180, element: document.getElementById('discovery3') },
+            { x: canvas.width - 320, y: canvas.height - 350, width: 220, height: 120, element: document.getElementById('discovery4') }
+        ];
+
+        // Класс для звезды
+        class Star {
+            constructor(x, y, radius, isSpecial = false, specialIndex = -1) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.baseRadius = radius;
+                this.isSpecial = isSpecial;
+                this.specialIndex = specialIndex;
+                this.brightness = Math.random() * 0.5 + 0.5;
+                this.twinkleSpeed = Math.random() * 0.05 + 0.02;
+                this.twinkleDirection = 1;
+                this.isHighlighted = false;
+                this.isActivated = false;
+                this.isNext = false;
+                
+                if (isSpecial) {
+                    specialStars.push(this);
+                } else {
+                    stars.push(this);
+                }
+            }
+            
+            update() {
+                // Мерцание звезд
+                this.brightness += this.twinkleSpeed * this.twinkleDirection;
+                if (this.brightness >= 1 || this.brightness <= 0.5) {
+                    this.twinkleDirection *= -1;
+                }
+                
+                // Эффект подсветки при наведении
+                if (this.isHighlighted) {
+                    this.radius = this.baseRadius * 2;
+                } else {
+                    this.radius = this.baseRadius;
+                }
+                
+                // Эффект для активированных звезд
+                if (this.isActivated) {
+                    this.radius = this.baseRadius * 1.5;
+                }
+                
+                // Эффект для следующей звезды (пульсация)
+                if (this.isNext && isNextStarPulsing) {
+                    // Пульсация с использованием синусоидальной функции
+                    const pulse = Math.sin(nextStarPulseTimer * 0.1) * 0.5 + 0.5; // от 0 до 1
+                    this.radius = this.baseRadius * (1.5 + pulse * 0.5);
+                } else if (this.isNext) {
+                    this.radius = this.baseRadius;
+                }
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                
+                if (this.isSpecial) {
+                    // Особые звезды
+                    if (this.isActivated) {
+                        // Активированные звезды - красные
+                        ctx.fillStyle = `rgba(255, 50, 50, ${this.brightness})`;
+                    } else if (this.isNext && isNextStarPulsing) {
+                        // Следующая звезда - желтая с пульсацией
+                        const pulse = Math.sin(nextStarPulseTimer * 0.1) * 0.5 + 0.5;
+                        ctx.fillStyle = `rgba(255, 220, 0, ${this.brightness * (0.7 + pulse * 0.3)})`;
+                    } else {
+                        // Остальные особые звезды - белые как обычные
+                        ctx.fillStyle = `rgba(255, 255, 255, ${this.brightness})`;
+                    }
+                } else {
+                    // Обычные звезды
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.brightness})`;
+                }
+                
+                ctx.fill();
+                
+                // Добавляем свечение для подсвеченных и активированных звезд
+                if (this.isHighlighted || this.isActivated || (this.isNext && isNextStarPulsing)) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius * 2, 0, Math.PI * 2);
+                    const gradient = ctx.createRadialGradient(
+                        this.x, this.y, this.radius,
+                        this.x, this.y, this.radius * 2
+                    );
+                    
+                    if (this.isActivated) {
+                        gradient.addColorStop(0, `rgba(255, 50, 50, ${this.brightness * 0.7})`);
+                        gradient.addColorStop(1, 'rgba(255, 50, 50, 0)');
+                    } else if (this.isNext && isNextStarPulsing) {
+                        const pulse = Math.sin(nextStarPulseTimer * 0.1) * 0.5 + 0.5;
+                        gradient.addColorStop(0, `rgba(255, 220, 0, ${this.brightness * (0.5 + pulse * 0.3)})`);
+                        gradient.addColorStop(1, 'rgba(255, 220, 0, 0)');
+                    } else {
+                        gradient.addColorStop(0, `rgba(255, 255, 255, ${this.brightness * 0.7})`);
+                        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                    }
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Создаем случайные звезды
+        function createStars() {
+            const starCount = 300; // Увеличили количество звезд
+            
+            for (let i = 0; i < starCount; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 1.5 + 0.5;
+                
+                new Star(x, y, radius);
+            }
+            
+            // Создаем особые звезды для созвездия (в форме сердца)
+            createConstellationStars();
+        }
+
+        // Создаем звезды для созвездия в форме сердца
+        function createConstellationStars() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const size = Math.min(canvas.width, canvas.height) * 0.3;
+            
+            // Формула сердца в параметрической форме с большим количеством точек
+            const heartPoints = [];
+            const steps = totalSpecialStars;
+            
+            for (let i = 0; i < steps; i++) {
+                const t = (i / steps) * Math.PI * 2;
+                
+                // Параметрическое уравнение сердца
+                const x = 16 * Math.pow(Math.sin(t), 3);
+                const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+                
+                // Масштабируем и центрируем
+                const scaledX = centerX + (x * size) / 16;
+                const scaledY = centerY - (y * size) / 16;
+                
+                heartPoints.push({x: scaledX, y: scaledY});
+            }
+            
+            // Создаем звезды в точках сердца
+            for (let i = 0; i < heartPoints.length; i++) {
+                const point = heartPoints[i];
+                new Star(point.x, point.y, 2, true, i);
+                constellationPoints.push(point);
+            }
+            
+            // Указываем первую звезду как следующую
+            if (specialStars.length > 0) {
+                specialStars[0].isNext = true;
+            }
+            
+            updateProgress();
+        }
+
+        // Отрисовка созвездия
+        function drawConstellation() {
+            if (activatedStars.length < 2) return;
+            
+            // Рисуем линии между активированными звездами
+            ctx.beginPath();
+            ctx.moveTo(specialStars[activatedStars[0]].x, specialStars[activatedStars[0]].y);
+            
+            for (let i = 1; i < activatedStars.length; i++) {
+                ctx.lineTo(specialStars[activatedStars[i]].x, specialStars[activatedStars[i]].y);
+            }
+            
+            // Градиент для линии
+            const gradient = ctx.createLinearGradient(
+                specialStars[activatedStars[0]].x, specialStars[activatedStars[0]].y,
+                specialStars[activatedStars[activatedStars.length-1]].x, specialStars[activatedStars[activatedStars.length-1]].y
+            );
+            gradient.addColorStop(0, 'rgba(255, 100, 100, 0.8)');
+            gradient.addColorStop(1, 'rgba(255, 200, 100, 0.8)');
+            
+            ctx.strokeStyle = gradient;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Если все звезды активированы, замыкаем контур
+            if (activatedStars.length === totalSpecialStars) {
+                ctx.beginPath();
+                ctx.moveTo(specialStars[activatedStars[activatedStars.length-1]].x, specialStars[activatedStars[activatedStars.length-1]].y);
+                ctx.lineTo(specialStars[activatedStars[0]].x, specialStars[activatedStars[0]].y);
+                
+                const closingGradient = ctx.createLinearGradient(
+                    specialStars[activatedStars[activatedStars.length-1]].x, specialStars[activatedStars[activatedStars.length-1]].y,
+                    specialStars[activatedStars[0]].x, specialStars[activatedStars[0]].y
+                );
+                closingGradient.addColorStop(0, 'rgba(255, 100, 100, 0.8)');
+                closingGradient.addColorStop(1, 'rgba(255, 200, 100, 0.8)');
+                
+                ctx.strokeStyle = closingGradient;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Показываем сообщение
+                if (!isConstellationComplete) {
+                    isConstellationComplete = true;
+                    setTimeout(() => {
+                        message.classList.add('show');
+                    }, 1000);
+                }
+            }
+        }
+
+        // Обновление прогресса
+        function updateProgress() {
+            progress.textContent = `Созвездие: ${activatedStars.length}/${totalSpecialStars}`;
+        }
+
+        // Показать подсказку
+        function showHint(text) {
+            hint.textContent = text;
+            hint.classList.add('show');
+            setTimeout(() => {
+                hint.classList.remove('show');
+            }, 2000);
+        }
+
+        // Проверка областей обнаружения
+        function checkDiscoveryAreas(x, y) {
+            // Скрываем все области
+            discoveryAreas.forEach(area => {
+                area.element.classList.remove('show');
+            });
+            
+            // Проверяем, находится ли фонарик в какой-либо области
+            for (const area of discoveryAreas) {
+                if (x >= area.x && x <= area.x + area.width && 
+                    y >= area.y && y <= area.y + area.height) {
+                    // Показываем область обнаружения
+                    area.element.style.left = `${area.x}px`;
+                    area.element.style.top = `${area.y}px`;
+                    area.element.classList.add('show');
+                    break;
+                }
+            }
+        }
+
+        // Анимация
+        function animate() {
+            // Очищаем canvas
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Обновляем таймер пульсации следующей звезды
+            nextStarPulseTimer++;
+            
+            // Управляем пульсацией следующей звезды (включаем на 2 секунды каждые 5-10 секунд)
+            const pulseInterval = 300; // 5 секунд при 60 FPS
+            const pulseDuration = 120; // 2 секунды при 60 FPS
+            
+            if (nextStarIndex < totalSpecialStars) {
+                // Определяем, должна ли следующая звезда пульсировать
+                const cycleTime = nextStarPulseTimer % (pulseInterval + pulseDuration);
+                isNextStarPulsing = cycleTime > pulseInterval;
+            }
+            
+            // Обновляем и рисуем все звезды
+            for (const star of stars) {
+                star.update();
+                star.draw();
+            }
+            
+            for (const star of specialStars) {
+                star.update();
+                star.draw();
+            }
+            
+            // Рисуем созвездие
+            drawConstellation();
+            
+            requestAnimationFrame(animate);
+        }
+
+        // Обработка движения мыши
+        function handleMouseMove(e) {
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            // Перемещаем фонарик (даже если он выключен, чтобы при включении он был в правильном месте)
+            flashlight.style.left = `${x}px`;
+            flashlight.style.top = `${y}px`;
+            
+            // Перемещаем кастомный курсор
+            customCursor.style.left = `${x}px`;
+            customCursor.style.top = `${y}px`;
+            
+            // Проверяем области обнаружения
+            if (flashlightEnabled) {
+                checkDiscoveryAreas(x, y);
+            }
+            
+            // Проверяем, находится ли звезда в области фонарика
+            const flashlightRadius = 100;
+            
+            // Сбрасываем подсветку для всех звезд
+            for (const star of stars) {
+                star.isHighlighted = false;
+            }
+            
+            for (const star of specialStars) {
+                if (!star.isActivated && !star.isNext) {
+                    star.isHighlighted = false;
+                }
+            }
+            
+            // Подсвечиваем звезды в области фонарика (только если фонарик включен)
+            if (flashlightEnabled) {
+                for (const star of stars) {
+                    const dx = star.x - x;
+                    const dy = star.y - y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < flashlightRadius) {
+                        star.isHighlighted = true;
+                    }
+                }
+                
+                for (const star of specialStars) {
+                    if (star.isActivated) continue;
+                    
+                    const dx = star.x - x;
+                    const dy = star.y - y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < flashlightRadius) {
+                        star.isHighlighted = true;
+                    }
+                }
+            }
+        }
+
+        // Обработка клика
+        function handleClick(e) {
+            const x = e.clientX;
+            const y = e.clientY;
+            const clickRadius = 20;
+            
+            // Проверяем, кликнули ли на особую звезду
+            for (const star of specialStars) {
+                if (star.isActivated) continue;
+                
+                const dx = star.x - x;
+                const dy = star.y - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < clickRadius) {
+                    // Проверяем, является ли эта звезда следующей в последовательности
+                    if (star.specialIndex === nextStarIndex) {
+                        // Активируем звезду
+                        star.isActivated = true;
+                        star.isNext = false;
+                        activatedStars.push(star.specialIndex);
+                        
+                        // Обновляем следующую звезду
+                        nextStarIndex++;
+                        if (nextStarIndex < totalSpecialStars) {
+                            specialStars[nextStarIndex].isNext = true;
+                            // Сбрасываем таймер пульсации для новой следующей звезды
+                            nextStarPulseTimer = 0;
+                        }
+                        
+                        updateProgress();
+                    } else {
+                        // Показываем подсказку
+                        showHint("Следуйте правильной последовательности звёзд!");
+                    }
+                    break;
+                }
+            }
+        }
+
+        // Управление громкостью
+        function setupVolumeControl() {
+            // Устанавливаем начальную громкость
+            backgroundMusic.volume = volumeSlider.value;
+            
+            // Обработчик изменения громкости
+            volumeSlider.addEventListener('input', function() {
+                backgroundMusic.volume = this.value;
+            });
+        }
+
+        // Переключение фонарика
+        function setupFlashlightToggle() {
+            // Устанавливаем начальное состояние (выключен)
+            flashlightToggle.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+            flashlightToggle.style.boxShadow = 'none';
+            
+            flashlightToggle.addEventListener('click', function() {
+                flashlightEnabled = !flashlightEnabled;
+                
+                if (flashlightEnabled) {
+                    flashlight.classList.add('enabled');
+                    flashlightToggle.classList.add('enabled');
+                    flashlightToggle.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                    flashlightToggle.style.boxShadow = '0 0 5px rgba(255, 255, 255, 0.3)';
+                } else {
+                    flashlight.classList.remove('enabled');
+                    flashlightToggle.classList.remove('enabled');
+                    flashlightToggle.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+                    flashlightToggle.style.boxShadow = 'none';
+                    
+                    // Сбрасываем подсветку звезд
+                    for (const star of stars) {
+                        star.isHighlighted = false;
+                    }
+                    
+                    for (const star of specialStars) {
+                        star.isHighlighted = false;
+                    }
+                    
+                    // Скрываем области обнаружения
+                    discoveryAreas.forEach(area => {
+                        area.element.classList.remove('show');
+                    });
+                }
+            });
+        }
+
+        // Настройка музыки
+        function setupMusic() {
+            // Устанавливаем громкость по умолчанию
+            backgroundMusic.volume = 0.5;
+            
+            // Попытка автоматического воспроизведения
+            const playMusic = () => {
+                backgroundMusic.play().catch(e => {
+                    console.log("Автовоспроизведение заблокировано. Для включения музыки кликните по странице.");
+                });
+            };
+            
+            // Пытаемся воспроизвести сразу
+            playMusic();
+            
+            // Также пробуем воспроизвести при любом взаимодействии с страницей
+            document.addEventListener('click', playMusic, { once: true });
+            document.addEventListener('touchstart', playMusic, { once: true });
+            document.addEventListener('keydown', playMusic, { once: true });
+            
+            // Убедимся, что музыка продолжает играть
+            backgroundMusic.addEventListener('ended', function() {
+                this.currentTime = 0;
+                this.play();
+            });
+        }
+
+        // Обновление позиций областей обнаружения при изменении размера окна
+        function updateDiscoveryAreas() {
+            discoveryAreas[1].x = canvas.width - 300;
+            discoveryAreas[3].x = canvas.width - 320;
+            discoveryAreas[2].y = canvas.height - 300;
+            discoveryAreas[3].y = canvas.height - 350;
+        }
+
+        // Инициализация
+        function init() {
+            createStars();
+            animate();
+            setupMusic();
+            setupVolumeControl();
+            setupFlashlightToggle();
+            
+            // Обновляем области при изменении размера окна
+            window.addEventListener('resize', updateDiscoveryAreas);
+            
+            // Добавляем обработчики событий
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('click', handleClick);
+        }
+
+        // Запускаем приложение
+        init();
+    </script>
+</body>
+</html>
