@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="logo.png" type="image/x-icon">
+    <title>Для милашки</title>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Уютный деревянный фон */
+            background: radial-gradient(circle at center, #8d6e63 0%, #3e2723 100%);
+            font-family: 'Caveat', cursive;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .heart-bg {
+            position: fixed; /* Чтобы не зависели от контейнеров */
+            top: -10vh; /* Прячем за верхний край в конце */
+            color: rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+            z-index: 1;
+            animation: float-bg linear infinite;
+            will-change: transform;
+        }
+        @keyframes float-bg {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(0vh) rotate(360deg); opacity: 0; }
+        }
+
+        .scene {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Счетчик */
+        .counter {
+            position: absolute;
+            top: 29px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.8rem;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 8px 20px;
+            border-radius: 30px;
+            backdrop-filter: blur(4px);
+            z-index: 50;
+        }
+
+        /* --- БАНКА (Увеличенная) --- */
+        /* Контейнер-обертка для фото и сердечек */
+        .jar-wrapper {
+            margin-top: 100px;
+            position: relative;
+            width: 350px; /* Подбери под размер своего фото */
+            height: auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .jar-image {
+            width: 100%;
+            display: block;
+            user-select: none;
+            pointer-events: none; /* Чтобы клик шел на контейнер */
+        }
+
+        /* --- АНИМАЦИЯ ОТКРЫТИЯ --- */
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* Контейнер записки */
+        .note-container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Сама записка */
+        .note {
+            background: #fff;
+            color: #3e2723;
+            font-size: 2rem;
+            line-height: 1.4;
+            text-align: center;
+            padding: 40px;
+            box-sizing: border-box;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+
+            /* ФИКС МЕЛЬКАНИЯ: начальное состояние — невидимка */
+            opacity: 0;
+            transform: scale(0); 
+        }
+
+        /* Класс для анимации развертывания */
+        .unfold-animation {
+            animation: unfoldPaper 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        @keyframes unfoldPaper {
+            0% {
+                width: 50px; height: 50px; border-radius: 50%;
+                transform: scale(0.5) rotate(720deg);
+                opacity: 0;
+            }
+            10% { opacity: 1; } /* Быстро становимся видимыми, но маленькими */
+            60% {
+                width: 150px; height: 150px; border-radius: 20%;
+                transform: scale(0.9) rotate(180deg);
+            }
+            100% {
+                width: 340px; height: auto; min-height: 250px; border-radius: 5px;
+                transform: scale(1) rotate(-2deg);
+                opacity: 1;
+            }
+        }
+
+        /* Текст внутри записки (появляется после развертывания) */
+        .note-text {
+            opacity: 0;
+            /* Убираем задержку отсюда, перенесем её в JS для надежности */
+            transition: none; 
+        }
+
+        .note-text.visible {
+            opacity: 1;
+            transition: opacity 0.5s ease-in; /* Плавное появление только когда добавляем класс */
+        }
+
+
+
+        .close-btn {
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: #ff7043;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-family: inherit;
+            font-size: 1.4rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 87, 34, 0.4);
+            
+            /* Начальное состояние: невидима и не нажимается */
+            opacity: 0;
+            pointer-events: none; 
+            transition: opacity 0.6s ease, transform 0.2s;
+        }
+
+        /* Класс, который мы будем добавлять через JS */
+        .close-btn.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1);
+            background: #f4511e;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        /* Тряска банки */
+        @keyframes shakeHard {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-5px, -5px) rotate(-3deg); }
+            20% { transform: translate(5px, 0px) rotate(3deg); }
+            30% { transform: translate(-5px, 5px) rotate(-3deg); }
+            40% { transform: translate(5px, -5px) rotate(3deg); }
+            50% { transform: translate(-5px, 5px) rotate(-3deg); }
+            60% { transform: translate(5px, 0px) rotate(3deg); }
+            70% { transform: translate(-5px, -5px) rotate(-3deg); }
+            80% { transform: translate(5px, 5px) rotate(3deg); }
+            90% { transform: translate(-2px, -2px) rotate(0deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        .shake-active {
+            animation: shakeHard 0.6s ease-in-out;
+        }
+
+        .instruction {
+            margin-top: 30px;
+            color: rgba(255,255,255,0.6);
+            font-size: 1.3rem;
+        }
+        /* Панель истории */
+.history-panel {
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    width: 280px;
+    max-height: 70vh;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+}
+
+.history-panel h3 {
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-size: 1.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.history-list {
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 10px;
+}
+
+/* Стили для каждой строчки текста в истории */
+.history-item {
+    background: rgba(255, 255, 255, 0.15);
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    animation: slideIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Красивый скроллбар */
+.history-list::-webkit-scrollbar {
+    width: 5px;
+}
+.history-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+}
+
+/* Адаптивность для мобилок: прячем панель или сдвигаем вниз */
+@media (max-width: 900px) {
+    .history-panel {
+        position: relative;
+        right: 0;
+        top: 20px;
+        width: 90%;
+        max-height: 200px;
+        order: 3; /* Появится под банкой */
+    }
+}
+    </style>
+</head>
+<body>
+
+<div id="welcomeOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #3e2723; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.8s;">
+    <h1 style="color: white; font-size: 3rem; margin-bottom: 20px;">Для самой красивой принцессы</h1>
+    <button onclick="startApp()" style="padding: 15px 40px; font-family: inherit; font-size: 1.8rem; background: #ff7043; color: white; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">Открыть</button>
+</div>
+
+<audio id="bgMusic" src="music.mp3" loop preload="auto"></audio>
+<div class="scene">
+    <div class="counter" id="counter">0 / 0</div>
+
+    <div class="history-panel">
+        <h3>Сердце:</h3>
+        <div id="historyList" class="history-list"></div>
+    </div>
+
+    <div class="jar-wrapper" id="jarContainer" onclick="openJar()">
+        <img src="jar.png" class="jar-image" alt="Love Jar">
+        
+        <div class="hearts-container" id="jar"></div>
+    </div>
+    
+    <div class="instruction">Потряси банку! (кликни)</div>
+</div>
+
+    <div class="overlay" id="overlay">
+        <div class="note-container">
+            <div class="note" id="noteCard">
+                <div class="tape" id="tape"></div>
+                <div class="note-text" id="noteText">Текст</div>
+                <button class="close-btn" onclick="closeNote()">Сохранить в сердце</button>
+            </div>
+        </div>
+    </div>
+
+<audio id="unfoldSound" src="paper.mp3" preload="auto"></audio>
+
+<script>
+    const reasons = [
+        "Знаешь, я думал, что тебе сказать...",
+        "И по итогу не придумал ничего лучше, как рассказать о своих чувствах...",
+        "Ты правда очень милая, красивая и просто ахуенная...",
+        "Поэтому я очень хочу, чтобы ты, не смотря на трудности в учебе и в отношениях с бабушкой, меньше грустила, переживала и чаще светила своей потрясающей улыбкой",
+        "Я очень хочу сделать тебя счастливой, радовать мелочами, заботиться и дарить подарочки)",
+        "И даже не смотря на трудности в наших с тоббой отношениях, я очень хочу, чтобы у нас с тобой все сложилось, ты мне очень нравишься и я так хочу тебя обнять",
+        "И надеюсь, что бабушка мешать нам не будет, а то мало ли чо ей в голову придет, но даже если так, я был бы не прочь за тебя посражаться и отбить от этой карги (без негатива, хвхв)",
+        "Так что впереди много всего, не сдавайся, продолжай оставаться такой же красивой и нереально милой, а я буду делать все, что в моих силах, чтобы тебе помочь",
+        "А вообще я забыл сказать самое главное...",
+        "Я люблю тебя, Касатик❤️"
+
+    ];
+
+    const colors = ['#ffcdd2', '#f8bbd0', '#e1bee7', '#d1c4e9', '#c5cae9', '#b3e5fc', '#b2dfdb', '#c8e6c9', '#f0f4c3', '#ffecb3', '#ffe0b2', '#ffccbc'];
+
+    const jar = document.getElementById('jar');
+    const jarContainer = document.getElementById('jarContainer');
+    const overlay = document.getElementById('overlay');
+    const noteCard = document.getElementById('noteCard');
+    const noteText = document.getElementById('noteText');
+    const tape = document.getElementById('tape');
+    const counter = document.getElementById('counter');
+    const unfoldSound = document.getElementById('unfoldSound'); // Ссылка на звук
+
+    let openedCount = 0;
+    let unreadIndices = Array.from({length: reasons.length}, (_, i) => i);
+    
+    counter.innerText = `${openedCount} / ${reasons.length}`;
+
+    function fillJar() {
+        const paperCount = Math.min(reasons.length * 3, 70);
+        for (let i = 0; i < paperCount; i++) {
+            const paper = document.createElement('div');
+            paper.classList.add('crumpled-paper');
+            paper.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            const bottomOffset = Math.random() * 200;
+            const leftPos = Math.random() * 240 + 10;
+            paper.style.bottom = `${bottomOffset}px`;
+            paper.style.left = `${leftPos}px`;
+            paper.style.transform = `rotate(${Math.random() * 360}deg)`;
+            jar.appendChild(paper);
+        }
+    }
+    fillJar();
+
+        function openJar() {
+            if (overlay.classList.contains('active')) return;
+
+            // Звук запускается СРАЗУ при клике на банку
+            unfoldSound.currentTime = 0;
+            unfoldSound.play().catch(e => console.log("Sound blocked"));
+
+            jarContainer.classList.add('shake-active');
+            setTimeout(() => {
+                jarContainer.classList.remove('shake-active');
+                showNote();
+            }, 600);
+        }
+
+        function showNote() {
+            let currentReason = "";
+            
+            // 1. Сначала определяем текст ПО ПОРЯДКУ
+            if (openedCount >= reasons.length) {
+                currentReason = "А все записочек нет больше, их нет, а я есть)";
+            } else {
+                // Берем текст по текущему номеру (индексу)
+                currentReason = reasons[openedCount];
+                openedCount++; // Увеличиваем счетчик для следующего раза
+                counter.innerText = `${openedCount} / ${reasons.length}`;
+            }
+
+            // 2. СБРОС: Полная очистка перед анимацией
+            noteText.innerText = ""; 
+            noteText.classList.remove('visible');
+            tape.classList.remove('visible');
+            noteCard.classList.remove('unfold-animation');
+            
+            const btn = document.querySelector('.close-btn');
+            btn.classList.remove('visible');
+
+            // Принудительный сброс для браузера
+            void noteCard.offsetWidth; 
+
+            // 3. Показываем оверлей
+            overlay.classList.add('active');
+
+            // 4. Запуск развертывания (2.5 сек в CSS)
+            setTimeout(() => {
+                noteCard.classList.add('unfold-animation');
+            }, 50);
+
+            // 5. Остановка звука в конце развертывания
+            setTimeout(() => {
+                unfoldSound.pause();
+            }, 2400); 
+
+            // 7. ЗАТЕМ ТЕКСТ (на 3.2 сек — даем время скотчу появиться)
+            setTimeout(() => {
+                noteText.innerText = currentReason;
+                noteText.classList.add('visible');
+            }, 2450); 
+
+            // 8. КНОПКА (на 4.5 сек)
+            setTimeout(() => {
+                btn.classList.add('visible');
+            }, 3200);
+        }
+
+        function closeNote() {
+        const currentText = noteText.innerText;
+            
+            // ПРОВЕРКА: Добавляем в историю, только если текст НЕ совпадает с финальной фразой
+            const finalPhrase = "А все записочек нет больше, их нет, а я есть)";
+            
+            if (currentText && currentText !== finalPhrase) {
+                const historyList = document.getElementById('historyList');
+                const newItem = document.createElement('div');
+                newItem.className = 'history-item';
+                newItem.innerText = currentText;
+                historyList.appendChild(newItem);
+                
+                // Авто-скролл вниз
+                historyList.scrollTop = historyList.scrollHeight;
+            }
+            // 1. Убираем оверлей мгновенно
+            overlay.classList.remove('active');
+            
+            // 2. Останавливаем звук
+            unfoldSound.pause();
+            unfoldSound.currentTime = 0;
+
+            // 3. Очищаем всё, чтобы следующая записка была как новая
+            noteText.innerText = "";
+            noteText.classList.remove('visible');
+            tape.classList.remove('visible');
+            noteCard.classList.remove('unfold-animation');
+            document.querySelector('.close-btn').classList.remove('visible');
+        }
+        function createBg() {
+            for (let i = 0; i < 25; i++) {
+                const h = document.createElement('div');
+                h.className = 'heart-bg';
+                h.innerText = '❤';
+                h.style.left = Math.random() * 100 + 'vw';
+                h.style.fontSize = (Math.random() * 20 + 10) + 'px';
+                h.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                // Отрицательная задержка заставляет анимацию начаться "в прошлом"
+                h.style.animationDelay = -(Math.random() * 20) + 's'; 
+                document.body.appendChild(h);
+            }
+        }
+        createBg();
+
+    function startApp() {
+        // Запускаем музыку
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.volume = 0.4;
+        bgMusic.play().catch(e => console.log("Ошибка звука:", e));
+
+        // Убираем экран приветствия
+        const overlay = document.getElementById('welcomeOverlay');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.display = 'none';
+        }, 800);
+    }
+</script>
+</body>
+</html>
