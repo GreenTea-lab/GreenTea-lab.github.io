@@ -1,0 +1,13 @@
+{
+  "name": "tractor-farm",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/lobster": "^5.2.0",
+    "@fontsource/rubik": "^5.2.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0",
+    "three": "^0.186.1"
+  }
+}
