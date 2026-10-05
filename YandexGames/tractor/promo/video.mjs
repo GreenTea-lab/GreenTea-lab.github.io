@@ -237,7 +237,7 @@ for (const lang of langs) {
   execSync(
     `ffmpeg -y -loglevel error -framerate ${FPS} -i "${dir}/%05d.jpg" -ss 0.4 -i "${audio}" ` +
       `-filter:a "loudnorm=I=-16:TP=-1.5:LRA=11,afade=t=in:st=0:d=0.3,afade=t=out:st=${(SECONDS - 0.8).toFixed(2)}:d=0.8" ` +
-      `-vf "scale=1920:1080:flags=lanczos" -c:v libx264 -preset slow -crf 19 -pix_fmt yuv420p -r ${FPS} -c:a aac -b:a 160k -ar 48000 -t ${SECONDS} -movflags +faststart "${out}"`,
+      `-vf "scale=1920:1080:flags=lanczos" -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p -r ${FPS} -c:a aac -b:a 160k -ar 48000 -t ${SECONDS} -movflags +faststart "${out}"`,
     { stdio: 'inherit' },
   );
   const errs = [...e1, ...e2];
