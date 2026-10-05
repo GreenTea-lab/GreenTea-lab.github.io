@@ -30,6 +30,7 @@ node tools/music_audit.mjs       # музыка без протяжных и р�
 node promo/art.mjs       # иконка, обложки, витрина
 node promo/shots.mjs     # скриншоты геймплея RU/EN, desktop и mobile
 node promo/inapps.mjs    # иконки покупок и CSV
+node promo/video.mjs     # видео 16:9 до 8 с, RU и EN (release/video/)
 ```
 
 Инструкция по публикации: `release/КАК_ОПУБЛИКОВАТЬ.md`.
