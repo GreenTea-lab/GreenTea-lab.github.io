@@ -48,7 +48,7 @@ let all = await run({ w: 1280, h: 720, pre, steps: async (page) => {
   await page.evaluate(() => window.__game.growNow(1)); await page.waitForTimeout(900);
   res.instantRipe = await page.evaluate(() => window.__game.fields[1].stage === 3);
   // заказ: загрузить прицеп урожаем заказа и продать
-  const ord = await page.evaluate(() => { const g = window.__game, o = g.s.orders[0]; g.s.load = { [o.crop]: o.qty }; g.tractor.load = o.qty; return o; });
+  const ord = await page.evaluate(() => { const g = window.__game; g.s.xp = 0; const o = g.s.orders[0]; g.s.load = { [o.crop]: o.qty }; g.tractor.load = o.qty; return o; });
   const c2 = await page.evaluate(() => window.__game.s.coins);
   await page.evaluate(() => window.__game.sell());
   res.orderPaid = (await page.evaluate(() => window.__game.s.coins)) - c2 === ord.reward;

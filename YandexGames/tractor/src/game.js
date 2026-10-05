@@ -156,7 +156,7 @@ export class Game {
       }
     }
     this.full = tr.load >= tr.cap - 0.01;
-    audio.engine(this.s.settings.engine, Math.abs(tr.v), working);
+    audio.engine(this.s.settings.engine, Math.abs(tr.v));
     // разгрузка в амбаре
     const du = Math.hypot(tr.x - UNLOAD.x, tr.z - UNLOAD.z);
     if (this.unloadT < 0 && du < UNLOAD.r && tr.load > 0.5) this.unloadT = 0;
@@ -903,7 +903,7 @@ export class Game {
     this.ui.root.classList.add('hidden');
     this.arrow.visible = false;
     audio.setMood('menu');
-    audio.engine(false, 0, false);
+    audio.engine(false, 0);
     this.persist(true);
     this.setGameplay();
   }

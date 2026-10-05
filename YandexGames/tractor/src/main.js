@@ -7,10 +7,21 @@ import { audio } from './audio.js';
 import { initVolume } from './volume.js';
 import { Game, IAP_DEFS } from './game.js';
 
+// шкала загрузки на заставке
+function progress(p) {
+  const f = document.getElementById('bootFill'),
+    t = document.getElementById('bootPct');
+  if (f) f.style.width = Math.round(p) + '%';
+  if (t) t.textContent = Math.round(p) + '%';
+}
+
 async function boot() {
+  progress(18);
   await sdk.init();
+  progress(42);
   setLang(sdk.lang);
   await save.load();
+  progress(60);
   try {
     await iap.init(IAP_DEFS, () => save.flush());
   } catch (e) {
@@ -19,10 +30,13 @@ async function boot() {
   if (iap.owned.has('disable_ads')) save.data.noAds = true;
   sdk.noAds = !!save.data.noAds;
   initVolume(save.data.settings);
+  progress(72);
   try {
     await Promise.all(['800 20px Rubik', '500 20px Rubik', '20px Lobster'].map((f) => document.fonts.load(f, 'Аa1')));
   } catch (e) {}
+  progress(85);
   const game = new Game();
+  progress(100);
   const unlock = () => {
     audio.unlock();
     audio.startMusic();
@@ -53,8 +67,11 @@ async function boot() {
     if (!e.target.closest('.sh-b')) e.preventDefault();
   }, { passive: false });
   const b = document.getElementById('boot');
-  b.style.opacity = '0';
-  setTimeout(() => b.remove(), 500);
+  // короткая пауза, чтобы шкала успела дойти до конца
+  setTimeout(() => {
+    b.style.opacity = '0';
+    setTimeout(() => b.remove(), 550);
+  }, 350);
   sdk.ready();
 }
 

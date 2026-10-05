@@ -165,46 +165,39 @@ class AudioEngine {
     }
   }
 
-  // мотор: мягкий низкий гул, тон и громкость зависят от скорости. work — орудие работает (шорох)
-  engine(on, speed, work) {
+  // мотор: очень тихий мягкий «бархатный» шум, только низы (никаких пил и средних частот).
+  // Громкость чуть растёт со скоростью; на месте почти не слышно.
+  engine(on, speed) {
     if (!this.ctx || this.ctx.state !== 'running') return;
     const c = this.ctx;
     if (!this.eng) {
-      const o1 = c.createOscillator(),
-        o2 = c.createOscillator();
-      o1.type = 'sawtooth';
-      o2.type = 'triangle';
+      // коричневый шум: интегрированный белый — мягкий, без шипения
+      const len = c.sampleRate * 2;
+      const buf = c.createBuffer(1, len, c.sampleRate);
+      const d = buf.getChannelData(0);
+      let last = 0;
+      for (let i = 0; i < len; i++) {
+        last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02;
+        d[i] = last * 3.5;
+      }
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
       const lp = c.createBiquadFilter();
       lp.type = 'lowpass';
-      lp.frequency.value = 260;
+      lp.frequency.value = 140;
+      lp.Q.value = 0.3;
       const g = c.createGain();
       g.gain.value = 0;
-      o1.connect(lp);
-      o2.connect(lp);
-      lp.connect(g).connect(this.sfx);
-      o1.start();
-      o2.start();
-      const ns = c.createBufferSource();
-      ns.buffer = this.noise;
-      ns.loop = true;
-      const nf = c.createBiquadFilter();
-      nf.type = 'bandpass';
-      nf.frequency.value = 700;
-      nf.Q.value = 0.6;
-      const ng = c.createGain();
-      ng.gain.value = 0;
-      ns.connect(nf).connect(ng).connect(this.sfx);
-      ns.start();
-      this.eng = { o1, o2, lp, g, ng };
+      src.connect(lp).connect(g).connect(this.sfx);
+      src.start();
+      this.eng = { lp, g };
     }
     const e = this.eng,
       t = c.currentTime;
     const k = Math.min(1, speed / 7);
-    e.o1.frequency.setTargetAtTime(46 + k * 30, t, 0.2);
-    e.o2.frequency.setTargetAtTime(92 + k * 60, t, 0.2);
-    e.lp.frequency.setTargetAtTime(220 + k * 260, t, 0.2);
-    e.g.gain.setTargetAtTime(on ? 0.05 + k * 0.05 : 0, t, 0.25);
-    e.ng.gain.setTargetAtTime(on && work ? 0.025 : 0, t, 0.2);
+    e.lp.frequency.setTargetAtTime(110 + k * 70, t, 0.4);
+    e.g.gain.setTargetAtTime(on ? 0.012 + k * 0.03 : 0, t, 0.4);
   }
 }
 
