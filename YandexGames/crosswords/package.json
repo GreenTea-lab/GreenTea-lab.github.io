@@ -1,0 +1,15 @@
+{
+  "name": "crosswords-classic",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node tools/genlevels.mjs && node build.mjs"
+  },
+  "dependencies": {
+    "@fontsource/pt-sans": "^5.2.0",
+    "@fontsource/pt-serif": "^5.2.0",
+    "esbuild": "^0.28.2",
+    "playwright": "^1.63.0"
+  }
+}

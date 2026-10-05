@@ -1,0 +1,338 @@
+# Medium words
+PARIS|City of the Eiffel Tower
+LONDON|City of Big Ben
+ROME|Eternal City
+MADRID|Capital of Spain
+BERLIN|Capital of Germany
+VIENNA|City of the waltz
+ATHENS|City of the Parthenon
+CAIRO|Capital of Egypt
+TOKYO|Capital of Japan
+DUBLIN|Capital of Ireland
+OSLO|Capital of Norway
+LISBON|Capital of Portugal
+PRAGUE|Capital of the Czech Republic
+VENICE|Italian city of canals
+FLORENCE|Italian city of Michelangelo's David
+BOSTON|City of the famous Tea Party
+CHICAGO|Windy City
+TEXAS|Lone Star State
+ALASKA|Largest US state
+FLORIDA|Sunshine State
+ITALY|Boot-shaped country
+FRANCE|Country of the Louvre
+SPAIN|Country of flamenco
+GREECE|Birthplace of the Olympic Games
+EGYPT|Land of the pyramids
+INDIA|Country of the Taj Mahal
+CHINA|Country of the Great Wall
+JAPAN|Land of the rising sun
+CANADA|Country with a maple leaf flag
+BRAZIL|Country of the Rio carnival
+MEXICO|Country of tacos and sombreros
+PERU|Country of Machu Picchu
+KENYA|African country of safaris
+NORWAY|Country of fjords
+SWEDEN|Country of ABBA
+SCOTLAND|Land of kilts and bagpipes
+WALES|Land of the red dragon
+IRELAND|Emerald Isle
+AFRICA|Continent with the Sahara
+EUROPE|Continent with Paris and Rome
+ASIA|Largest continent
+NILE|Longest river in Africa
+AMAZON|Great South American river
+THAMES|River through London
+DANUBE|Blue river of the waltz
+ALPS|Mountains of Switzerland
+SAHARA|Largest hot desert
+DESERT|Dry sandy land
+JUNGLE|Tropical forest
+VALLEY|Low land between hills
+CANYON|Deep gorge like the Grand one
+VOLCANO|Mountain that erupts
+GLACIER|Slow-moving river of ice
+CAPE|Point of land like Horn or Cod
+COAST|Land beside the sea
+HARBOUR|Safe place for ships
+LIGHTHOUSE|Tower that guides ships
+CASTLE|Fortress with towers
+PALACE|Royal residence
+TOWER|Tall narrow building
+CATHEDRAL|Large church
+TEMPLE|Ancient place of worship
+PYRAMID|Egyptian tomb
+STATUE|Sculpted figure
+FOUNTAIN|Water feature in a square
+GALLERY|Place to see paintings
+PAINTER|Artist with brushes
+PORTRAIT|Picture of a person
+CANVAS|Cloth for oil paintings
+EASEL|Stand for a painting
+BRUSH|Painter's tool
+PIANO|Instrument with black and white keys
+VIOLIN|String instrument played with a bow
+GUITAR|Six-string instrument
+DRUM|Instrument you beat
+FLUTE|Woodwind instrument
+TRUMPET|Brass instrument
+HARP|Angel's instrument
+ORGAN|Church instrument with pipes
+CHOIR|Group of singers
+OPERA|Drama set to music
+BALLET|Dance performance in tutus
+WALTZ|Dance in three-four time
+TANGO|Passionate Argentine dance
+CONCERT|Musical performance
+MELODY|Tune
+SYMPHONY|Piece for an orchestra
+ORCHESTRA|Group of musicians with a conductor
+MOZART|Composer of The Magic Flute
+BACH|German composer of the Brandenburg Concertos
+CHOPIN|Polish composer of nocturnes
+ELVIS|King of rock and roll
+BEATLES|Fab Four from Liverpool
+NOVEL|Long work of fiction
+POEM|Verse
+POET|Writer of verse
+AUTHOR|Writer of a book
+CHAPTER|Part of a book
+RHYME|Words that sound alike at the end
+FABLE|Short story with a moral
+LEGEND|Old traditional story
+MYTH|Ancient story about gods
+SHAKESPEARE|Bard of Avon
+DICKENS|Author of Oliver Twist
+AUSTEN|Author of Pride and Prejudice
+TWAIN|Creator of Tom Sawyer
+HAMLET|Prince of Denmark
+ROMEO|Juliet's lover
+SHERLOCK|Detective of Baker Street
+WATSON|Holmes's friend and doctor
+POIROT|Christie's Belgian detective
+MARPLE|Christie's village sleuth
+ALICE|She fell down the rabbit hole
+CINDERELLA|She lost her glass slipper
+DRAGON|Fire-breathing beast
+UNICORN|Horse with a single horn
+GIANT|Huge being from fairy tales
+FAIRY|Tiny magical being with wings
+WIZARD|Magician like Merlin
+WITCH|She flies on a broomstick
+KING|Ruler with a crown
+QUEEN|Wife of a king
+PRINCE|Son of a king
+PRINCESS|Daughter of a king
+KNIGHT|Warrior in armour
+SWORD|Knight's weapon
+SHIELD|Knight's protection
+CROWN|Royal headpiece
+THRONE|Royal seat
+EMPIRE|Lands ruled by an emperor
+ARMY|Soldiers together
+NAVY|Sea force
+CAPTAIN|Leader of a ship
+ANCHOR|It keeps a ship in place
+SAIL|Canvas that catches the wind
+MAST|Pole that holds a sail
+DECK|Floor of a ship
+CABIN|Room on a ship
+COMPASS|It points north
+VOYAGE|Long journey by sea
+JOURNEY|Trip
+HOLIDAY|Time off work
+HOTEL|Place to stay on a trip
+SUITCASE|Bag for travel
+TICKET|Pass for a train or a show
+PASSPORT|Travel document
+CAMERA|It takes photos
+PHOTO|Picture taken with a camera
+ALBUM|Book for photos
+POSTCARD|Card sent from a holiday
+STAMP|You stick it on an envelope
+PARCEL|Package sent by post
+ENVELOPE|Paper cover for a letter
+ADDRESS|Where you live
+CARPENTER|Woodworker
+PLUMBER|Person who fixes pipes
+BUTCHER|Person who sells meat
+TAILOR|Person who makes suits
+FIREMAN|Person who puts out fires
+POLICEMAN|Officer on the beat
+DENTIST|Person who treats teeth
+LAWYER|Person who gives legal advice
+JUDGE|Person who presides over a court
+ACTOR|Person who performs in films
+SINGER|Person who performs songs
+WRITER|Novelist or poet
+ENGINEER|Person who designs machines
+GARDENER|Person who looks after plants
+FISHERMAN|Person who catches fish
+SHEPHERD|Person who looks after sheep
+HAMMER|Tool for nails
+SAW|Tool with teeth for wood
+SPADE|Tool for digging
+RAKE|Garden tool for leaves
+LADDER|You climb it
+BUCKET|Pail
+NAIL|Metal pin you hammer
+SCREW|Pin you turn with a driver
+NEEDLE|It has an eye but cannot see
+THREAD|You put it through a needle
+BUTTON|Fastening on a coat
+POCKET|Small pouch sewn into clothes
+APRON|Garment worn when cooking
+SLIPPERS|Soft shoes worn at home
+SWEATER|Knitted jumper
+CARDIGAN|Knitted top with buttons
+TROUSERS|Pants
+JEANS|Denim trousers
+BELT|Strap around your waist
+NECKLACE|Jewellery for the neck
+BRACELET|Jewellery for the wrist
+EARRING|Jewellery for the ear
+PEARL|Gem from an oyster
+DIAMOND|Hardest gem
+RUBY|Red gem
+EMERALD|Green gem
+SAPPHIRE|Blue gem
+AMBER|Fossil resin
+CRYSTAL|Clear glass-like stone
+BREAKFAST|First meal of the day
+LUNCH|Midday meal
+DINNER|Evening meal
+SUPPER|Late evening meal
+PICNIC|Meal outdoors on a blanket
+SANDWICH|Two slices of bread with a filling
+TOAST|Browned bread
+PANCAKE|Flat cake tossed in a pan
+WAFFLE|Grid-patterned breakfast treat
+MUFFIN|Small sweet cake
+SCONE|Served with jam and cream
+BISCUIT|Cookie
+PUDDING|Dessert
+CUSTARD|Sweet yellow sauce for desserts
+CREAM|Thick part of milk
+YOGURT|Fermented milk dessert
+CHOCOLATE|Sweet made from cocoa
+CANDY|Sweet
+LEMONADE|Fizzy citrus drink
+BACON|Breakfast strips of pork
+SAUSAGE|Banger
+STEAK|Thick slice of beef
+CHICKEN|Roast poultry
+TURKEY|Christmas roast bird
+SALMON|Pink fish
+TUNA|Fish in a can
+PASTA|Spaghetti or penne
+RICE|Grain eaten in Asia
+NOODLES|Long strips of pasta
+PEPPER|Spice in a mill
+GARLIC|Pungent bulb in cooking
+GINGER|Spicy root for biscuits
+CINNAMON|Spice from bark
+VINEGAR|Sour liquid for chips
+MUSTARD|Yellow sauce for hot dogs
+KETCHUP|Tomato sauce
+OLIVE|Small fruit for oil
+WALNUT|Wrinkled nut
+PEANUT|Monkey nut
+ALMOND|Nut for marzipan
+COCONUT|Hairy tropical nut
+PINEAPPLE|Tropical fruit with a crown
+APRICOT|Small orange fruit with a stone
+LIME|Small green citrus
+MANGO|Tropical stone fruit
+RASPBERRY|Red berry
+BLUEBERRY|Small blue berry
+CRANBERRY|Red berry served with turkey
+PUMPKIN|Halloween squash
+SPINACH|Popeye's favourite vegetable
+LETTUCE|Salad leaves
+CELERY|Crunchy green stalks
+BROCCOLI|Green vegetable like a tiny tree
+MUSHROOM|Fungus you can eat
+BEETROOT|Red root vegetable
+RADISH|Small red root
+PARSLEY|Green herb for garnish
+MINT|Herb for tea and sauce
+BASIL|Herb for pesto
+THYME|Herb that sounds like a clock word
+PINE|Evergreen tree with cones
+BIRCH|Tree with white bark
+MAPLE|Tree on the Canadian flag
+WILLOW|Weeping tree by water
+CHESTNUT|Conker tree
+PALM|Tropical tree
+CACTUS|Prickly desert plant
+FERN|Feathery green plant
+IVY|Climbing evergreen
+MOSS|Soft green carpet on stones
+LILY|White flower of Easter
+ORCHID|Exotic flower
+VIOLET|Small purple flower
+POPPY|Red flower of remembrance
+SUNFLOWER|Tall yellow flower
+DANDELION|Yellow weed that turns to fluff
+LAVENDER|Purple fragrant herb
+BLOSSOM|Spring flowers on a tree
+SEED|It grows into a plant
+ROOT|Underground part of a plant
+BRANCH|Arm of a tree
+THORN|Sharp point on a rose
+ACORN|Seed of an oak
+GREENHOUSE|Glass building for plants
+ORCHARD|Field of fruit trees
+HARVEST|Gathering of crops
+WHEAT|Grain for flour
+BARLEY|Grain for malt
+OATS|Grain for porridge
+HAY|Dried grass for horses
+BARN|Farm building
+TRACTOR|Farm vehicle
+PLOUGH|It turns the soil
+STABLE|Home for horses
+SADDLE|Seat on a horse
+PONY|Small horse
+DONKEY|Animal that brays
+LAMB|Young sheep
+CALF|Young cow
+PUPPY|Young dog
+KITTEN|Young cat
+FOAL|Young horse
+PIGLET|Young pig
+DUCKLING|Young duck
+HEDGEHOG|Spiny garden animal
+BADGER|Striped burrowing animal
+OTTER|River animal that loves fish
+BEAVER|Dam-building rodent
+MOLE|Burrowing animal with tiny eyes
+SEAL|Sea mammal with flippers
+WALRUS|Tusked sea mammal
+PENGUIN|Bird that cannot fly
+OSTRICH|Largest bird
+PEACOCK|Bird with a fan of feathers
+FLAMINGO|Pink wading bird
+STORK|Bird that brings babies
+HERON|Grey wading bird
+SPARROW|Small brown bird
+SWALLOW|Bird of summer
+PELICAN|Bird with a pouch
+GORILLA|Largest ape
+KANGAROO|Animal with a pouch
+KOALA|Australian bear-like animal
+PANDA|Black and white bear from China
+LEOPARD|Spotted big cat
+CHEETAH|Fastest land animal
+CROCODILE|Reptile of the Nile
+LIZARD|Small reptile
+OCTOPUS|Sea creature with eight arms
+CRAB|It walks sideways
+LOBSTER|Shellfish with claws
+JELLYFISH|Stinging sea creature
+SNAIL|It carries its house on its back
+BEETLE|Insect with hard wings
+LADYBIRD|Red beetle with spots
+DRAGONFLY|Insect with four wings near ponds
+GRASSHOPPER|Jumping insect in the grass
+MOSQUITO|Biting insect
