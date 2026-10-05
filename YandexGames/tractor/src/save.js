@@ -22,7 +22,7 @@ const DEFAULT = () => ({
   pos: null,
   noAds: false,
   tutDone: false,
-  settings: { musicVol: 0.5, sfxVol: 0.8, quality: 'auto', engine: false, eng2: true },
+  settings: { musicVol: 0.5, sfxVol: 0.8, quality: 'auto', engine: true, eng3: true },
 });
 
 export const save = {
@@ -42,10 +42,11 @@ export const save = {
     if (cloud && (!local || (cloud.ts || 0) >= (local.ts || 0))) pick = cloud;
     this.data = Object.assign(DEFAULT(), pick || {});
     this.data.settings = Object.assign(DEFAULT().settings, this.data.settings || {});
-    // старый звук мотора был навязчивым: у всех, кто играл раньше, выключаем его один раз
-    if (pick && !(pick.settings && pick.settings.eng2)) {
-      this.data.settings.engine = false;
-      this.data.settings.eng2 = true;
+    // новый тихий мотор включён по умолчанию: в старых сохранениях включаем его один раз,
+    // дальше действует выбор игрока в настройках
+    if (pick && !(pick.settings && pick.settings.eng3)) {
+      this.data.settings.engine = true;
+      this.data.settings.eng3 = true;
     }
     this.data.upg = Object.assign(DEFAULT().upg, this.data.upg || {});
     this.data.load = this.data.load || {};
