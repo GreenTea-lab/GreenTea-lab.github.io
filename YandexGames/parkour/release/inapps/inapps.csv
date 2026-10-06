@@ -1,0 +1,5 @@
+id,price,title_ru,title_en
+coins_500,19,"Горсть монет","Handful of coins"
+coins_2000,59,"Мешок монет","Bag of coins"
+coins_6000,149,"Сундук монет","Chest of coins"
+disable_ads,99,"Без рекламы","No ads"
