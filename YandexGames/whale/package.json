@@ -1,0 +1,1 @@
+{"name":"whale-town","version":"1.0.0","private":true,"type":"module","dependencies":{"@fontsource/marmelad":"^5.3.0","@fontsource/rubik":"^5.3.0","esbuild":"^0.28.2","playwright":"^1.63.0"}}
