@@ -1234,7 +1234,10 @@ export class Game {
     const h = document.createElement('div');
     h.className = 'inhint';
     h.textContent = text;
-    m.appendChild(h);
+    // внутри окна над строкой с ценой: не уезжает за край экрана, когда окно растёт
+    const at = m.querySelector('.offer');
+    if (at) at.before(h);
+    else m.prepend(h);
   }
 
   // ---------- обучение ----------

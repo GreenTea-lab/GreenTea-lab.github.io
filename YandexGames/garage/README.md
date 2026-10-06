@@ -24,6 +24,7 @@ node tools/music_audit.mjs       # музыка без протяжных и р�
 node test/carlab.mjs             # контактный лист всех моделей и состояний
 node test/ui.mjs [d|m]           # скриншоты экранов в test/out/
 node test/flow.mjs               # полный цикл с моком SDK: покупка, ремонт, продажа, реклама, покупки
+node test/hint.mjs               # подсказка обучения в чате видна целиком и не ездит
 node promo/art.mjs && sh promo/fit.sh   # иконка, обложки, витрина
 node promo/shots.mjs             # скриншоты геймплея
 node promo/inapps.mjs            # иконки покупок и CSV
