@@ -1,0 +1,6 @@
+node_modules/
+dist/
+dist-single/
+test/out/
+release/garage-release.zip
+release/garage-promo.zip

@@ -1,0 +1,22 @@
+// Снимки стенда моделей: node test/carlab.mjs <name> '<json opts>'
+import { build } from 'esbuild';
+import { chromium } from 'playwright';
+import fs from 'fs';
+await build({ entryPoints: [process.env.ENTRY || 'tools/carlab.js'], bundle: true, format: 'iife', outfile: 'test/out/carlab.js', logLevel: 'error' });
+fs.writeFileSync('test/out/carlab.html', '<!doctype html><html><body style="margin:0;overflow:hidden"><script src="carlab.js"></script></body></html>');
+const [name, json, w = 1280, h = 720] = process.argv.slice(2);
+const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const page = await browser.newPage({ viewport: { width: +w, height: +h } });
+const errs = [];
+page.on('pageerror', (e) => errs.push(e.message));
+page.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
+await page.goto('file://' + process.cwd() + '/test/out/carlab.html');
+await page.waitForFunction(() => window.__lab, null, { timeout: 20000 });
+const tri = await page.evaluate((o) => window.__lab.show(o), JSON.parse(json));
+if (process.env.THIN) console.log(JSON.stringify(await page.evaluate((m) => window.__lab.thin(m), process.env.THIN), null, 0));
+if (process.env.BK) console.log(JSON.stringify(await page.evaluate((m) => window.__lab.bodyKids(m), process.env.BK)));
+if (process.env.KIDS) console.log(JSON.stringify(await page.evaluate((m) => window.__lab.kids(m), process.env.KIDS)));
+if (process.env.STATS) console.log(JSON.stringify(await page.evaluate((m) => window.__lab.stats(m), process.env.STATS)));
+await page.screenshot({ path: `test/out/${name}.png` });
+console.log('triangles', tri, errs.join('\n') || 'ok');
+await browser.close();

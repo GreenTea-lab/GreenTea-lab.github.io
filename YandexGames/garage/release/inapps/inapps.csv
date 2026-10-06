@@ -1,0 +1,5 @@
+id,price,title_ru,title_en,description_ru,description_en
+cash_small,19,"Пачка денег","Wad of cash","Деньги на ремонт и покупку машин. Сумма растёт вместе с вашим гаражом.","Cash for repairs and buying cars. The amount grows with your garage."
+cash_medium,59,"Чемодан денег","Case of cash","В 4 раза больше пачки. Сумма растёт вместе с вашим гаражом.","4 times the wad. The amount grows with your garage."
+cash_large,149,"Сейф денег","Safe of cash","В 12 раз больше пачки — хватит на машину мечты.","12 times the wad — enough for a dream car."
+disable_ads,99,"Без рекламы","No ads","Навсегда отключает полноэкранную рекламу. Реклама за награду остаётся по желанию.","Permanently removes full-screen ads. Optional rewarded ads stay available."
