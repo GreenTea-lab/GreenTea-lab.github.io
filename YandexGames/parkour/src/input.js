@@ -34,13 +34,21 @@ export class Input {
       }
       if (k === 'Space') {
         e.preventDefault();
+        if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
         if (!e.repeat) this.jumpPressed = true;
         this.jumpHeld = true;
       }
     });
     addEventListener('keyup', (e) => {
       this.keys.delete(e.code);
-      if (e.code === 'Space') this.jumpHeld = false;
+      if (e.code === 'Space') {
+        this.jumpHeld = false;
+        if (this.enabled) e.preventDefault();
+      }
+    });
+    // кнопки интерфейса не забирают фокус клавиатуры, иначе пробел «нажимает» кнопку вместо прыжка
+    addEventListener('mousedown', (e) => {
+      if (e.target.closest && e.target.closest('button')) e.preventDefault();
     });
     addEventListener('blur', () => this.release());
   }

@@ -171,12 +171,15 @@ export function stepPlayer(P, lv, inp, dt) {
     P.coy = 0;
     P.buf = 0;
     P.jmp = true;
+    P.jt = 0;
     ev.push('jump');
   }
   // гравитация; отпустил прыжок рано — прыжок ниже
   const G = PH.grav * gm;
+  // короткий тап всё равно даёт заметный прыжок: срез высоты только после 0,12 с
+  P.jt = (P.jt || 0) + dt;
   if (!P.ground) {
-    P.vy -= G * dt * (P.vy > 0 && P.jmp && !inp.held ? 1.9 : 1);
+    P.vy -= G * dt * (P.vy > 0 && P.jmp && !inp.held && P.jt > 0.12 ? 1.9 : 1);
     P.vy = Math.max(P.vy, -32);
   }
   // движение по горизонтали с выталкиванием и ступеньками

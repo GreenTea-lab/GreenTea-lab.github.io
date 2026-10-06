@@ -25,6 +25,7 @@ node tools/bot.mjs [уровень]     # бот проходит уровни �
 node tools/music_audit.mjs       # музыка без протяжных и резких нот
 node test/ui.mjs [d|m]           # скриншоты экранов в test/out/
 node test/flow.mjs               # интеграция с моком SDK
+node test/jump.mjs               # прыжок при 60–240 Гц, короткие тапы, фокус кнопок
 node promo/art.mjs && sh promo/fit.sh   # иконка, обложки, витрина
 node promo/shots.mjs             # скриншоты геймплея
 node promo/inapps.mjs            # иконки покупок и CSV

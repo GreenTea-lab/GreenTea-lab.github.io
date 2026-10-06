@@ -97,6 +97,7 @@ export class Game {
     this.finished = false;
     this.hintQ = [];
     this.hinted = new Set();
+    this.jumpQ = false;
     audio.setMood(this.state === 'menu' ? 'menu' : ['neon', 'space', 'volcano'].includes(lv.theme.id) ? 'night' : 'day');
     this.hud(true);
   }
@@ -168,15 +169,16 @@ export class Game {
         fz = Math.cos(this.view.yaw);
       const wx = fx * mv.y - fz * mv.x,
         wz = fz * mv.y + fx * mv.x;
-      let jump = this.input.takeJump();
-      if (!this.started && (mv.m > 0 || jump)) this.started = true;
+      // нажатие ждёт ближайшего шага физики: при частоте кадров выше 120 Гц бывают кадры без шагов
+      if (this.input.takeJump()) this.jumpQ = true;
+      if (!this.started && (mv.m > 0 || this.jumpQ)) this.started = true;
       if (this.started) this.time += dt;
       this.acc += dt;
       while (this.acc >= STEP) {
         this.acc -= STEP;
         tickLevel(lv, STEP);
-        const ev = stepPlayer(P, lv, ap ? ap(P, lv) : { x: wx, z: wz, jump, held: this.input.jumpHeld }, STEP);
-        jump = false;
+        const ev = stepPlayer(P, lv, ap ? ap(P, lv) : { x: wx, z: wz, jump: !!this.jumpQ, held: this.input.jumpHeld }, STEP);
+        this.jumpQ = false;
         if (ev.length) this.events(ev);
         if (this.finished) break;
       }
