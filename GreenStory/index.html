@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Уютный кот</title>
+<style>
+:root{--bg1:#ffe9e3;--bg2:#ffd6e0;--ink:#7a4b5a;--soft:#fff8f3;--pink:#ff9bb3;--peach:#ffc9a8;--cat:#ffcf9e;--catd:#f0a96b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Segoe UI",Roboto,system-ui,sans-serif;color:var(--ink);background:linear-gradient(#ffe9e3,#ffd6e0)}
+#app{position:relative;height:100%;max-width:560px;margin:0 auto;overflow:hidden}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.screen.on{display:flex}
+h1{font-size:30px;margin:8px 0}
+p{margin:6px 0;line-height:1.4}
+input{font:inherit;font-size:20px;padding:12px 16px;border-radius:20px;border:3px solid var(--pink);background:#fff;color:var(--ink);text-align:center;width:80%;max-width:300px;outline:none;user-select:text;-webkit-user-select:text}
+.btn{font:inherit;font-size:18px;font-weight:600;border:none;border-radius:24px;padding:12px 22px;background:var(--pink);color:#fff;box-shadow:0 5px 0 #e57d99;cursor:pointer;margin-top:16px;transition:transform .1s}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #e57d99}
+/* game */
+#room{position:absolute;inset:0;background:linear-gradient(#ffeede 0 62%,#cbb8e6 62%)}
+#window{position:absolute;top:7%;right:8%;width:30%;aspect-ratio:1;background:linear-gradient(#bfe6ff,#e8f6ff);border:6px solid #fff;border-radius:18px;box-shadow:0 4px 10px #0001;overflow:hidden}
+#window::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:5px;background:#fff;transform:translateX(-50%)}
+#window::after{content:"";position:absolute;left:0;right:0;top:50%;height:5px;background:#fff}
+#sun{position:absolute;top:12%;left:14%;width:22%;aspect-ratio:1;border-radius:50%;background:#ffe27a;box-shadow:0 0 18px #ffe27a}
+.item{position:absolute;display:none;font-size:34px;filter:drop-shadow(0 2px 2px #0002)}
+.item.on{display:block;animation:pop .6s}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.3)}100%{transform:scale(1)}}
+#top{position:absolute;top:0;left:0;right:0;padding:calc(env(safe-area-inset-top) + 12px) 14px 0;display:flex;gap:10px;align-items:center;z-index:5}
+#bar{flex:1;height:18px;background:#fff9;border-radius:12px;overflow:hidden;border:2px solid #fff}
+#fill{height:100%;width:0;background:linear-gradient(90deg,#ff9bb3,#ffb88c);border-radius:10px;transition:width .5s}
+#love{font-weight:700;font-size:18px;min-width:64px}
+.rb{width:42px;height:42px;border-radius:50%;border:none;background:#fff;font-size:20px;box-shadow:0 3px 0 #0001;cursor:pointer}
+#bubble{position:absolute;left:50%;top:21%;transform:translateX(-50%) scale(0);background:#fff;border-radius:22px;padding:12px 18px;max-width:84%;font-size:17px;font-weight:600;text-align:center;box-shadow:0 5px 14px #0001;transition:transform .25s;z-index:4;pointer-events:none}
+#bubble.on{transform:translateX(-50%) scale(1)}
+#bubble::after{content:"";position:absolute;left:50%;bottom:-9px;width:18px;height:18px;background:#fff;transform:translateX(-50%) rotate(45deg)}
+#catwrap{position:absolute;left:50%;top:44%;width:min(78vw,340px);transform:translateX(-50%);z-index:2;cursor:pointer}
+#catwrap svg{width:100%;display:block;overflow:visible}
+#cat{animation:breathe 3.6s ease-in-out infinite;transform-origin:50% 90%}
+@keyframes breathe{50%{transform:scaleY(1.025)}}
+#tail{transform-origin:12px 8px;animation:wag 3s ease-in-out infinite}
+.happy #tail{animation-duration:.6s}
+@keyframes wag{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(14deg)}}
+#eyes .open{display:block}#eyes .shut{display:none}
+.happy #eyes .open{display:none}.happy #eyes .shut{display:block}
+.blink #eyes .open ellipse{transform:scaleY(.1)}
+#eyes ellipse{transform-box:fill-box;transform-origin:center;transition:transform .08s}
+#bow{display:none}.hasbow #bow{display:block}
+.bounce{animation:bounce .4s}
+@keyframes bounce{40%{transform:translateY(-14px) scale(1.03)}}
+#dock{position:absolute;left:0;right:0;bottom:0;padding:12px 12px calc(env(safe-area-inset-bottom) + 14px);display:flex;gap:10px;justify-content:center;z-index:5}
+.act{flex:1;max-width:160px;font:inherit;font-weight:700;font-size:15px;border:none;border-radius:22px;padding:10px 4px;background:#fff;color:var(--ink);box-shadow:0 5px 0 #e7b9a8;cursor:pointer}
+.act span{display:block;font-size:28px}
+.act:active{transform:translateY(4px);box-shadow:0 1px 0 #e7b9a8}
+#food,#yarn{position:absolute;font-size:44px;z-index:3;display:none;touch-action:none}
+#food{left:50%;top:80%;transform:translateX(-50%);animation:bob 1s infinite}
+@keyframes bob{50%{margin-top:-8px}}
+#yarn{left:20%;top:76%}
+.fx{position:absolute;pointer-events:none;font-size:28px;z-index:6;animation:up 1.4s ease-out forwards}
+@keyframes up{to{transform:translateY(-130px) scale(1.3);opacity:0}}
+#catch{position:absolute;inset:0;display:none;z-index:8;background:linear-gradient(#bfe6ff,#ffe9f0 70%,#cbb8e6 70%)}
+#catch.on{display:block}#cv{width:100%;height:100%;display:block;touch-action:none}
+#hud{position:absolute;top:14px;left:14px;font-weight:800;font-size:22px;display:flex;gap:14px;align-items:center}
+#cc{color:#e0527a}
+#gift{position:absolute;inset:0;background:#fff8;display:none;align-items:center;justify-content:center;z-index:9;padding:20px}
+#gift.on{display:flex}
+.card{background:var(--soft);border-radius:28px;padding:26px 22px;max-width:420px;max-height:90%;overflow:auto;text-align:center;box-shadow:0 10px 40px #0003;animation:pop .5s}
+.card h2{margin:0 0 10px;font-size:26px}
+.card .big{font-size:56px}
+.letter{text-align:left;font-size:17px;line-height:1.55;white-space:pre-line}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="intro" class="screen on">
+  <div style="font-size:70px">🐱</div>
+  <h1>Привет!</h1>
+  <p>Тут живёт маленький кот.<br>Он очень ждал именно тебя.</p>
+  <p style="margin-top:18px">Как тебя зовут?</p>
+  <input id="name" maxlength="20" placeholder="Твоё имя" autocomplete="off">
+  <button class="btn" id="go">Познакомиться</button>
+</div>
+
+<div id="game" class="screen" style="padding:0;justify-content:flex-start">
+  <div id="room">
+    <div id="window"><div id="sun"></div></div>
+    <div class="item" id="it_flower" style="top:calc(7% + 22vw*0.9);right:11%;font-size:38px">🌷</div>
+    <div class="item" id="it_lamp" style="left:8%;top:30%;font-size:48px">🪔</div>
+    <div class="item" id="it_plant" style="left:6%;top:50%;font-size:56px">🪴</div>
+    <div class="item" id="it_stars" style="left:14%;top:12%;font-size:30px">✨</div>
+    <div class="item" id="it_rainbow" style="left:36%;top:8%;font-size:46px">🌈</div>
+  </div>
+  <div id="top">
+    <div id="love">❤ 0</div>
+    <div id="bar"><div id="fill"></div></div>
+    <button class="rb" id="letterBtn" title="Письмо" style="display:none">💌</button>
+    <button class="rb" id="mute" title="Звук">🔊</button>
+  </div>
+  <div id="bubble"></div>
+  <div id="catwrap">
+    <svg viewBox="0 0 300 300" id="svg">
+      <ellipse cx="150" cy="276" rx="130" ry="22" fill="#fff8e8"/><ellipse cx="150" cy="276" rx="110" ry="15" fill="#ffb3c6"/>
+      <g id="cat">
+        <g id="tail"><path d="M222 235 C285 235 292 160 258 140" fill="none" stroke="#f0a96b" stroke-width="22" stroke-linecap="round" transform="translate(0,0)"/></g>
+        <ellipse cx="150" cy="215" rx="82" ry="62" fill="#ffcf9e" stroke="#d98a4e" stroke-width="3"/>
+        <ellipse cx="150" cy="240" rx="46" ry="34" fill="#fff0dc"/>
+        <ellipse cx="108" cy="272" rx="24" ry="14" fill="#ffcf9e" stroke="#d98a4e" stroke-width="3"/>
+        <ellipse cx="192" cy="272" rx="24" ry="14" fill="#ffcf9e" stroke="#d98a4e" stroke-width="3"/>
+        <path d="M82 92 L92 28 L132 68Z" fill="#ffcf9e" stroke="#d98a4e" stroke-width="3"/><path d="M218 92 L208 28 L168 68Z" fill="#ffcf9e" stroke="#d98a4e" stroke-width="3"/>
+        <path d="M94 76 L98 46 L118 68Z" fill="#ffb5c0"/><path d="M206 76 L202 46 L182 68Z" fill="#ffb5c0"/>
+        <ellipse cx="150" cy="120" rx="78" ry="68" fill="#ffcf9e" stroke="#d98a4e" stroke-width="3"/>
+        <path d="M150 54 C142 70 142 78 150 84 C158 78 158 70 150 54" fill="#f0a96b"/>
+        <path d="M104 62 L112 80 M196 62 L188 80" stroke="#f0a96b" stroke-width="7" stroke-linecap="round"/>
+        <ellipse cx="102" cy="138" rx="15" ry="10" fill="#ffa8b8" opacity=".7"/>
+        <ellipse cx="198" cy="138" rx="15" ry="10" fill="#ffa8b8" opacity=".7"/>
+        <g id="eyes">
+          <g class="open"><ellipse cx="118" cy="118" rx="10" ry="13" fill="#5b3a3a"/><ellipse cx="182" cy="118" rx="10" ry="13" fill="#5b3a3a"/>
+            <circle id="pl" cx="121" cy="113" r="4" fill="#fff"/><circle id="pr" cx="185" cy="113" r="4" fill="#fff"/></g>
+          <g class="shut" fill="none" stroke="#5b3a3a" stroke-width="5" stroke-linecap="round"><path d="M104 120 Q118 105 132 120"/><path d="M168 120 Q182 105 196 120"/></g>
+        </g>
+        <path d="M144 134 L156 134 L150 142Z" fill="#ff8aa0"/>
+        <path d="M150 142 Q142 152 134 146 M150 142 Q158 152 166 146" fill="none" stroke="#5b3a3a" stroke-width="3.5" stroke-linecap="round"/>
+        <g stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".9"><path d="M96 142 L58 134 M96 150 L58 154 M204 142 L242 134 M204 150 L242 154"/></g>
+        <g id="bow"><path d="M150 60 L120 42 L120 74Z M150 60 L180 42 L180 74Z" fill="#ff7fa3"/><circle cx="150" cy="60" r="9" fill="#ff5c8a"/></g>
+      </g>
+    </svg>
+  </div>
+  <div id="food">🐟</div>
+  
+  <div id="dock">
+    <button class="act" id="bPet"><span>🤲</span>Погладить</button>
+    <button class="act" id="bFeed"><span>🐟</span>Покормить</button>
+    <button class="act" id="bPlay"><span>🎮</span>Играть</button>
+  </div>
+  <div id="catch"><canvas id="cv"></canvas><div id="hud"><span id="cs">0</span><span id="cc"></span><span id="cl"></span></div><button class="rb" id="cx" style="position:absolute;top:12px;right:12px">✖</button></div>
+  <div id="gift"><div class="card" id="giftCard"></div></div>
+</div>
+</div>
+
+<script>
+/* ====== ТЕКСТЫ — можно править ====== */
+// {name} подставится вместо имени
+const PHRASES=[
+ "Мур-мур… {name}, с тобой так тепло 🧡",
+ "{name}, ты самая замечательная!",
+ "Ты умеешь делать мир немного добрее ✨",
+ "Мяу! Это значит «я рад, что ты здесь».",
+ "{name}, даже плохой день когда-нибудь заканчивается.",
+ "Ты справляешься лучше, чем думаешь 🌷",
+ "Можно я тут полежу рядом? Мне с тобой спокойно.",
+ "Ты прекрасна, {name}. Просто так.",
+ "Сегодня можно ничего не делать. Это тоже можно.",
+ "Мур. Твоя улыбка — моя любимая 😺",
+ "Я тебя обнимаю лапками (мысленно) 🤗",
+ "Всё наладится. А пока — гладь кота.",
+ "{name}, ты важная. Очень.",
+ "Тут никто не торопит и никто не оценивает 🌙"
+];
+const LETTER=`Дорогая {name}!
+
+Если ты дошла до этого письма, значит, ты немного побыла в тишине с маленьким котом. Надеюсь, стало хоть чуточку легче.
+
+Знай: плохое настроение — это просто погода. Оно пройдёт, а ты останешься самой светлой, доброй и удивительной.
+
+Я рядом. Всегда. Обнимаю тебя крепко 🧡
+
+Твой человек, который очень тебя любит.`;
+/* ==================================== */
+
+const $=id=>document.getElementById(id);
+let S={name:"",love:0,got:[]};
+try{Object.assign(S,JSON.parse(localStorage.getItem("cozycat")||"{}"))}catch(e){}
+const save=()=>{try{localStorage.setItem("cozycat",JSON.stringify(S))}catch(e){}};
+
+// звук
+let ac=null,muted=false;
+function A(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==="suspended")ac.resume();return ac}
+function tone(f,d=0.25,type="sine",v=0.07,delay=0){if(muted)return;const a=A();if(!a)return;const t=a.currentTime+delay,o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+0.03);g.gain.exponentialRampToValueAtTime(0.0001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d+0.05)}
+const chime=()=>[660,784,988].forEach((f,i)=>tone(f,.5,"sine",.06,i*.12));
+const meow=()=>{tone(520,.2,"sine",.04);tone(660,.3,"sine",.035,.12)};
+let lastS=0;const purr=()=>{const n=Date.now();if(n-lastS<1200)return;lastS=n;tone(180,.7,"sine",.03)};
+const pop=()=>{};
+$("mute").onclick=()=>{muted=!muted;$("mute").textContent=muted?"🔇":"🔊"};
+
+// старт
+$("go").onclick=()=>{S.name=($("name").value.trim()||"солнышко");save();A();start()};
+$("name").addEventListener("keydown",e=>{if(e.key==="Enter")$("go").click()});
+if(S.name){$("name").value=S.name==="солнышко"?"":S.name}
+
+function start(){
+  $("intro").classList.remove("on");$("game").classList.add("on");
+  render();
+  say("Привет, "+S.name+"! Погладь меня 🐾");
+}
+
+const MILES=[
+ {at:10,id:"it_lamp",t:"Тёплая лампа",e:"🪔",m:"Кот зажёг для тебя уютный свет."},
+ {at:25,id:"it_flower",t:"Тюльпаны на окне",e:"🌷",m:"Это цветы для тебя. Просто потому что ты есть."},
+ {at:45,id:"it_plant",t:"Домашний цветок",e:"🪴",m:"В комнате стало ещё уютнее."},
+ {at:70,id:"it_stars",t:"Звёздочки",e:"✨",m:"Кот поймал для тебя немного волшебства."},
+ {at:100,id:"it_rainbow",t:"Радуга",e:"🌈",m:"После любого дождя бывает радуга."},
+];
+const BOW_AT=5, LETTER_AT=30;
+
+function nextGoal(){const g=[BOW_AT,LETTER_AT,...MILES.map(m=>m.at)].sort((a,b)=>a-b).filter(x=>x>S.love)[0];return g||S.love}
+function render(){
+  $("love").textContent="❤ "+S.love;
+  const goal=nextGoal(),prev=[0,BOW_AT,LETTER_AT,...MILES.map(m=>m.at)].sort((a,b)=>a-b).filter(x=>x<=S.love).pop()||0;
+  $("fill").style.width=(goal===S.love?100:((S.love-prev)/(goal-prev))*100)+"%";
+  MILES.forEach(m=>$(m.id).classList.toggle("on",S.love>=m.at));
+  $("catwrap").classList.toggle("hasbow",S.love>=BOW_AT);
+  $("letterBtn").style.display=S.love>=LETTER_AT?"":"none";
+}
+
+function say(t,ms=3200){const b=$("bubble");b.textContent=t;b.classList.add("on");clearTimeout(say.t);say.t=setTimeout(()=>b.classList.remove("on"),ms)}
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+const phrase=()=>rnd(PHRASES).replace(/\{name\}/g,S.name);
+
+function fx(e,x,y){const el=document.createElement("div");el.className="fx";el.textContent=e;el.style.left=(x-14)+"px";el.style.top=(y-14)+"px";$("game").appendChild(el);setTimeout(()=>el.remove(),1400)}
+function hearts(n,x,y){for(let i=0;i<n;i++)setTimeout(()=>fx(rnd(["❤️","🧡","💖","💗"]),x+(Math.random()-.5)*80,y+(Math.random()-.5)*30),i*90)}
+function catPos(){const r=$("catwrap").getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height*.4}}
+
+function addLove(n){
+  const before=S.love;S.love+=n;save();render();
+  const hit=[...MILES.map(m=>({at:m.at,m})),{at:LETTER_AT,letter:1},{at:BOW_AT,bow:1}].filter(g=>before<g.at&&S.love>=g.at).sort((a,b)=>a.at-b.at).pop();
+  if(hit)setTimeout(()=>showGift(hit),700);
+}
+function showGift(g){
+  chime();
+  let h;
+  if(g.letter){h=`<div class="big">💌</div><h2>Тебе письмо!</h2><p>Кот принёс его в зубах.</p><button class="btn" onclick="openLetter()">Открыть</button>`}
+  else if(g.bow){h=`<div class="big">🎀</div><h2>Бантик!</h2><p>Кот нашёл бантик и очень гордится.<br>Ему идёт, правда?</p><button class="btn" onclick="closeGift()">Ага 😺</button>`}
+  else{h=`<div class="big">${g.m.e}</div><h2>${g.m.t}</h2><p>${g.m.m}</p><button class="btn" onclick="closeGift()">Спасибо, котик</button>`}
+  $("giftCard").innerHTML=h;$("gift").classList.add("on");
+  const p=catPos();hearts(8,p.x,p.y);
+}
+function openLetter(){
+  $("giftCard").innerHTML=`<div class="big">💌</div><div class="letter">${LETTER.replace(/\{name\}/g,S.name)}</div><button class="btn" onclick="closeGift()">Мур ❤</button>`;
+  $("gift").classList.add("on");
+}
+function closeGift(){$("gift").classList.remove("on")}
+$("letterBtn").onclick=()=>{A();openLetter()};
+
+// эмоции
+function happy(ms=1500){const c=$("catwrap");c.classList.add("happy");clearTimeout(happy.t);happy.t=setTimeout(()=>c.classList.remove("happy"),ms)}
+setInterval(()=>{const c=$("catwrap");c.classList.add("blink");setTimeout(()=>c.classList.remove("blink"),140)},3500);
+
+// глаза следят
+let eyeT=null;
+document.addEventListener("pointermove",e=>{
+  const r=$("catwrap").getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height*.4;
+  const dx=Math.max(-1,Math.min(1,(e.clientX-cx)/200)),dy=Math.max(-1,Math.min(1,(e.clientY-cy)/200));
+  $("pl").setAttribute("cx",121+dx*4);$("pr").setAttribute("cx",185+dx*4);
+  $("pl").setAttribute("cy",113+dy*3);$("pr").setAttribute("cy",113+dy*3);
+});
+
+// гладить
+let petCount=0,lastPet=0;
+function pet(x,y){
+  A();const now=Date.now();if(now-lastPet<250)return;lastPet=now;
+  happy();pop();hearts(1,x,y);petCount++;
+  if(petCount%3===0){purr()}
+  if(petCount%4===0){addLove(1);say(phrase())}
+  $("cat").classList.remove("bounce");void $("cat").offsetWidth;$("cat").classList.add("bounce");
+}
+$("catwrap").addEventListener("pointerdown",e=>pet(e.clientX,e.clientY));
+$("catwrap").addEventListener("pointermove",e=>{if(e.buttons)pet(e.clientX,e.clientY)});
+$("bPet").onclick=()=>{const p=catPos();pet(p.x,p.y);say("Ещё-ещё! Можно просто водить пальцем по мне 🐾")};
+
+// кормить
+let feeding=false;
+$("bFeed").onclick=()=>{
+  A();if(feeding)return;feeding=true;
+  const f=$("food");f.style.display="block";f.textContent=rnd(["🐟","🥛","🐠","🍣"]);
+  say("Ой, что это? Дай-дай! 👀");
+  f.onclick=()=>{
+    f.style.display="none";feeding=false;
+    happy(2500);meow();const p=catPos();hearts(5,p.x,p.y);addLove(3);
+    setTimeout(()=>say("Ням-ням! Спасибо, "+S.name+"! 😋"),300);
+  };
+};
+
+// играть
+$("bPlay").onclick=()=>{A();startCatch()};
+
+// ===== мини-игра: лови вкусняшки =====
+const catImg=new Image();
+(function(){const x=new XMLSerializer().serializeToString($("svg")).replace('<svg ','<svg width="300" height="300" ');catImg.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(x)})();
+const TOTAL=30;
+let G=null;
+function startCatch(){
+  $("catch").classList.add("on");
+  const cv=$("cv"),r=cv.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  cv.width=r.width*dpr;cv.height=r.height*dpr;
+  G={w:r.width,h:r.height,dpr,x:r.width/2,tx:r.width/2,items:[],spawned:0,caught:0,score:0,combo:0,big:0,shake:0,t:0,next:30,pops:[],run:true,hearts:0};
+  loop();
+}
+function endCatch(){
+  if(!G)return;G.run=false;
+  const sc=G.score,max=TOTAL*1.6,st=sc>=max*.7?3:sc>=max*.45?2:sc>=max*.2?1:0;
+  const gain=Math.max(2,Math.round(sc/2)+st*3);
+  $("catch").classList.remove("on");G=null;
+  addLoveQuiet(gain);
+  $("giftCard").innerHTML=`<div class="big">${"⭐".repeat(st)||"🌙"}</div><h2>${["Хорошая попытка!","Здорово!","Отлично!","Идеально!"][st]}</h2><p>Очков: ${sc}<br>Кот получил ${gain} ❤</p><button class="btn" onclick="closeGift();startCatch()">Ещё раз</button><br><button class="btn" style="background:#bba0dd;box-shadow:0 5px 0 #957ac0" onclick="closeGift()">К коту</button>`;
+  $("gift").classList.add("on");chime();
+}
+function addLoveQuiet(n){addLove(n)}
+$("cx").onclick=()=>{if(G){G.run=false;$("catch").classList.remove("on");G=null}};
+function spawn(){
+  const r=Math.random();let k;
+  if(r<.12)k={e:"⭐",v:3,gold:1};else if(r<.24)k={e:"☁️",bad:1};else if(r<.30)k={e:"🌈",pw:1};
+  else k={e:rnd(["🐟","🍓","🧁","🥛","🍣","🍪"]),v:1};
+  k.x=30+Math.random()*(G.w-60);k.y=-30;k.vy=2+Math.min(2.5,G.spawned/12)+Math.random()*.8;k.s=34;
+  G.items.push(k);G.spawned++;
+}
+function loop(){
+  if(!G||!G.run)return;const g=G,c=$("cv").getContext("2d");c.setTransform(g.dpr,0,0,g.dpr,0,0);
+  c.clearRect(0,0,g.w,g.h);
+  // пол
+  const fy=g.h*.86;c.fillStyle="#cbb8e6";c.fillRect(0,fy,g.w,g.h-fy);
+  g.t++;g.x+=(g.tx-g.x)*.22;
+  if(g.t>=g.next&&g.spawned<TOTAL){spawn();g.next=g.t+Math.max(26,52-g.spawned);}
+  const cw=(g.big>0?170:120),ch=cw;const cy=fy-ch+20;
+  if(g.big>0)g.big--;
+  // кот
+  c.save();c.translate(g.x,cy+ch/2);if(g.shake>0){c.rotate(Math.sin(g.t*.8)*.12);g.shake--}c.drawImage(catImg,-cw/2,-ch/2,cw,ch);c.restore();
+  c.font="34px serif";c.textAlign="center";c.textBaseline="middle";
+  for(const k of g.items){
+    k.y+=k.vy;c.save();c.translate(k.x,k.y);if(k.gold){c.shadowColor="#ffd34d";c.shadowBlur=18}c.fillText(k.e,0,0);c.restore();
+    if(!k.done&&Math.abs(k.x-g.x)<cw*.38&&k.y>cy+ch*.15&&k.y<cy+ch*.7){
+      k.done=1;
+      if(k.bad){g.combo=0;g.shake=25;tone(300,.25,"sine",.04)}
+      else if(k.pw){g.big=300;chime()}
+      else{g.caught++;g.combo++;const m=1+Math.floor(g.combo/5);g.score+=k.v*m;g.pops.push({x:k.x,y:k.y,t:0,txt:"+"+k.v*m});tone(520+Math.min(g.combo,10)*40,.15,"sine",.04);}
+    } else if(k.y>fy+20)k.done=1;
+  }
+  g.items=g.items.filter(k=>!k.done);
+  c.font="bold 22px sans-serif";
+  for(const p of g.pops){p.t++;c.globalAlpha=Math.max(0,1-p.t/40);c.fillStyle="#e0527a";c.fillText(p.txt,p.x,p.y-p.t);}
+  c.globalAlpha=1;g.pops=g.pops.filter(p=>p.t<40);
+  $("cs").textContent="⭐ "+g.score;$("cc").textContent=g.combo>=3?"комбо ×"+(1+Math.floor(g.combo/5)):"";$("cl").textContent=(TOTAL-g.spawned+g.items.length)+" 🍴";
+  if(g.spawned>=TOTAL&&!g.items.length){setTimeout(endCatch,300);g.run=false;return}
+  requestAnimationFrame(loop);
+}
+(function(){const cv=$("cv");const mv=e=>{if(G){const r=cv.getBoundingClientRect();G.tx=e.clientX-r.left}};
+cv.addEventListener("pointermove",mv);cv.addEventListener("pointerdown",mv);
+addEventListener("keydown",e=>{if(!G)return;if(e.key==="ArrowLeft")G.tx-=60;if(e.key==="ArrowRight")G.tx+=60;G.tx=Math.max(0,Math.min(G.w,G.tx))})})();
+
+// сюрпризы сами по себе
+setInterval(()=>{
+  if(!$("game").classList.contains("on")||$("gift").classList.contains("on"))return;
+  if(Math.random()<.5){say(phrase(),3500)}
+},14000);
+
+if(S.name&&S.love>0){/* вернулась — приветствие после нажатия */
+  $("go").textContent="Продолжить";
+}
+</script>
+</body>
+</html>
