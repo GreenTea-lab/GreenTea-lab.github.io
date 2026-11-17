@@ -92,7 +92,8 @@ export function genMap(id, seed = 1) {
   const items = [];
   const ground = [];
   let GID = 1;
-  const S = { items, ground, R, theme: id, gid: () => GID++ };
+  const landmarks=[];
+  const S = { items, ground, R, theme: id, landmarks, gid: () => GID++ };
 
   // ---------- земля и дороги ----------
   ground.push({ t: th.ground, x0: -half, z0: -half, x1: half, z1: half });
@@ -228,12 +229,12 @@ export function genMap(id, seed = 1) {
   // ограда по краю карты
   border(S, half);
   const palettes={autumn:[0xeeb455,0xd58e49,0xc86937],neoncity:[0x6e6aaf,0x49b8bc,0xc781bd],candyland:[0xffb8d4,0xbad8ff,0xd7c1ff],aurora:[0xb9d9e5,0xe1c7e3,0xa7cecb]};
-  if(palettes[id])for(const it of items)if(it.tint!==undefined&&it.kind==='block')it.tint=pick(palettes[id],R);
+  if(palettes[id])for(const it of items)if(it.tint!==undefined&&it.kind==='block'&&!it.keepTint)it.tint=pick(palettes[id],R);
   for(const it of items)if(it.kind==='prop'){
     const look=themedLook(id,it.look);
     if(look!==it.look){it.sourceLook=it.look;it.look=look;}
   }
-  return { id, half, span, lines, items, ground, roads: S.roads, blocks };
+  return { id, half, span, lines, items, ground, roads: S.roads, blocks,landmarks };
 }
 
 export const PERSON_TINTS = [0xe8473f, 0x3f8fe8, 0xf2c230, 0x5cc06a, 0x9a6ae0, 0xff8a3a, 0x3fd0c8, 0xff7ab0, 0xffffff];
@@ -389,7 +390,8 @@ function building(S, o) {
     y0 += fh;
     // перекрытие (большие — из двух плит)
     const slabLook = o.slabLook || 'plain';
-    const slabTint = o.slabTint || 0xd8d2c8;
+    const accent = o.slabAccents?.[f + 1];
+    const slabTint = accent || o.slabTint || 0xd8d2c8;
     if (w > 9 || d > 9) {
       if (w >= d) {
         put(slabLook, 'concrete', [w / 2, SLAB, d], -w / 4, y0 + SLAB / 2, 0, slabTint);
@@ -398,7 +400,10 @@ function building(S, o) {
         put(slabLook, 'concrete', [w, SLAB, d / 2], 0, y0 + SLAB / 2, -d / 4, slabTint);
         put(slabLook, 'concrete', [w, SLAB, d / 2], 0, y0 + SLAB / 2, d / 4, slabTint);
       }
-    } else put(slabLook, 'concrete', [w, SLAB, d], 0, y0 + SLAB / 2, 0, slabTint);
+    } else {
+      const overhang = accent ? .35 : 0;
+      put(slabLook, 'concrete', [w + overhang, SLAB, d + overhang], 0, y0 + SLAB / 2, 0, slabTint);
+    }
     y0 += SLAB;
   }
   if (o.roof === 'gable') {
@@ -758,6 +763,36 @@ const BLOCKS = {
     for (let k = 0; k < 3; k++) prop(S, 'palm', b.cx + (R() - 0.5) * 16, b.cz + 8 + R() * 2, R() * 6);
   },
   // ---------- мегаполис ----------
+  skyscraper(S, b) {
+    const neon = S.theme === 'neoncity', town = S.theme === 'town';
+    const floors = town ? 16 : neon ? 22 : 20 + (S.R() > .5 ? 2 : 0);
+    const w = town ? 8 : 9, d = town ? 8 : 8.5;
+    const start = S.items.length;
+    // One panel per wall keeps tall buildings within the existing physics envelope.
+    const tower = building(S, {
+      cx: b.cx, cz: b.cz, w, d, floors, fh: neon ? 3.5 : 3.3, seg: 9,
+      look: town ? 'office' : 'glass', groundLook: 'lobby', door: 'lobbyDoor',
+      mat: town ? 'concrete' : 'glass', tint: town ? 0xa8b9cb : neon ? 0x718bbb : 0x83bdcf,
+      slabTint: 0xc6d0da, slabAccents: neon ? { 6: 0x73e9ef, 13: 0xff8bdb, 20: 0x73e9ef } : null,
+      roof: 'flat', top: [],
+    });
+    const roofPart = (size, bottom, tint, shape = 'box') =>
+      block(S, 'plain', 'metal', size, b.cx, tower.h + bottom + size[1] / 2, b.cz, 0, tint, tower.g, shape);
+    if (neon) {
+      roofPart([6.5, 1.6, 6], 0, 0x7ee2e7);
+      roofPart([4.8, 1.3, 4.5], 1.6, 0xc293ef);
+    } else {
+      roofPart([w * .8, 1.4, d * .8], 0, town ? 0x7196ac : 0x88cadb);
+      roofPart([.3, town ? 3 : 6, .3], 1.4, 0xb9d9e2, 'cyl');
+    }
+    const parts = S.items.slice(start);
+    for (const part of parts) part.keepTint = true;
+    const height = Math.max(...parts.map(part => part.y + part.size[1] / 2));
+    S.landmarks.push({ type: 'skyscraper', group: tower.g, x: b.cx, z: b.cz, floors, height, parts: parts.length });
+    S.ground.push({ t: 'plaza', x0: b.cx - b.iw, z0: b.cz - b.iw, x1: b.cx + b.iw, z1: b.cz + b.iw });
+    for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]])
+      prop(S, town ? 'pot' : 'bench', b.cx + x * (b.iw - 1.4), b.cz + z * (b.iw - 1.4), x < 0 ? Math.PI / 2 : 0);
+  },
   tower(S, b) {
     const R = S.R;
     const w = 10 + Math.floor(R() * 3) * 2, d = 10;
@@ -1253,11 +1288,11 @@ autumn:["orchard","park","chapel","cafes"],
 canyon:["outpost","outpost","bazaar","warehouse"],
 candyland:["candyworks","carousel","candyworks","orchard"],
 aurora:["lighthouse","rink","forest","chalets"],
-neoncity:["twin","plaza","tower","mall"],
-  town: ['plaza', 'park', 'apartments', 'office'],
+neoncity:["skyscraper","plaza","skyscraper","mall"],
+  town: ['plaza', 'park', 'apartments', 'skyscraper'],
   beach: ['aqua', 'beachfront', 'hotel', 'cafes'],
   port: ['crane', 'lighthouse', 'warehouse', 'containers'],
-  metro: ['tower', 'plaza', 'twin', 'tower'],
+  metro: ['skyscraper', 'plaza', 'twin', 'skyscraper'],
   winter: ['xmasfair', 'rink', 'chalets', 'forest'],
   castle: ['keep', 'market', 'chapel', 'cottages'],
   fair: ['ferris', 'carousel', 'circus', 'coaster'],

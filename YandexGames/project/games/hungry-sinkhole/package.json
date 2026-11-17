@@ -1,6 +1,6 @@
 {
   "name": "hungry-sinkhole",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -28,6 +28,7 @@
     "test:loading": "node test/loading-menu.mjs",
     "test:audit": "node test/audit-core.mjs && node test/audit-sdk.mjs",
     "test:offline": "node test/offline-v2.mjs",
-    "test:offline-browser": "node test/offline-browser.mjs"
+    "test:offline-browser": "node test/offline-browser.mjs",
+    "test:balance": "node test/balance-skyline.mjs"
   }
 }

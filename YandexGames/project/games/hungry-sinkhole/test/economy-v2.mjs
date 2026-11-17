@@ -15,7 +15,7 @@ const food=sim.items.find(it=>!it.grp);sim._eat(food,b);assert.equal(b.pts,0);as
 sim.respawn(b);assert.equal(b.pts,0);assert.equal(b.mass,0);
 const food2=sim.items.find(it=>it.st!==2&&!it.grp);sim._eat(food2,b);assert.equal(b.pts,scoreForMass(b.mass));assert.ok(b.pts>0);
 // A growth boost changes mass and score together.
-const mass=b.mass,base=sim.items.find(it=>it.st!==2&&!it.grp);b.eff.x2=5;sim._eat(base,b);assert.ok(Math.abs(b.mass-mass-base.vol*2)<1e-7);assert.equal(b.pts,scoreForMass(b.mass));sim.free();
+const mass=b.mass,base=sim.items.find(it=>it.st!==2&&!it.grp);b.eff.x2=5;sim._eat(base,b);assert.ok(Math.abs(b.mass-mass-base.foodMass*2)<1e-7);assert.equal(b.pts,scoreForMass(b.mass));sim.free();
 const cases=[0,1000,10000,100000,1e12].map(pts=>({pts,battleFirst:roundCoins({mode:'battle',pts,place:1,elapsed:120}),battleLast:roundCoins({mode:'battle',pts,place:11,elapsed:120}),zen:roundCoins({mode:'zen',pts,elapsed:120})}));
 for(const row of cases){assert.ok(row.battleFirst<=42);assert.ok(row.battleLast<=30);}
 assert.equal(roundCoins({mode:'battle',pts:0,elapsed:0}),0);

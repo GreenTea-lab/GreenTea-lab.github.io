@@ -132,7 +132,7 @@ function plan(sim, h) {
     sim.query(x, z, h.r + 2, (it) => {
       if (it.st === 2 || fitOf(it) >= h.r * 1.9 || it.p.y > it.rad + 0.3) return;
       if (Math.hypot(it.p.x - x, it.p.z - z) > h.r + 2) return;
-      v += Math.min(it.vol, 30) + it.pts * 0.05;
+      v += Math.min(it.foodMass, 30) + (it.gold ? 20 : 0);
     });
     v = (v * bonus) / (6 + Math.hypot(x - h.x, z - h.z));
     if (v > bv) {

@@ -40,6 +40,7 @@ jobs:
           npm run test:audit
           node test/audit-adaptation.mjs
           npm run test:offline
+          npm run test:balance
       - id: build
         run: npm run build
       - name: Remote Chrome

@@ -62,6 +62,21 @@ try{
  // Expedition -> continue city -> immediate end: no old-score rewards.
  await p.evaluate(()=>{__game.play(1);__game.me.mass=10000;__game.me.pts=100000;__game.stats.eaten=100;__game.end();});await p.locator('#freewalk').click();
  const continuation=await p.evaluate(()=>{const g=__game,coins=__save.data.coins,xp=__save.data.xp,rounds=__save.data.rounds;g.end();return {mode:g.mode,regen:g.sim.regen,coins:g.lastRes.coins,xp:g.lastRes.xp,roundsDelta:__save.data.rounds-rounds,coinDelta:__save.data.coins-coins,xpDelta:__save.data.xp-xp};});report.continuation=continuation;check('continuation cannot award old mass',continuation.regen&&continuation.coins===0&&continuation.xp===0&&continuation.roundsDelta===0);await p.screenshot({path:out+'/small-continuation-result.png'});
+ // Show the new skyline at an angle, with the same materials and geometry as gameplay.
+ await p.setViewportSize({width:1100,height:650});
+ for(const id of ['town','metro','neoncity']){
+  const landmark=await p.evaluate(id=>{
+   const g=__game;g.manual=true;__save.data.map=id;__save.data.mode='zen';g.play();
+   const l=g.map.landmarks.find(it=>it.type==='skyscraper'),v=g.view;
+   v.frame(.016,g.sim,g.me);
+   v.camera.position.set(l.x+85,l.height*.86,l.z+115);
+   v.camera.lookAt(l.x,l.height*.46,l.z);
+   v.render();
+   return {id,height:l.height,floors:l.floors,glError:v.renderer.getContext().getError()};
+  },id);
+  check('skyscraper draws without WebGL errors on '+id,landmark.glError===0);
+  await p.screenshot({path:out+'/skyline-'+id+'.png'});
+ }
  // Frame interval benchmark: production render on EVERY frame, no manual/synthetic loop.
  await p.setViewportSize({width:390,height:844});const cdp=await p.context().newCDPSession(p);
  for(const rate of [1,4])for(const map of ['town','metro','neoncity','aurora']){

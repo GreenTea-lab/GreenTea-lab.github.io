@@ -1,4 +1,5 @@
 import {lanePose,advanceTraffic,footprintOverlap,turnCurve,curvePose} from './traffic.js';
+import {foodMassFor} from './food-balance.js';
 // Мир игры: предметы города, дыры и физика обрушения на Rapier (физика взята из «Разрушителя Замков»:
 // урон по Δv из контактов, разрушение, взрывы). Модуль не зависит от three — его гоняют и игра, и тесты в Node.
 //
@@ -199,6 +200,7 @@ export class Sim {
       body: null,
       col: null,
       vol,
+      foodMass:foodMassFor(s,vol),
       pts: s.pts != null ? s.pts : Math.max(1, Math.round(vol * M.val * 6)),
       hp: M.hp,
       rad: 0.5 * Math.hypot(size[0], size[1], size[2]),
@@ -662,7 +664,7 @@ export class Sim {
     let pts=0;
     if (h && h.alive) {
       const before=h.pts;
-      h.mass += it.vol * (h.grow || 1) * growthMul(h);
+      h.mass += it.foodMass * (h.grow || 1) * growthMul(h);
       h.pts = scoreForMass(h.mass);
       pts=h.pts-before;
       h.eaten++;
@@ -1002,6 +1004,7 @@ export class Sim {
           z: it.p.z + o[2],
           q: { ...it.q },
           kind: 'chunk',
+          foodMass:it.foodMass/n,
           v: { x: vel.x + sep[0], y: vel.y + sep[1] + 0.6, z: vel.z + sep[2] },
           w: ang,
         });
@@ -1011,7 +1014,7 @@ export class Sim {
       }
     } else if (owner && owner.alive) {
       // мелочь рассыпается в пыль — очки той дыре, что всё устроила
-      owner.mass += it.vol * 0.5 * (owner.grow || 1) * growthMul(owner);
+      owner.mass += it.foodMass * 0.5 * (owner.grow || 1) * growthMul(owner);
       owner.pts = scoreForMass(owner.mass);
       this.eatenVol += it.vol;
     }
