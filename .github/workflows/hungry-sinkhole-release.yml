@@ -23,6 +23,17 @@ jobs:
       CLOUD_CHROME: /usr/bin/google-chrome
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 2
+      - name: Determine audit scope
+        id: changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -Eq '(/src/|/package(-lock)?\.json$|/build\.mjs$|/tools/build-release\.mjs$|/test/cloud-(audit|browser)\.mjs$)'
+          then
+            echo 'physics=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'physics=false' >> "$GITHUB_OUTPUT"
+          fi
       - run: npm ci
       - name: Node physics, SDK, collections and game modes
         run: |
@@ -58,7 +69,7 @@ jobs:
           NODE_OPTIONS: --import=./test/cloud-browser.mjs
         run: node test/cloud-ads.mjs
       - name: All maps, GPU memory and real rendered frame timings
-        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        if: ${{ !cancelled() && steps.build.outcome == 'success' && (github.event_name == 'workflow_dispatch' || steps.changes.outputs.physics == 'true') }}
         env:
           NODE_OPTIONS: --import=./test/cloud-browser.mjs
         run: node test/cloud-audit.mjs
