@@ -1,0 +1,64 @@
+name: Sudoku release checks
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'YandexGames/project/games/sudoku/**'
+      - '.github/workflows/sudoku-release.yml'
+  push:
+    branches: ['codex/sudoku-zen-*']
+    paths:
+      - 'YandexGames/project/games/sudoku/**'
+      - '.github/workflows/sudoku-release.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sudoku-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: YandexGames/project/games/sudoku
+    env:
+      GAME_TESTS_REMOTE: '1'
+      MOCK_SDK: '1'
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: YandexGames/project/games/sudoku/package-lock.json
+      - run: npm ci
+      - run: npm run test:levels
+      - run: node test/runtime.mjs
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Release interactions and responsive screenshots
+        run: npm run test:release
+      - name: Existing game and SDK flows
+        run: npm run test:flow
+      - name: Theme and large text layouts
+        run: node test/themes.mjs
+      - name: Preserve screenshots and audit
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: sudoku-release-review
+          path: |
+            YandexGames/project/games/sudoku/test/out/
+            YandexGames/project/games/sudoku/reports/
+          retention-days: 14
+      - name: Preserve game builds
+        if: success()
+        uses: actions/upload-artifact@v5
+        with:
+          name: sudoku-zen-1.1.0-builds
+          path: |
+            YandexGames/project/games/sudoku/dist/
+            YandexGames/project/games/sudoku/dist-single/
+          retention-days: 14

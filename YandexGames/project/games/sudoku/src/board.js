@@ -284,7 +284,7 @@ export class Board {
 
   // ---------- ввод ----------
   tapCell(i) {
-    if (this.done || this.paused) return;
+    if (this.done || this.paused || this.app.blocked()) return;
     if (this.hintShown && i !== this.hintShown.target) this.closeHint();
     const digitMode = this.app.opt('input') === 'digit';
     if (digitMode) {
@@ -310,7 +310,7 @@ export class Board {
   }
 
   tapDigit(d) {
-    if (this.done || this.paused) return;
+    if (this.done || this.paused || this.app.blocked()) return;
     if (this.app.opt('input') === 'digit') {
       this.activeDigit = this.activeDigit === d ? 0 : d;
       audio.play('select');
@@ -335,7 +335,7 @@ export class Board {
   }
 
   input(d) {
-    if (this.done || this.paused) return;
+    if (this.done || this.paused || this.app.blocked()) return;
     const i = this.sel;
     if (i === null) return this.app.toast(t(this.app.opt('input') === 'digit' ? 'selectCellD' : 'selectCell'));
     if (this.givens[i]) return this.app.toast(t('given'));
@@ -364,7 +364,7 @@ export class Board {
     this.vals[i] = d;
     this.notes[i] = 0;
     const ok = d === this.sol[i];
-    if (ok) this._clearPeerNotes(i, d, rec);
+    if (ok && this.app.opt('autoNotes') !== false) this._clearPeerNotes(i, d, rec);
     else this.mistakes++;
     this._push(rec);
     if (this.hintShown && i === this.hintShown.target) this.closeHint(true);
@@ -390,7 +390,7 @@ export class Board {
 
   erase() {
     const i = this.sel;
-    if (this.done || this.paused || i === null || this.givens[i]) return;
+    if (this.done || this.paused || this.app.blocked() || i === null || this.givens[i]) return;
     if (!this.vals[i] && !this.notes[i]) return;
     if (this.revealed.has(i)) return;
     if (this.vals[i] && this.vals[i] === this.sol[i] && this.app.opt('autoCheck')) return this.app.toast(t('alreadyOk'));
@@ -403,7 +403,7 @@ export class Board {
   }
 
   undo() {
-    if (this.done || this.paused) return;
+    if (this.done || this.paused || this.app.blocked()) return;
     const r = this.hist.pop();
     if (!r) return;
     this.vals[r.i] = r.v;
@@ -418,7 +418,7 @@ export class Board {
   }
 
   toggleNotes() {
-    if (this.done) return;
+    if (this.done || this.paused || this.app.blocked()) return;
     this.notesMode = !this.notesMode;
     audio.play('click');
     this._notesBtn();
@@ -433,7 +433,7 @@ export class Board {
 
   // ---------- умная подсказка ----------
   hint() {
-    if (this.done || this.paused) return;
+    if (this.done || this.paused || this.app.blocked()) return;
     if (this.hintShown) return this.applyHint();
     const h = makeHint(this);
     if (!h) return;
@@ -473,6 +473,7 @@ export class Board {
   }
 
   applyHint() {
+    if (this.done || this.paused || this.app.blocked()) return;
     const h = this.hintShown;
     if (!h) return;
     this.closeHint(true);

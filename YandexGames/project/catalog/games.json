@@ -106,15 +106,15 @@
       "path": "games/sudoku/src",
       "originalPath": "materials/expanded/sudoku-source-506888bfaf6c",
       "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/sudoku/sudoku-source.zip",
-      "codeModified": "2026-10-11T14:08:10+03:00"
+      "codeModified": "2026-11-17T05:41:55.963Z"
     },
     "preview": {
       "path": "games/sudoku/preview/index.html",
-      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/sudoku.html",
-      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
-      "modified": "2026-10-12T15:16:10+03:00",
-      "generated": false,
-      "bundleComparison": "only-local-sdk-wait"
+      "originalPath": "games/sudoku/dist-single",
+      "origin": "Local build from games/sudoku/src and games/sudoku/static; 1.1.0",
+      "modified": "2026-11-17T05:41:55.963Z",
+      "generated": true,
+      "bundleComparison": "rebuilt-from-working-source"
     },
     "releases": [
       {
@@ -131,7 +131,7 @@
         "codeModified": "2026-10-10T07:24:00+03:00"
       }
     ],
-    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+    "note": "17.11.2026: v1.1.0. Six generated landscapes, 14 board skins, dimensional UI, seasonal garden collection and preview, platform pause and save fixes. Original logo and all 1000 puzzle IDs preserved. See games/sudoku/RELEASE.md."
   },
   {
     "id": "postcard-mahjong",

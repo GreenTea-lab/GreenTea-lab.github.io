@@ -185,6 +185,7 @@ export class Scene {
 
   // всплеск лепестков в точке экрана (решён квадрат/строка/судоку)
   burst(x, y, n = 18, spread = 1) {
+    if (this.reducedMotion) return;
     const T = THEMES[this.theme];
     if (!T.petal.length) return;
     for (let i = 0; i < n; i++) {

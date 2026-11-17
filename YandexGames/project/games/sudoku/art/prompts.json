@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-17",
+  "generator": "Built-in image_gen tool",
+  "assets": [
+    {
+      "key": "spring",
+      "original": "art/originals/garden-spring.png",
+      "runtime": "static/art/garden-spring.webp",
+      "prompt": "Use case: stylized-concept. Asset type: actual landscape background for a premium cozy Japanese zen garden game, wide 16:9 full bleed. Painterly hand-crafted 3D illustration, rounded organic forms, rich subtle material detail, layered atmospheric depth, cinematic soft light, beautiful and inviting, muted elegant colors. Camera slightly elevated looking across garden, distant mountains and trees across upper half, broad mostly empty raked sand terrace across lower 48 percent where separate collectible objects will be placed. Keep foreground low-detail and uncluttered; no buildings, bridges, lanterns, animals or people in the terrace. No text, logos, watermark or UI. Landscape only. SPRING DAWN: exquisite flowering cherry trees framing the edges, pale blush blossoms and hanging branches, misty lavender mountains, dawn peach light reflected in a narrow distant pond, moss-covered rocks at far edges, pale warm sand terrace with a few delicate fallen petals. Focal depth and subtle luminous mist; avoid flat cartoon style."
+    },
+    {
+      "key": "summer",
+      "original": "art/originals/garden-summer.png",
+      "runtime": "static/art/garden-summer.webp",
+      "prompt": "undefinedSUMMER BLUE HOUR: luminous jade bamboo grove at edges, graceful dark pines, distant cascading mountain stream and deep emerald hills, a serene narrow blue pond beyond the sand terrace, humid turquoise mist, tiny warm fireflies in the distance and warm grazing twilight light on pale sand. Spacious empty terrace. Highly crafted warm atmospheric stylized painting."
+    },
+    {
+      "key": "autumn",
+      "original": "art/originals/garden-autumn.png",
+      "runtime": "static/art/garden-autumn.webp",
+      "prompt": "Use case: lighting-weather. Edit target: the provided spring zen garden background. Keep the exact composition, terrace outline, horizon, mountain placement, camera framing and broad EMPTY raked sand foreground unchanged. Change season to spectacular autumn golden hour: replace the cherry blossoms with copper red and gold maple leaves, turn side foliage amber and crimson, warm the distant mountain mist and lake, add sunbeams and a few fallen maple leaves at far edges only. Maintain the broad unobstructed empty sand terrace across bottom 50 percent for game collectibles. NO architecture, tea houses, furniture, pillows, lanterns, objects or people, no text or UI. Do not fill the terrace. Premium detailed serene painterly game art. Landscape 16:9."
+    },
+    {
+      "key": "winter",
+      "original": "art/originals/garden-winter.png",
+      "runtime": "static/art/garden-winter.webp",
+      "prompt": "Use case: stylized-concept. Asset type: actual landscape background for a premium cozy Japanese zen garden game, wide 16:9 full bleed. Painterly hand-crafted 3D illustration, rounded organic forms, rich subtle material detail, layered atmospheric depth, cinematic soft light, beautiful and inviting, muted elegant colors. Camera slightly elevated looking across garden, distant mountains and trees across upper half, broad mostly empty raked sand terrace across lower 48 percent where separate collectible objects will be placed. Keep foreground low-detail and uncluttered; no buildings, bridges, lanterns, animals or people in the terrace. No text, logos, watermark or UI. Landscape only. WINTER MOONLIGHT: exquisite snow-draped dark pines at far edges, a flowering red plum branch high at right edge, ethereal luminous full moon above distant snowy indigo mountain peaks, light mist on distant half-frozen blue pond beyond terrace, silver and pale lilac snow dusting over a broad empty pale sand terrace, tiny crystalline sparkles, magical tranquil twilight with subtle warm rim light. Detailed snow material, beautiful depth."
+    },
+    {
+      "key": "night",
+      "original": "art/originals/interface-night.png",
+      "runtime": "static/art/interface-night.webp",
+      "prompt": "Use case: stylized-concept. Asset type: wide 16:9 landscape backdrop for existing Sudoku Zen Garden game menu, actual game asset, no UI. Premium painterly 3D illustration of Japanese zen garden at moonlit blue hour. Indigo violet sky, distant misty mountain silhouettes and small luminous moon high right, flowering pink sakura branches framing upper left and far right, low mossy stones beside winding reflective stream and raked sand in lower foreground. Warm tiny stone lantern glow near far lower left edge. Keep central 55 percent simple dark low contrast mist and atmospheric depth, to support overlaid gold logo and menu cards. Rich luminous light gradients and subtle crafted stone and blossom materials, sophisticated cozy serene mood, NOT flat clipart, no text, logo, people, watermark. Entire composition sharp yet atmospheric, no artificial blurry patches."
+    },
+    {
+      "key": "dawn",
+      "original": "art/originals/interface-dawn.png",
+      "runtime": "static/art/interface-dawn.webp",
+      "prompt": "Use case: stylized-concept. Asset type: wide 16:9 landscape backdrop for existing Sudoku Zen Garden game menu, actual game asset, no UI. Premium painterly 3D illustration of Japanese zen garden at pastel dawn. Pale peach and lavender sky, receding misty mountains and a soft warm rising sun high right, flowering pink sakura branches framing upper left and far right, low mossy stones beside winding reflective stream and raked sand in lower foreground. Keep central 55 percent simple pale peach lavender low contrast mist and atmospheric depth, to support overlaid dark plum text and menu cards. Rich luminous grazing light and subtle crafted stone and blossom materials, elegant cozy serene mood, NOT flat clipart, no text, logo, people, watermark. Entire composition sharp yet atmospheric, no artificial blurry patches."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const base = new URL('../', import.meta.url);
+fs.copyFileSync(new URL('dist-single/index.html',base),new URL('preview/index.html',base));
+const catalog=new URL('../../catalog/games.json',base);
+const games=JSON.parse(fs.readFileSync(catalog));
+const game=games.find(g=>g.id==='sudoku');
+const now=new Date().toISOString();
+game.source.codeModified=now;
+game.preview.importedOriginalPath ||= game.preview.originalPath;
+Object.assign(game.preview,{originalPath:'games/sudoku/dist-single',origin:'Local build from games/sudoku/src and games/sudoku/static; 1.1.0',modified:now,generated:true,bundleComparison:'rebuilt-from-working-source'});
+game.note='17.11.2026: v1.1.0. Six generated landscapes, 14 board skins, dimensional UI, seasonal garden collection and preview, platform pause and save fixes. Original logo and all 1000 puzzle IDs preserved. See games/sudoku/RELEASE.md.';
+fs.writeFileSync(catalog,JSON.stringify(games,null,2)+'\n');
+console.log('Updated Sudoku shelf preview and catalog provenance.');

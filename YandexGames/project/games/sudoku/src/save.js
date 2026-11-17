@@ -39,7 +39,7 @@ const DEFAULT = () => ({
   hintsUsed: 0,
   noAds: false,
   tutDone: false,
-  settings: { musicVol: 0.45, sfxVol: 0.8, text: 0, theme: 'night', autoCheck: true, timer: true, petals: true, hlPeers: true, hlSame: true, input: 'cell', skin: 'paper' },
+  settings: { musicVol: 0.45, sfxVol: 0.8, text: 0, theme: 'night', autoCheck: true, timer: true, petals: true, hlPeers: true, hlSame: true, input: 'cell', skin: 'paper', background: 'living', reducedMotion: false, autoNotes: true },
   skins: [], // купленные стили поля
   premium: false, // «Сад мастера»
   gift: '', // дата последнего подарка дня
@@ -52,7 +52,7 @@ const DEFAULT = () => ({
   ip: {}, // незаконченные: ключ -> состояние поля
   last: '',
   daily: { done: {}, streak: 0, best: 0, last: '', saved: '', medals: {} },
-  garden: { extra: 0, seen: 0 },
+  garden: { extra: 0, seen: 0, light: 'natural' },
   ach: {}, // полученные награды за достижения
   flags: {}, // разовые события: diag, mini, fast, clean, master …
 });

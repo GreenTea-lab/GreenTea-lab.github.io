@@ -865,6 +865,40 @@ const EN = {
   wd0: 'Su',
 };
 
+Object.assign(RU, {
+  skin_jade: 'Нефрит', skin_lotus: 'Лотос', skin_porcelain: 'Фарфор', skin_maple: 'Клён',
+  skin_lavender: 'Лаванда', skin_midnight: 'Лунная ночь', skin_snow: 'Первый снег', skin_matcha: 'Матча',
+  autoNotes: 'Убирать заметки', autoNotesDesc: 'Убирать введённую цифру из заметок соседей. Отмена возвращает заметки.',
+  reducedMotion: 'Меньше движения', reducedMotionDesc: 'Спокойные фоны без движения камеры, частиц и переходов.',
+  background: 'Пейзаж', backgroundLiving: 'Живые пейзажи', backgroundClassic: 'Классический',
+  backgroundDesc: 'Живые пейзажи плавно сменяются раз в 45 секунд. Можно выбрать любимый сезон.',
+  gardenStage_seed: 'Начало истории', gardenStage_growing: 'Сад пробуждается', gardenStage_bloom: 'Время цветения', gardenStage_complete: 'Сад расцвёл',
+  gardenPreview: 'Сад мечты', gardenReturn: 'Мой сад', gardenPreviewBadge: 'Сад мечты · предпросмотр',
+  gardenWalk: 'Прогулка', gardenExitWalk: 'Вернуться в сад', gardenLight: 'Освещение',
+  gardenLight_natural: 'Естественное', gardenLight_warm: 'Тёплое', gardenLight_moon: 'Лунное',
+  gardenSeasonProgress: 'Развитие сезона', gardenDecorationNext: 'Следующее украшение', gardenSoon: 'Ещё впереди',
+  gardenPlaced: 'В саду', gardenStored: 'В коллекции', gardenCollection: 'Коллекция украшений',
+  gardenItemOwned: 'Этот уголок сада — ваш. Можно оставить украшение в коллекции или вернуть его в пейзаж.',
+  gardenItemLocked: 'Откроется после {n} решённых судоку. Следующее украшение можно получить раньше за игровые монеты.',
+  gardenPlace: 'Поставить в сад', gardenStore: 'Убрать в коллекцию',
+});
+Object.assign(EN, {
+  skin_jade: 'Jade', skin_lotus: 'Lotus', skin_porcelain: 'Porcelain', skin_maple: 'Maple',
+  skin_lavender: 'Lavender', skin_midnight: 'Moonlight', skin_snow: 'First snow', skin_matcha: 'Matcha',
+  autoNotes: 'Clean up notes', autoNotesDesc: 'Remove a placed digit from peer notes. Undo restores the notes.',
+  reducedMotion: 'Reduce motion', reducedMotionDesc: 'Still scenery without camera movement, particles or transitions.',
+  background: 'Scenery', backgroundLiving: 'Living scenery', backgroundClassic: 'Classic',
+  backgroundDesc: 'Living scenery fades to a new landscape every 45 seconds. Or choose a favorite season.',
+  gardenStage_seed: 'A new beginning', gardenStage_growing: 'The garden awakens', gardenStage_bloom: 'Time to blossom', gardenStage_complete: 'In full bloom',
+  gardenPreview: 'Dream garden', gardenReturn: 'My garden', gardenPreviewBadge: 'Dream garden · preview',
+  gardenWalk: 'Take a walk', gardenExitWalk: 'Return to garden', gardenLight: 'Lighting',
+  gardenLight_natural: 'Natural', gardenLight_warm: 'Warm', gardenLight_moon: 'Moonlit',
+  gardenSeasonProgress: 'Season progress', gardenDecorationNext: 'Next decoration', gardenSoon: 'Still to come',
+  gardenPlaced: 'In the garden', gardenStored: 'In collection', gardenCollection: 'Decoration collection',
+  gardenItemOwned: 'This little piece of the garden is yours. Keep it in your collection or place it back in the landscape.',
+  gardenItemLocked: 'Unlocks after {n} solved puzzles. The next decoration can be unlocked early with game coins.',
+  gardenPlace: 'Place in garden', gardenStore: 'Store in collection',
+});
 let dict = RU;
 export let LANG = 'ru';
 
