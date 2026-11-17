@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {spawnSync} from 'node:child_process';
-const out=path.resolve('promo/vk-2.2.2'),work=path.resolve('test-results/media-v2');fs.mkdirSync(out,{recursive:true});fs.mkdirSync(work,{recursive:true});
+const out=path.resolve('promo/vk-2.3.0'),work=path.resolve('test-results/media-v2');fs.mkdirSync(out,{recursive:true});fs.mkdirSync(work,{recursive:true});
 const ffmpeg=path.resolve('../postcard-mahjong/tools/media-runtime/node_modules/@ffmpeg-installer/win32-x64/ffmpeg.exe');
 if(!fs.existsSync(ffmpeg))throw Error('FFmpeg media runtime missing');
 process.env.PLAYWRIGHT_BROWSERS_PATH=path.join(work,'pw');

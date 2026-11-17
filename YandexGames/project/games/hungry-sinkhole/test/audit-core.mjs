@@ -19,6 +19,7 @@ check('malformed save fields recover without losing valid coins or stars',()=>{
  assert.deepEqual(sanitizeSave(null),DEFAULT());
  const clean=sanitizeSave({expeditions:{1:3,48:2,999:3},records:{bad:null,a:{map:'town',mode:'expedition',pts:42}},skins:['classic','classic','invalid'],daily:{day:today(),q:[null]}});
  assert.deepEqual(clean.expeditions,{'1':3,'48':2});assert.equal(clean.records['expedition:town'].pts,42);assert.deepEqual(clean.skins,['classic','cityBrick','cyber']);ensureDaily(clean);assert.equal(clean.daily.q.length,3);assert.ok(Number.isFinite(takeGift(clean)));
+ const mid=sanitizeSave({level:6,daily:{day:today(),q:[{id:'win',need:1,reward:110,n:0},{id:'cars',need:25,reward:90,n:3},{id:'rounds',need:3,reward:80,n:1}]}});assert.equal(mid.daily.q[0].reward,110,'equal targets must preserve their valid saved reward tier');
 });
 storage.set('hungry_sinkhole_save_v1',JSON.stringify({coins:90,ts:20,records:7,up:{speed:1e308}}));sdk.loadData=async()=>({coins:100,ts:30,expeditions:3});await save.load();
 check('cloud/local load uses validation; invalid XP inputs do not hang',()=>{assert.equal(save.data.coins,100);assert.deepEqual(save.data.expeditions,{});assert.deepEqual(save.addXp(Infinity),[]);assert.deepEqual(save.addXp(NaN),[]);});

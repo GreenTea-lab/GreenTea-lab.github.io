@@ -29,7 +29,11 @@ export function normalizeDaily(value){
   if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value.day)||!Array.isArray(value.q)||value.q.length!==3)return null;
   const ids=new Set(),q=[];
   for(const entry of value.q){
-    const spec=QUESTS.find(s=>s.id===entry?.id),tier=spec?.need.indexOf(entry?.need);
+    const spec=QUESTS.find(s=>s.id===entry?.id);
+    // Some tiers share the same target, e.g. one win, but have different rewards.
+    // Preserve a valid saved tier while still replacing arbitrary reward amounts.
+    let tier=spec?.need.findIndex((n,i)=>n===entry?.need&&spec.reward[i]===entry?.reward);
+    if(tier<0)tier=spec?.need.indexOf(entry?.need);
     if(!spec||tier<0||ids.has(spec.id))return null;
     ids.add(spec.id);
     q.push({id:spec.id,n:Number.isFinite(entry.n)?Math.max(0,Math.min(entry.need,Math.floor(entry.n))):0,need:entry.need,reward:spec.reward[tier],max:!!spec.max,got:entry.got===true});
