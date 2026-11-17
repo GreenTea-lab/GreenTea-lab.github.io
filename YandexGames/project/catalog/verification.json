@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-17T05:06:24.439Z",
+  "games": 27,
+  "materialFiles": 0,
+  "importedWorkingFiles": 0,
+  "sourceModules": 567,
+  "inlineScripts": 3,
+  "localResources": 1378,
+  "httpPages": 28,
+  "allowEdits": true,
+  "editedFiles": [],
+  "errors": [],
+  "passed": true,
+  "limitations": [
+    "No gameplay walkthrough or visual browser testing.",
+    "Dependencies not installed; module projects not rebuilt.",
+    "Three dev-kit source projects are not proven identical to standalone previews."
+  ]
+}

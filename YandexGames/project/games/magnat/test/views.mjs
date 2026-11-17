@@ -1,0 +1,44 @@
+// снимки окон интерфейса
+import { run, done } from './shot.mjs';
+const [w, h, mobile, tag] = [+(process.argv[2] || 1280), +(process.argv[3] || 720), process.argv[4] === 'm', process.argv[5] || 'v'];
+const errs = await run({ w, h, mobile, debug: { dice: [[1, 2], [3, 4]] }, steps: async (page) => {
+  const snap = async (n) => { await page.waitForTimeout(700); await page.screenshot({ path: `shots/${tag}_${n}.png` }); };
+  await page.waitForTimeout(1200);
+  await page.evaluate(() => document.querySelectorAll('.modal').forEach((m) => m.close && m.close()));
+  await page.waitForTimeout(1500);
+  await page.evaluate(() => document.querySelectorAll('.modal').forEach((m) => m.close && m.close()));
+  await page.click('[data-a="new"]');
+  await snap('setup');
+  await page.click('[data-a="go"]');
+  await page.waitForTimeout(1500);
+  await page.click('[data-a="roll"]');
+  await page.waitForSelector('[data-a="buy"]', { timeout: 30000 });
+  await snap('buy');
+  await page.click('[data-a="buy"]');
+  await page.waitForSelector('[data-a="end"]', { timeout: 30000 });
+  await snap('afterbuy');
+  // подарим себе группу и деньги, откроем имущество
+  await page.evaluate(() => { const g = window.__game; const M = g.M; for (const i of [1, 3, 37, 39, 5, 15, 12]) M.own[i] = { o: 0, h: i === 37 ? 3 : i === 39 ? 5 : 0, m: i === 12 }; M.players[0].money = 2000; g.syncAll(); g.ui.refreshPlayers(); });
+  await page.click('.bar [data-a="manage"]');
+  await snap('manage');
+  await page.evaluate(() => document.querySelectorAll('#mod .modal').forEach((m) => m.close()));
+  await page.click('.bar [data-a="trade"]');
+  await page.evaluate(() => { const c = document.querySelectorAll('.tchip'); c[0] && c[0].click(); });
+  await snap('trade');
+  await page.evaluate(() => document.querySelectorAll('#mod .modal').forEach((m) => m.close()));
+  await page.evaluate(() => { window.__game.ui.showCard({ k: 'h_bday', a: 'collect', n: 10, deck: 'chest' }, window.__game.M.players[0]); });
+  await snap('card');
+  await page.evaluate(() => document.querySelectorAll('#mod .modal').forEach((m) => m.close()));
+  await page.evaluate(() => { const g = window.__game; g.ui.auctionOpen({ i: 24, bid: 120, leader: 1, active: new Set([0, 1, 2]), log: [{ idx: 1, bid: 120 }, { idx: 3, pass: true }] }); g.ui.auctionTurn({ i: 24, bid: 120, leader: 1, active: new Set([0, 1, 2]), log: [] }, 20); });
+  await snap('auction');
+  await page.evaluate(() => document.querySelectorAll('#mod .modal').forEach((m) => m.close()));
+  await page.evaluate(() => { const g = window.__game; g.flow++; g.finish(); });
+  await snap('results');
+  await page.evaluate(() => { window.__game.toHome(); document.querySelectorAll('#mod .modal').forEach((m) => m.close()); window.__game.ui.shop(); });
+  await snap('shop');
+  await page.click('[data-tab="places"]');
+  await snap('shop2');
+  await page.click('[data-tab="houses"]');
+  await snap('shop3');
+} });
+done(errs);

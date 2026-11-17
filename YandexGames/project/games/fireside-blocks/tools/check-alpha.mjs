@@ -1,0 +1,3 @@
+import {chromium} from 'playwright';import {pathToFileURL} from 'node:url';import path from 'node:path';
+const b=await chromium.launch({channel:'chrome'});const p=await b.newPage();
+for(const f of ['items-a','items-b']){await p.goto(pathToFileURL(path.resolve('art/v2/generated/'+f+'.png')).href);console.log(f,await p.evaluate(()=>{const i=document.querySelector('img'),c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;const g=c.getContext('2d');g.drawImage(i,0,0);const d=g.getImageData(0,0,c.width,c.height).data;let n=0;for(let j=3;j<d.length;j+=4)if(d[j]<10)n++;return {w:c.width,h:c.height,transparent:n};}));}await b.close();

@@ -1,0 +1,10 @@
+import { build } from 'esbuild';
+import { chromium } from 'playwright';
+await build({ entryPoints: ['test/sheet/entry.js'], bundle: true, outfile: '/tmp/claude-0/sheet.js' });
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+const p = await b.newPage({ viewport: { width: 1300, height: 640 } });
+p.on('pageerror', (e) => console.log('ERR', e.message));
+await p.setContent(`<canvas id=c width=1300 height=640></canvas><script>${(await import('fs')).readFileSync('/tmp/claude-0/sheet.js','utf8')}</script>`);
+await p.waitForFunction(() => window.done);
+await p.screenshot({ path: '/tmp/claude-0/shots/sheet.png' });
+await b.close();

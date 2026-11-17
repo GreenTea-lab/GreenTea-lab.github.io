@@ -1,0 +1,30 @@
+{
+  "name": "hungry-sinkhole",
+  "version": "2.2.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@dimforge/rapier3d-compat": "^0.14.0",
+    "@vkontakte/vk-bridge": "2.15.5",
+    "esbuild": "^0.28.2",
+    "playwright": "1.63",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@fontsource/rubik": "^5.3.0",
+    "@fontsource/rubik-bubbles": "^5.3.0",
+    "@fontsource/rubik-mono-one": "^5.3.0"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test:worlds": "node test/worlds-v2.mjs",
+    "test:release": "node test/release-v2.mjs",
+    "test:economy": "node test/economy-v2.mjs",
+    "test:routes": "node test/expedition-routes.mjs",
+    "test:runtime": "node test/runtime-v2.mjs",
+    "test:traffic": "node test/traffic-models.mjs",
+    "test:models": "node test/model-expansion.mjs",
+    "test:themes": "node test/theme-variety.mjs",
+    "test:loading": "node test/loading-menu.mjs"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "survivor-mart",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/neucha": "^5.3.0",
+    "@fontsource/rubik-dirt": "^5.3.0",
+    "esbuild": "^0.28.2",
+    "playwright": "1.63",
+    "three": "^0.186.1"
+  }
+}

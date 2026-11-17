@@ -1,0 +1,1130 @@
+[
+  {
+    "id": "fruits",
+    "file": "fruits.webp",
+    "width": 1024,
+    "height": 1024,
+    "masterSize": [
+      1254,
+      1254
+    ],
+    "cells": [
+      {
+        "face": "apple",
+        "column": 0,
+        "row": 0,
+        "source": {
+          "x": 41,
+          "y": 34,
+          "w": 259,
+          "h": 262
+        }
+      },
+      {
+        "face": "banana",
+        "column": 1,
+        "row": 0,
+        "source": {
+          "x": 344,
+          "y": 44,
+          "w": 253,
+          "h": 249
+        }
+      },
+      {
+        "face": "grapes",
+        "column": 2,
+        "row": 0,
+        "source": {
+          "x": 662,
+          "y": 29,
+          "w": 246,
+          "h": 271
+        }
+      },
+      {
+        "face": "orange",
+        "column": 3,
+        "row": 0,
+        "source": {
+          "x": 972,
+          "y": 51,
+          "w": 243,
+          "h": 247
+        }
+      },
+      {
+        "face": "strawberry",
+        "column": 0,
+        "row": 1,
+        "source": {
+          "x": 54,
+          "y": 338,
+          "w": 223,
+          "h": 266
+        }
+      },
+      {
+        "face": "pear",
+        "column": 1,
+        "row": 1,
+        "source": {
+          "x": 367,
+          "y": 339,
+          "w": 214,
+          "h": 269
+        }
+      },
+      {
+        "face": "cherry",
+        "column": 2,
+        "row": 1,
+        "source": {
+          "x": 652,
+          "y": 343,
+          "w": 245,
+          "h": 257
+        }
+      },
+      {
+        "face": "watermelon",
+        "column": 3,
+        "row": 1,
+        "source": {
+          "x": 965,
+          "y": 350,
+          "w": 261,
+          "h": 253
+        }
+      },
+      {
+        "face": "lemon",
+        "column": 0,
+        "row": 2,
+        "source": {
+          "x": 50,
+          "y": 651,
+          "w": 217,
+          "h": 266
+        }
+      },
+      {
+        "face": "plum",
+        "column": 1,
+        "row": 2,
+        "source": {
+          "x": 341,
+          "y": 670,
+          "w": 264,
+          "h": 249
+        }
+      },
+      {
+        "face": "kiwi",
+        "column": 2,
+        "row": 2,
+        "source": {
+          "x": 655,
+          "y": 676,
+          "w": 251,
+          "h": 242
+        }
+      },
+      {
+        "face": "pineapple",
+        "column": 3,
+        "row": 2,
+        "source": {
+          "x": 993,
+          "y": 637,
+          "w": 200,
+          "h": 296
+        }
+      },
+      {
+        "face": "peach",
+        "column": 0,
+        "row": 3,
+        "source": {
+          "x": 30,
+          "y": 979,
+          "w": 255,
+          "h": 248
+        }
+      },
+      {
+        "face": "blueberry",
+        "column": 1,
+        "row": 3,
+        "source": {
+          "x": 343,
+          "y": 977,
+          "w": 264,
+          "h": 241
+        }
+      },
+      {
+        "face": "avocado",
+        "column": 2,
+        "row": 3,
+        "source": {
+          "x": 661,
+          "y": 965,
+          "w": 223,
+          "h": 270
+        }
+      },
+      {
+        "face": "coconut",
+        "column": 3,
+        "row": 3,
+        "source": {
+          "x": 958,
+          "y": 981,
+          "w": 265,
+          "h": 246
+        }
+      }
+    ]
+  },
+  {
+    "id": "flowers",
+    "file": "flowers.webp",
+    "width": 1024,
+    "height": 1024,
+    "masterSize": [
+      1254,
+      1254
+    ],
+    "cells": [
+      {
+        "face": "sunflower",
+        "column": 0,
+        "row": 0,
+        "source": {
+          "x": 13,
+          "y": 21,
+          "w": 290,
+          "h": 272
+        }
+      },
+      {
+        "face": "cornflower",
+        "column": 1,
+        "row": 0,
+        "source": {
+          "x": 326,
+          "y": 22,
+          "w": 290,
+          "h": 265
+        }
+      },
+      {
+        "face": "rose",
+        "column": 2,
+        "row": 0,
+        "source": {
+          "x": 641,
+          "y": 21,
+          "w": 284,
+          "h": 267
+        }
+      },
+      {
+        "face": "daisy",
+        "column": 3,
+        "row": 0,
+        "source": {
+          "x": 955,
+          "y": 21,
+          "w": 283,
+          "h": 267
+        }
+      },
+      {
+        "face": "lavender",
+        "column": 0,
+        "row": 1,
+        "source": {
+          "x": 40,
+          "y": 321,
+          "w": 233,
+          "h": 288
+        }
+      },
+      {
+        "face": "tulip",
+        "column": 1,
+        "row": 1,
+        "source": {
+          "x": 335,
+          "y": 329,
+          "w": 264,
+          "h": 281
+        }
+      },
+      {
+        "face": "forgetme",
+        "column": 2,
+        "row": 1,
+        "source": {
+          "x": 642,
+          "y": 331,
+          "w": 277,
+          "h": 272
+        }
+      },
+      {
+        "face": "poppy",
+        "column": 3,
+        "row": 1,
+        "source": {
+          "x": 955,
+          "y": 327,
+          "w": 284,
+          "h": 275
+        }
+      },
+      {
+        "face": "bell",
+        "column": 0,
+        "row": 2,
+        "source": {
+          "x": 15,
+          "y": 645,
+          "w": 285,
+          "h": 275
+        }
+      },
+      {
+        "face": "sakura",
+        "column": 1,
+        "row": 2,
+        "source": {
+          "x": 325,
+          "y": 644,
+          "w": 286,
+          "h": 260
+        }
+      },
+      {
+        "face": "lily",
+        "column": 2,
+        "row": 2,
+        "source": {
+          "x": 636,
+          "y": 633,
+          "w": 291,
+          "h": 287
+        }
+      },
+      {
+        "face": "iris",
+        "column": 3,
+        "row": 2,
+        "source": {
+          "x": 954,
+          "y": 633,
+          "w": 285,
+          "h": 285
+        }
+      },
+      {
+        "face": "lotus",
+        "column": 0,
+        "row": 3,
+        "source": {
+          "x": 6,
+          "y": 960,
+          "w": 302,
+          "h": 267
+        }
+      },
+      {
+        "face": "pansy",
+        "column": 1,
+        "row": 3,
+        "source": {
+          "x": 341,
+          "y": 955,
+          "w": 264,
+          "h": 264
+        }
+      },
+      {
+        "face": "hydrangea",
+        "column": 2,
+        "row": 3,
+        "source": {
+          "x": 639,
+          "y": 958,
+          "w": 286,
+          "h": 262
+        }
+      },
+      {
+        "face": "valley",
+        "column": 3,
+        "row": 3,
+        "source": {
+          "x": 956,
+          "y": 953,
+          "w": 276,
+          "h": 277
+        }
+      }
+    ]
+  },
+  {
+    "id": "gems-a",
+    "file": "gems-a.webp",
+    "width": 1024,
+    "height": 1024,
+    "masterSize": [
+      1261,
+      1247
+    ],
+    "cells": [
+      {
+        "face": "apple",
+        "column": 0,
+        "row": 0,
+        "source": {
+          "x": 36,
+          "y": 42,
+          "w": 270,
+          "h": 263
+        }
+      },
+      {
+        "face": "sunflower",
+        "column": 1,
+        "row": 0,
+        "source": {
+          "x": 373,
+          "y": 45,
+          "w": 205,
+          "h": 252
+        }
+      },
+      {
+        "face": "grapes",
+        "column": 2,
+        "row": 0,
+        "source": {
+          "x": 687,
+          "y": 36,
+          "w": 187,
+          "h": 275
+        }
+      },
+      {
+        "face": "cornflower",
+        "column": 3,
+        "row": 0,
+        "source": {
+          "x": 967,
+          "y": 54,
+          "w": 247,
+          "h": 237
+        }
+      },
+      {
+        "face": "banana",
+        "column": 0,
+        "row": 1,
+        "source": {
+          "x": 53,
+          "y": 337,
+          "w": 238,
+          "h": 255
+        }
+      },
+      {
+        "face": "rose",
+        "column": 1,
+        "row": 1,
+        "source": {
+          "x": 350,
+          "y": 348,
+          "w": 250,
+          "h": 248
+        }
+      },
+      {
+        "face": "orange",
+        "column": 2,
+        "row": 1,
+        "source": {
+          "x": 654,
+          "y": 350,
+          "w": 252,
+          "h": 230
+        }
+      },
+      {
+        "face": "daisy",
+        "column": 3,
+        "row": 1,
+        "source": {
+          "x": 954,
+          "y": 333,
+          "w": 274,
+          "h": 267
+        }
+      },
+      {
+        "face": "strawberry",
+        "column": 0,
+        "row": 2,
+        "source": {
+          "x": 46,
+          "y": 625,
+          "w": 243,
+          "h": 284
+        }
+      },
+      {
+        "face": "lavender",
+        "column": 1,
+        "row": 2,
+        "source": {
+          "x": 354,
+          "y": 626,
+          "w": 242,
+          "h": 278
+        }
+      },
+      {
+        "face": "pear",
+        "column": 2,
+        "row": 2,
+        "source": {
+          "x": 651,
+          "y": 640,
+          "w": 259,
+          "h": 237
+        }
+      },
+      {
+        "face": "tulip",
+        "column": 3,
+        "row": 2,
+        "source": {
+          "x": 961,
+          "y": 643,
+          "w": 254,
+          "h": 253
+        }
+      },
+      {
+        "face": "cherry",
+        "column": 0,
+        "row": 3,
+        "source": {
+          "x": 35,
+          "y": 988,
+          "w": 270,
+          "h": 167
+        }
+      },
+      {
+        "face": "forgetme",
+        "column": 1,
+        "row": 3,
+        "source": {
+          "x": 358,
+          "y": 935,
+          "w": 236,
+          "h": 274
+        }
+      },
+      {
+        "face": "watermelon",
+        "column": 2,
+        "row": 3,
+        "source": {
+          "x": 677,
+          "y": 938,
+          "w": 206,
+          "h": 259
+        }
+      },
+      {
+        "face": "poppy",
+        "column": 3,
+        "row": 3,
+        "source": {
+          "x": 963,
+          "y": 935,
+          "w": 249,
+          "h": 275
+        }
+      }
+    ]
+  },
+  {
+    "id": "gems-b",
+    "file": "gems-b.webp",
+    "width": 1024,
+    "height": 1024,
+    "masterSize": [
+      1254,
+      1254
+    ],
+    "cells": [
+      {
+        "face": "lemon",
+        "column": 0,
+        "row": 0,
+        "source": {
+          "x": 79,
+          "y": 62,
+          "w": 196,
+          "h": 238
+        }
+      },
+      {
+        "face": "bell",
+        "column": 1,
+        "row": 0,
+        "source": {
+          "x": 402,
+          "y": 46,
+          "w": 144,
+          "h": 262
+        }
+      },
+      {
+        "face": "plum",
+        "column": 2,
+        "row": 0,
+        "source": {
+          "x": 662,
+          "y": 74,
+          "w": 209,
+          "h": 217
+        }
+      },
+      {
+        "face": "sakura",
+        "column": 3,
+        "row": 0,
+        "source": {
+          "x": 967,
+          "y": 63,
+          "w": 215,
+          "h": 230
+        }
+      },
+      {
+        "face": "kiwi",
+        "column": 0,
+        "row": 1,
+        "source": {
+          "x": 99,
+          "y": 353,
+          "w": 153,
+          "h": 233
+        }
+      },
+      {
+        "face": "lily",
+        "column": 1,
+        "row": 1,
+        "source": {
+          "x": 384,
+          "y": 343,
+          "w": 173,
+          "h": 252
+        }
+      },
+      {
+        "face": "pineapple",
+        "column": 2,
+        "row": 1,
+        "source": {
+          "x": 667,
+          "y": 356,
+          "w": 198,
+          "h": 228
+        }
+      },
+      {
+        "face": "iris",
+        "column": 3,
+        "row": 1,
+        "source": {
+          "x": 948,
+          "y": 348,
+          "w": 255,
+          "h": 233
+        }
+      },
+      {
+        "face": "peach",
+        "column": 0,
+        "row": 2,
+        "source": {
+          "x": 75,
+          "y": 631,
+          "w": 196,
+          "h": 250
+        }
+      },
+      {
+        "face": "lotus",
+        "column": 1,
+        "row": 2,
+        "source": {
+          "x": 352,
+          "y": 630,
+          "w": 241,
+          "h": 262
+        }
+      },
+      {
+        "face": "blueberry",
+        "column": 2,
+        "row": 2,
+        "source": {
+          "x": 649,
+          "y": 641,
+          "w": 239,
+          "h": 238
+        }
+      },
+      {
+        "face": "pansy",
+        "column": 3,
+        "row": 2,
+        "source": {
+          "x": 948,
+          "y": 641,
+          "w": 253,
+          "h": 224
+        }
+      },
+      {
+        "face": "avocado",
+        "column": 0,
+        "row": 3,
+        "source": {
+          "x": 68,
+          "y": 941,
+          "w": 207,
+          "h": 253
+        }
+      },
+      {
+        "face": "hydrangea",
+        "column": 1,
+        "row": 3,
+        "source": {
+          "x": 359,
+          "y": 941,
+          "w": 202,
+          "h": 245
+        }
+      },
+      {
+        "face": "coconut",
+        "column": 2,
+        "row": 3,
+        "source": {
+          "x": 656,
+          "y": 942,
+          "w": 225,
+          "h": 229
+        }
+      },
+      {
+        "face": "valley",
+        "column": 3,
+        "row": 3,
+        "source": {
+          "x": 965,
+          "y": 941,
+          "w": 207,
+          "h": 253
+        }
+      }
+    ]
+  },
+  {
+    "id": "stamps-a",
+    "file": "stamps-a.webp",
+    "width": 1024,
+    "height": 1024,
+    "masterSize": [
+      1254,
+      1254
+    ],
+    "cells": [
+      {
+        "face": "apple",
+        "column": 0,
+        "row": 0,
+        "source": {
+          "x": 83,
+          "y": 23,
+          "w": 227,
+          "h": 291
+        }
+      },
+      {
+        "face": "sunflower",
+        "column": 1,
+        "row": 0,
+        "source": {
+          "x": 379,
+          "y": 22,
+          "w": 223,
+          "h": 292
+        }
+      },
+      {
+        "face": "grapes",
+        "column": 2,
+        "row": 0,
+        "source": {
+          "x": 656,
+          "y": 23,
+          "w": 225,
+          "h": 291
+        }
+      },
+      {
+        "face": "cornflower",
+        "column": 3,
+        "row": 0,
+        "source": {
+          "x": 943,
+          "y": 23,
+          "w": 227,
+          "h": 291
+        }
+      },
+      {
+        "face": "banana",
+        "column": 0,
+        "row": 1,
+        "source": {
+          "x": 77,
+          "y": 331,
+          "w": 237,
+          "h": 287
+        }
+      },
+      {
+        "face": "rose",
+        "column": 1,
+        "row": 1,
+        "source": {
+          "x": 378,
+          "y": 330,
+          "w": 225,
+          "h": 287
+        }
+      },
+      {
+        "face": "orange",
+        "column": 2,
+        "row": 1,
+        "source": {
+          "x": 655,
+          "y": 331,
+          "w": 227,
+          "h": 285
+        }
+      },
+      {
+        "face": "daisy",
+        "column": 3,
+        "row": 1,
+        "source": {
+          "x": 942,
+          "y": 331,
+          "w": 231,
+          "h": 284
+        }
+      },
+      {
+        "face": "strawberry",
+        "column": 0,
+        "row": 2,
+        "source": {
+          "x": 79,
+          "y": 630,
+          "w": 235,
+          "h": 282
+        }
+      },
+      {
+        "face": "lavender",
+        "column": 1,
+        "row": 2,
+        "source": {
+          "x": 370,
+          "y": 630,
+          "w": 233,
+          "h": 282
+        }
+      },
+      {
+        "face": "pear",
+        "column": 2,
+        "row": 2,
+        "source": {
+          "x": 655,
+          "y": 630,
+          "w": 231,
+          "h": 281
+        }
+      },
+      {
+        "face": "tulip",
+        "column": 3,
+        "row": 2,
+        "source": {
+          "x": 942,
+          "y": 630,
+          "w": 235,
+          "h": 280
+        }
+      },
+      {
+        "face": "cherry",
+        "column": 0,
+        "row": 3,
+        "source": {
+          "x": 76,
+          "y": 941,
+          "w": 238,
+          "h": 283
+        }
+      },
+      {
+        "face": "forgetme",
+        "column": 1,
+        "row": 3,
+        "source": {
+          "x": 370,
+          "y": 941,
+          "w": 235,
+          "h": 283
+        }
+      },
+      {
+        "face": "watermelon",
+        "column": 2,
+        "row": 3,
+        "source": {
+          "x": 654,
+          "y": 941,
+          "w": 232,
+          "h": 282
+        }
+      },
+      {
+        "face": "poppy",
+        "column": 3,
+        "row": 3,
+        "source": {
+          "x": 942,
+          "y": 941,
+          "w": 236,
+          "h": 282
+        }
+      }
+    ]
+  },
+  {
+    "id": "stamps-b",
+    "file": "stamps-b.webp",
+    "width": 1024,
+    "height": 1024,
+    "masterSize": [
+      1254,
+      1254
+    ],
+    "cells": [
+      {
+        "face": "lemon",
+        "column": 0,
+        "row": 0,
+        "source": {
+          "x": 27,
+          "y": 21,
+          "w": 283,
+          "h": 290
+        }
+      },
+      {
+        "face": "bell",
+        "column": 1,
+        "row": 0,
+        "source": {
+          "x": 335,
+          "y": 22,
+          "w": 282,
+          "h": 289
+        }
+      },
+      {
+        "face": "plum",
+        "column": 2,
+        "row": 0,
+        "source": {
+          "x": 641,
+          "y": 22,
+          "w": 282,
+          "h": 289
+        }
+      },
+      {
+        "face": "sakura",
+        "column": 3,
+        "row": 0,
+        "source": {
+          "x": 946,
+          "y": 22,
+          "w": 281,
+          "h": 289
+        }
+      },
+      {
+        "face": "kiwi",
+        "column": 0,
+        "row": 1,
+        "source": {
+          "x": 27,
+          "y": 328,
+          "w": 283,
+          "h": 290
+        }
+      },
+      {
+        "face": "lily",
+        "column": 1,
+        "row": 1,
+        "source": {
+          "x": 335,
+          "y": 328,
+          "w": 284,
+          "h": 290
+        }
+      },
+      {
+        "face": "pineapple",
+        "column": 2,
+        "row": 1,
+        "source": {
+          "x": 642,
+          "y": 328,
+          "w": 281,
+          "h": 290
+        }
+      },
+      {
+        "face": "iris",
+        "column": 3,
+        "row": 1,
+        "source": {
+          "x": 946,
+          "y": 328,
+          "w": 281,
+          "h": 291
+        }
+      },
+      {
+        "face": "peach",
+        "column": 0,
+        "row": 2,
+        "source": {
+          "x": 27,
+          "y": 635,
+          "w": 283,
+          "h": 283
+        }
+      },
+      {
+        "face": "lotus",
+        "column": 1,
+        "row": 2,
+        "source": {
+          "x": 334,
+          "y": 635,
+          "w": 282,
+          "h": 284
+        }
+      },
+      {
+        "face": "blueberry",
+        "column": 2,
+        "row": 2,
+        "source": {
+          "x": 640,
+          "y": 635,
+          "w": 283,
+          "h": 284
+        }
+      },
+      {
+        "face": "pansy",
+        "column": 3,
+        "row": 2,
+        "source": {
+          "x": 946,
+          "y": 635,
+          "w": 284,
+          "h": 284
+        }
+      },
+      {
+        "face": "avocado",
+        "column": 0,
+        "row": 3,
+        "source": {
+          "x": 27,
+          "y": 941,
+          "w": 282,
+          "h": 283
+        }
+      },
+      {
+        "face": "hydrangea",
+        "column": 1,
+        "row": 3,
+        "source": {
+          "x": 334,
+          "y": 941,
+          "w": 282,
+          "h": 283
+        }
+      },
+      {
+        "face": "coconut",
+        "column": 2,
+        "row": 3,
+        "source": {
+          "x": 639,
+          "y": 941,
+          "w": 286,
+          "h": 283
+        }
+      },
+      {
+        "face": "valley",
+        "column": 3,
+        "row": 3,
+        "source": {
+          "x": 947,
+          "y": 941,
+          "w": 282,
+          "h": 283
+        }
+      }
+    ]
+  }
+]

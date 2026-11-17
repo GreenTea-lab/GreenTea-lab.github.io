@@ -1,0 +1,20 @@
+import { run, done } from './shot.mjs';
+const W = +process.argv[2] || 1280, H = +process.argv[3] || 720, mob = process.argv[4] === 'm';
+const tag = process.argv[5] || 'd';
+const errs = await run({ w: W, h: H, mobile: mob, debug: { shots: 1 }, steps: async (p) => {
+  await p.waitForTimeout(1500);
+  await p.screenshot({ path: `shots/${tag}-menu.png` });
+  await p.evaluate(() => window.__game.ui.showLevels());
+  await p.waitForTimeout(400);
+  await p.screenshot({ path: `shots/${tag}-levels.png` });
+  await p.evaluate(() => window.__game.ui.showUpgrades());
+  await p.waitForTimeout(400);
+  await p.screenshot({ path: `shots/${tag}-ups.png` });
+  await p.evaluate(() => window.__game.ui.openIntro(9));
+  await p.waitForTimeout(400);
+  await p.screenshot({ path: `shots/${tag}-intro.png` });
+  await p.evaluate(() => { window.__game.ui.closeModal(true); window.__game.startLevel(9); });
+  await p.waitForTimeout(2500);
+  await p.screenshot({ path: `shots/${tag}-l9a.png` });
+}});
+done(errs);

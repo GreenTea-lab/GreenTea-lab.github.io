@@ -1,0 +1,42 @@
+import { run, done } from './shot.mjs';
+const all = [];
+for (const [w, h, mobile, tag] of [[1280, 720, false, 'd'], [390, 844, true, 'm']]) {
+  const errs = await run({ w, h, mobile, debug: {}, steps: async (page) => {
+    const G = (f, a) => page.evaluate(f, a);
+    const shot = (n) => page.screenshot({ path: `shots/tut_${tag}_${n}.png` });
+    const click = async (sel) => { const ok = await G((s) => { const e = document.querySelector(s); if (!e) return false; e.click(); return true; }, sel); if (!ok) console.log(tag, 'NO', sel); await page.waitForTimeout(500); };
+    await page.waitForTimeout(1500);
+    console.log(tag, 'start', await G(() => JSON.stringify({ b: window.__game.s.buildings.length, d: window.__game.s.decor.length, people: window.__game.people.length, coins: Math.round(window.__game.s.coins) })));
+    await shot(1);
+    await click('.modal [data-a="go"]');
+    await page.waitForTimeout(300);
+    await shot(2);
+    await click('.tut-hl');
+    await page.waitForTimeout(400);
+    await shot(3);
+    await click('.card[data-type="sawmill"]');
+    await page.waitForTimeout(400);
+    await shot(4);
+    await click('.placebar [data-a="ok"]');
+    await page.waitForTimeout(1500);
+    await shot(5);
+    await page.waitForFunction(() => window.__game.s.buildings.some(b => b.type === 'sawmill' && !(b.build > Date.now())), null, { timeout: 30000 });
+    await page.waitForTimeout(800);
+    await shot(6);
+    await click('.tut-hl');
+    await page.waitForTimeout(400);
+    await shot(7);
+    await click('.card[data-type="hut"]');
+    await page.waitForTimeout(400);
+    await click('.placebar [data-a="ok"]');
+    await page.waitForFunction(() => window.__game.people.length > 0, null, { timeout: 40000 });
+    await page.waitForTimeout(2500);
+    await shot(8);
+    await click('.modal [data-a="ok"]');
+    await page.waitForTimeout(800);
+    await shot(9);
+    console.log(tag, 'end', await G(() => JSON.stringify({ tut: window.__game.s.tut, goal: window.__game.s.goal, coins: Math.round(window.__game.s.coins), people: window.__game.people.length, goalVisible: !document.querySelector('.goal').classList.contains('hidden') })));
+  }});
+  all.push(...errs);
+}
+done(all);

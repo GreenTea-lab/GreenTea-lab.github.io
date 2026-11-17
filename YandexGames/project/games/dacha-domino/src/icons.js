@@ -1,0 +1,29 @@
+// SVG-иконки интерфейса (рисованные, с тёмным контуром)
+const O = '#3b2b20';
+const sv = (body, vb = '0 0 48 48') => `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">${body}</svg>`;
+export const IC = {
+  coin: sv(`<circle cx="24" cy="24" r="18" fill="#ffc93a" stroke="${O}" stroke-width="3"/><circle cx="24" cy="24" r="11" fill="none" stroke="#d89a12" stroke-width="3"/><path d="M17 16a10 10 0 0 1 6-4" stroke="#fff3b0" stroke-width="3" fill="none"/>`),
+  star: sv(`<path d="M24 4l6 12.5 13.6 2-9.8 9.6 2.3 13.6L24 35.3l-12.1 6.4 2.3-13.6-9.8-9.6 13.6-2z" fill="#ffd34a" stroke="${O}" stroke-width="3"/>`),
+  starE: sv(`<path d="M24 4l6 12.5 13.6 2-9.8 9.6 2.3 13.6L24 35.3l-12.1 6.4 2.3-13.6-9.8-9.6 13.6-2z" fill="#eadfca" stroke="${O}" stroke-width="3" opacity=".7"/>`),
+  close: sv(`<path d="M14 14l20 20M34 14L14 34" stroke="${O}" stroke-width="6"/>`),
+  menu: sv(`<path d="M11 14h26M11 24h26M11 34h26" stroke="${O}" stroke-width="5.5"/>`),
+  gear: sv(`<path d="M24 6l4 1 1 5 4 2 4-3 4 4-3 4 2 4 5 1v6l-5 1-2 4 3 4-4 4-4-3-4 2-1 5h-6l-1-5-4-2-4 3-4-4 3-4-2-4-5-1v-6l5-1 2-4-3-4 4-4 4 3 4-2 1-5z" fill="#d6ead0" stroke="${O}" stroke-width="3"/><circle cx="24" cy="24" r="6" fill="#fff" stroke="${O}" stroke-width="3"/>`),
+  trophy: sv(`<path d="M15 8h18v9a9 9 0 0 1-18 0z" fill="#ffd34a" stroke="${O}" stroke-width="3"/><path d="M15 11H8a6 6 0 0 0 7 8M33 11h7a6 6 0 0 1-7 8" fill="none" stroke="${O}" stroke-width="3"/><path d="M24 26v7M16 40h16l-2-7H18z" fill="#e3a72a" stroke="${O}" stroke-width="3"/>`),
+  gift: sv(`<rect x="8" y="20" width="32" height="20" rx="3" fill="#ff7a7a" stroke="${O}" stroke-width="3"/><rect x="6" y="14" width="36" height="8" rx="3" fill="#ff9d9d" stroke="${O}" stroke-width="3"/><path d="M24 14v26" stroke="#ffd34a" stroke-width="5"/><path d="M24 14c-4-8-12-6-9-1 2 2 9 1 9 1zM24 14c4-8 12-6 9-1-2 2-9 1-9 1z" fill="#ffd34a" stroke="${O}" stroke-width="2.5"/>`),
+  shop: sv(`<path d="M7 19h34l-3 21H10z" fill="#ffb25c" stroke="${O}" stroke-width="3"/><path d="M16 19a8 8 0 0 1 16 0" fill="none" stroke="${O}" stroke-width="3"/><path d="M7 19l3-7h28l3 7" fill="#e85a4a" stroke="${O}" stroke-width="3"/><path d="M14 12l-1 7M24 12v7M34 12l1 7" stroke="#fff" stroke-width="2" opacity=".8"/>`),
+  book: sv(`<path d="M8 10c6-2 11-1 16 3v27c-5-4-10-5-16-3z" fill="#fff8e8" stroke="${O}" stroke-width="3"/><path d="M40 10c-6-2-11-1-16 3v27c5-4 10-5 16-3z" fill="#e8f2ff" stroke="${O}" stroke-width="3"/><path d="M12 17c3-1 6-1 8 1M12 23c3-1 6-1 8 1M28 18c2-2 5-2 8-1M28 24c2-2 5-2 8-1" stroke="#9a8a7a" stroke-width="2"/>`),
+  note: sv(`<rect x="10" y="7" width="28" height="35" rx="3" fill="#fffdf0" stroke="${O}" stroke-width="3"/><path d="M15 16h18M15 22h18M15 28h18M15 34h11" stroke="#8ab0dd" stroke-width="2.4"/><path d="M24 12v28" stroke="#e07a7a" stroke-width="2"/><path d="M33 34l8-14 3 2-8 14-4 1z" fill="#f2c230" stroke="${O}" stroke-width="2.4"/>`),
+  bone: sv(`<g transform="rotate(-14 24 24)"><rect x="9" y="12" width="17" height="30" rx="4" fill="#f3ead6" stroke="${O}" stroke-width="3"/></g><g transform="rotate(10 24 24)"><rect x="19" y="7" width="18" height="32" rx="4" fill="#fff8e8" stroke="${O}" stroke-width="3"/><path d="M21 23h14" stroke="${O}" stroke-width="2.4"/><circle cx="28" cy="15" r="2.4" fill="${O}"/><circle cx="24" cy="30" r="2.4" fill="${O}"/><circle cx="32" cy="34" r="2.4" fill="${O}"/></g>`),
+  domino: sv(`<rect x="13" y="4" width="22" height="40" rx="5" fill="#fff8e8" stroke="${O}" stroke-width="3"/><path d="M15 24h18" stroke="${O}" stroke-width="2.6"/><circle cx="24" cy="24" r="1.8" fill="#c9a24a"/><circle cx="19" cy="10" r="2.6" fill="${O}"/><circle cx="29" cy="18" r="2.6" fill="${O}"/><circle cx="19" cy="30" r="2.6" fill="${O}"/><circle cx="29" cy="30" r="2.6" fill="${O}"/><circle cx="19" cy="38" r="2.6" fill="${O}"/><circle cx="29" cy="38" r="2.6" fill="${O}"/>`),
+  people: sv(`<circle cx="16" cy="17" r="6" fill="#ffd9b8" stroke="${O}" stroke-width="3"/><circle cx="32" cy="17" r="6" fill="#ffd9b8" stroke="${O}" stroke-width="3"/><path d="M5 40c1-8 5-12 11-12s10 4 11 12z" fill="#5aa0d8" stroke="${O}" stroke-width="3"/><path d="M21 40c1-8 5-12 11-12s10 4 11 12z" fill="#e8665a" stroke="${O}" stroke-width="3"/>`),
+  film: sv(`<rect x="6" y="11" width="36" height="26" rx="5" fill="#7ad0ff" stroke="${O}" stroke-width="3"/><path d="M20 18l10 6-10 6z" fill="#fff" stroke="${O}" stroke-width="2.5"/>`),
+  music: sv(`<path d="M18 34V12l20-5v22" fill="none" stroke="${O}" stroke-width="4"/><circle cx="13" cy="35" r="6" fill="#8fd18a" stroke="${O}" stroke-width="3"/><circle cx="33" cy="30" r="6" fill="#8fd18a" stroke="${O}" stroke-width="3"/>`),
+  sound: sv(`<path d="M8 19h8l10-8v26l-10-8H8z" fill="#ffd34a" stroke="${O}" stroke-width="3"/><path d="M32 17a9 9 0 0 1 0 14M36 12a15 15 0 0 1 0 24" fill="none" stroke="${O}" stroke-width="3.5"/>`),
+  lock: sv(`<path d="M15 22v-6a9 9 0 0 1 18 0v6" fill="none" stroke="${O}" stroke-width="4"/><rect x="10" y="21" width="28" height="21" rx="4" fill="#ffd34a" stroke="${O}" stroke-width="3"/><circle cx="24" cy="30" r="3" fill="${O}"/>`),
+  check: sv(`<path d="M10 25l9 9 19-20" fill="none" stroke="#fff" stroke-width="6"/>`),
+  noads: sv(`<rect x="6" y="11" width="36" height="26" rx="5" fill="#ff8a8a" stroke="${O}" stroke-width="3"/><path d="M14 31l20-14" stroke="#fff" stroke-width="5"/>`),
+  down: sv(`<path d="M24 40L8 20h10V8h12v12h10z" fill="#ffe066" stroke="${O}" stroke-width="3.5"/>`),
+  home: sv(`<path d="M8 24L24 10l16 14" fill="none" stroke="${O}" stroke-width="4"/><path d="M13 21v18h22V21" fill="#ffe7b8" stroke="${O}" stroke-width="3.5"/><rect x="20" y="28" width="8" height="11" fill="#c97a4a" stroke="${O}" stroke-width="3"/>`),
+  play: sv(`<path d="M15 9l25 15-25 15z" fill="#fff" stroke="${O}" stroke-width="3.5"/>`),
+  bolt: sv(`<path d="M27 4L10 28h12l-3 16 19-26H26z" fill="#ffd34a" stroke="${O}" stroke-width="3"/>`),
+};

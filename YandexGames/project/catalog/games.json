@@ -1,0 +1,1005 @@
+[
+  {
+    "id": "neon-swarm",
+    "title": "Неоновый Рой",
+    "description": "Выживай в неоновом шторме: аркадный экшен",
+    "directory": "games/neon-swarm",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/neon-swarm/src",
+      "originalPath": "materials/expanded/neon-swarm-source-909b9cd169a3",
+      "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/neon-swarm/neon-swarm-source.zip",
+      "codeModified": "2026-11-04T12:07:44+03:00",
+      "lastEdited": "2026-11-15"
+    },
+    "preview": {
+      "path": "games/neon-swarm/preview/index.html",
+      "originalPath": "games/neon-swarm/dist",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-11-15T14:23:40.190Z",
+      "generated": false
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/neon-swarm/releases/yandex",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/neon-swarm/neon-swarm-yandex.zip",
+        "modified": "2026-11-04T12:11:50+03:00"
+      },
+      {
+        "platform": "vk",
+        "path": "games/neon-swarm/releases/vk",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/neon-swarm/neon-swarm-vk.zip",
+        "modified": "2026-11-04T12:11:50+03:00"
+      }
+    ],
+    "alternatives": [
+      {
+        "path": "materials/expanded/61fd4e8e-fd7b-4b05-aaf2-592f1dfd8a12-2e5ca2c32caa/neon-swarm",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/загрузки_пользователя/61fd4e8e-fd7b-4b05-aaf2-592f1dfd8a12.zip",
+        "codeModified": "2026-10-11T17:37:38+03:00"
+      },
+      {
+        "path": "materials/expanded/neon-swarm-source-38498aa044a4",
+        "archive": "games-part4.zip!/neon-swarm/neon-swarm-source.zip",
+        "codeModified": "2026-10-04T20:15:02+03:00"
+      }
+    ],
+    "note": "15.11.2026: personal VK/OK records; external rating service removed. Original releases preserved. See HISTORY.md and PERSONAL-RECORD.md.",
+    "vkPreview": {
+      "path": "games/neon-swarm/preview-vk/index.html",
+      "originalPath": "games/neon-swarm/dist-vk",
+      "modified": "2026-11-15T14:23:40.190Z"
+    },
+    "currentVk": {
+      "path": "games/neon-swarm/dist-vk",
+      "artifact": "games/neon-swarm/deliverables/neon-swarm-vk-personal-record-2026-11-15.zip",
+      "date": "2026-11-15",
+      "basedOn": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/neon-swarm/neon-swarm-vk.zip",
+      "status": "Local build; game upload pending"
+    }
+  },
+  {
+    "id": "garage-flipper",
+    "title": "Гаражный флиппер",
+    "description": "Покупай старые авто, чини и выгодно продавай",
+    "directory": "games/garage-flipper",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/garage-flipper/src",
+      "originalPath": "materials/expanded/source-3fc1561c3550",
+      "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/garage-flipper/source.zip",
+      "codeModified": "2026-10-11T19:51:10+03:00"
+    },
+    "preview": {
+      "path": "games/garage-flipper/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/garage-flipper.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "only-local-sdk-wait"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/garage-flipper/releases/yandex",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/garage-flipper/yandex.zip",
+        "modified": "2026-10-11T19:51:10+03:00"
+      }
+    ],
+    "alternatives": [
+      {
+        "path": "materials/expanded/ee32ab33-a0dd-47f3-a9c2-ae855766cd9e-88fec0a72546/garage",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/загрузки_пользователя/ee32ab33-a0dd-47f3-a9c2-ae855766cd9e.zip",
+        "codeModified": "2026-10-10T07:24:02+03:00"
+      }
+    ],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "sudoku",
+    "title": "Судоку. Дзен-сад",
+    "description": "Судоку в спокойном дзен-саду",
+    "directory": "games/sudoku",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/sudoku/src",
+      "originalPath": "materials/expanded/sudoku-source-506888bfaf6c",
+      "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/sudoku/sudoku-source.zip",
+      "codeModified": "2026-10-11T14:08:10+03:00"
+    },
+    "preview": {
+      "path": "games/sudoku/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/sudoku.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:10+03:00",
+      "generated": false,
+      "bundleComparison": "only-local-sdk-wait"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/sudoku/releases/yandex",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/sudoku/sudoku-yandex.zip",
+        "modified": "2026-10-11T14:14:04+03:00"
+      }
+    ],
+    "alternatives": [
+      {
+        "path": "materials/expanded/a4056c19-8b0c-4713-8335-b608948d1440-24ce078616fe/sudoku",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/загрузки_пользователя/a4056c19-8b0c-4713-8335-b608948d1440.zip",
+        "codeModified": "2026-10-10T07:24:00+03:00"
+      }
+    ],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "postcard-mahjong",
+    "title": "Маджонг с открытками",
+    "description": "Маджонг с открытками городов мира",
+    "directory": "games/postcard-mahjong",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/postcard-mahjong/src",
+      "originalPath": "materials/expanded/postcard-mahjong-source-5bbcb9a245d9",
+      "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/postcard-mahjong/postcard-mahjong-source.zip",
+      "codeModified": "2026-10-11T19:58:12+03:00",
+      "lastEdited": "2026-11-15",
+      "revision": "postcard-responsive-backgrounds-centered-hud-v19"
+    },
+    "preview": {
+      "path": "games/postcard-mahjong/preview/index.html",
+      "originalPath": "games/postcard-mahjong/dist-single",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-11-15T15:45:04.429Z",
+      "generated": false,
+      "bundleComparison": "rebuilt-from-edited-source"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/postcard-mahjong/releases/yandex",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/postcard-mahjong/postcard-mahjong-yandex.zip",
+        "modified": "2026-10-11T19:56:24+03:00"
+      }
+    ],
+    "alternatives": [
+      {
+        "path": "materials/expanded/postcard-mahjong-source-27ac33163132",
+        "archive": "games-part3.zip!/postcard-mahjong/postcard-mahjong-source.zip",
+        "codeModified": "2026-10-05T18:23:24+03:00"
+      }
+    ],
+    "note": "15.11.2026 v2.3.1: personal records retained. Responsive city artwork: square originals plus 60 exports in 16:9, 2:1 and 1:2; nearest-format cover for unusual screens, no blur or extra landscape zoom. Pair goal below centered timer; helper row at bottom center, board reserves space. Artwork and loader checks passed; six viewport sizes reviewed; hint, undo, shuffle and pair counter verified via pointer input. Desktop kit and media updated; VK configuration preserved; no VK upload performed.",
+    "vkPreview": {
+      "path": "games/postcard-mahjong/preview-vk/index.html",
+      "originalPath": "games/postcard-mahjong/dist-vk-single",
+      "modified": "2026-11-15T15:45:05.707Z"
+    },
+    "currentVk": {
+      "path": "games/postcard-mahjong/dist-vk",
+      "artifact": "games/postcard-mahjong/deliverables/postcard-mahjong-vk-ok-personal-records-2026-11-15.zip",
+      "date": "2026-11-15",
+      "basedOn": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/postcard-mahjong/postcard-mahjong-source.zip",
+      "revision": "postcard-responsive-backgrounds-centered-hud-v19"
+    },
+    "standalone": "games/postcard-mahjong/deliverables/postcard-mahjong-play-personal-records-2026-11-15.html",
+    "generatedArt": {
+      "directory": "games/postcard-mahjong/static/cities",
+      "masters": "games/postcard-mahjong/art/city-backgrounds/generated",
+      "prompts": "games/postcard-mahjong/art/city-backgrounds/generation.json",
+      "count": 20,
+      "tool": "built-in image_gen"
+    },
+    "interfaceArt": {
+      "master": "games/postcard-mahjong/art/interface/emblem.png",
+      "asset": "games/postcard-mahjong/static/ui/emblem.webp",
+      "prompt": "games/postcard-mahjong/art/interface/generation.json",
+      "tool": "built-in image_gen"
+    },
+    "tileArt": {
+      "directory": "games/postcard-mahjong/static/tiles",
+      "masters": "games/postcard-mahjong/art/collections",
+      "prompts": "games/postcard-mahjong/art/collections/generation.json",
+      "generatedSymbols": 96,
+      "classicSymbols": 32,
+      "atlases": 6,
+      "tool": "built-in image_gen"
+    },
+    "skinArt": {
+      "fronts": "games/postcard-mahjong/static/tiles/skins-front.webp",
+      "backs": "games/postcard-mahjong/static/tiles/skins-back.webp",
+      "masters": "games/postcard-mahjong/art/skins",
+      "prompts": "games/postcard-mahjong/art/skins/generation.json",
+      "styles": 12,
+      "tool": "built-in image_gen"
+    },
+    "loaderArt": {
+      "directory": "games/postcard-mahjong/static/ui",
+      "preparation": "games/postcard-mahjong/tools/prepare-loader-art.mjs",
+      "origin": "Existing city art, emblem and actual in-game tile renders; no new image generation"
+    },
+    "moderationAudit": {
+      "date": "2026-11-14",
+      "report": "games/postcard-mahjong/MODERATION_RECHECK.md",
+      "platformResponses": "emulated",
+      "fullCurrentVkRulesVerified": false,
+      "uploaded": false,
+      "regressionReport": "games/postcard-mahjong/test-results/moderation/report.json",
+      "retestedVersion": "2.0.0"
+    },
+    "competitorReview": {
+      "date": "2026-11-14",
+      "report": "games/postcard-mahjong/COMPETITORS_AND_IMPROVEMENTS.md",
+      "method": "Official developer/store descriptions; own source inspection"
+    },
+    "postcardArt": {
+      "directory": "games/postcard-mahjong/static/postcards",
+      "masters": "games/postcard-mahjong/art/postcards",
+      "prompts": "games/postcard-mahjong/art/postcards/generation.json",
+      "specialPrompts": "games/postcard-mahjong/art/postcards/special-generation.json",
+      "atlases": 22,
+      "cityScenes": 80,
+      "specialScenes": 8,
+      "tool": "built-in image_gen"
+    },
+    "guideArt": {
+      "master": "games/postcard-mahjong/art/interface/mira.png",
+      "asset": "games/postcard-mahjong/static/ui/mira.webp",
+      "transparent": true
+    },
+    "travelFeatures": {
+      "version": "2.0.0",
+      "report": "games/postcard-mahjong/FEATURES_V2.md",
+      "tripRoutes": 4,
+      "tripStops": 28,
+      "languages": [
+        "ru",
+        "en"
+      ]
+    },
+    "vkUploadKit": {
+      "path": "games/postcard-mahjong/deliverables/vk-upload-2.3.1",
+      "desktopPath": "C:/Users/GreenTea/Desktop/postcard-mahjong-vk",
+      "date": "2026-11-15",
+      "version": "2.3.1",
+      "guide": "games/postcard-mahjong/VK_RELEASE_GUIDE.md",
+      "screenshots": 14,
+      "gameplayVideos": 2,
+      "buildFiles": 128,
+      "applicationIdConfigured": true,
+      "publishingPerformed": false,
+      "cardTexts": "games/postcard-mahjong/ТЕКСТЫ_ДЛЯ_КАРТОЧКИ_VK.md",
+      "landscapeScreenshots": {
+        "count": 7,
+        "width": 1200,
+        "height": 600
+      },
+      "videoDurationLimitSeconds": 30,
+      "videoDurations": [
+        {
+          "file": "video/gameplay-landscape.mp4",
+          "seconds": 29.01
+        },
+        {
+          "file": "video/gameplay-portrait.mp4",
+          "seconds": 29.01
+        }
+      ],
+      "backgroundFramingUpdated": true,
+      "centeredHud": true,
+      "defaultDeployment": "production"
+    },
+    "responsiveArt": {
+      "directory": "games/postcard-mahjong/static/cities/formats",
+      "manifest": "games/postcard-mahjong/static/cities/formats/manifest.json",
+      "exports": 60,
+      "originals": 20,
+      "method": "Proportional exports of existing illustrations; no new AI generation"
+    }
+  },
+  {
+    "id": "baraban-udachi",
+    "title": "Барабан удачи",
+    "description": "Капитал-шоу с вращающимся барабаном",
+    "directory": "games/baraban-udachi",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/baraban-udachi/src",
+      "originalPath": "materials/expanded/baraban-udachi-source-697d77726f6f",
+      "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/baraban-udachi/baraban-udachi-source.zip",
+      "codeModified": "2026-10-16T21:35:22+03:00"
+    },
+    "preview": {
+      "path": "games/baraban-udachi/preview/index.html",
+      "originalPath": "games/baraban-udachi/releases/yandex",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-16T21:40:54+03:00",
+      "generated": false
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/baraban-udachi/releases/yandex",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/baraban-udachi/baraban-udachi-yandex.zip",
+        "modified": "2026-10-16T21:40:54+03:00"
+      }
+    ],
+    "alternatives": [
+      {
+        "path": "materials/expanded/baraban-udachi-source-8f8639695bc7",
+        "archive": "games-part4.zip!/baraban-udachi/baraban-udachi-source.zip",
+        "codeModified": "2026-10-10T13:17:12+03:00"
+      }
+    ],
+    "note": "Превью собрано из более свежей готовой Яндекс-сборки: встроены ресурсы и убран внешний /sdk.js; игровой JS сохранён."
+  },
+  {
+    "id": "busy-farm",
+    "title": "Хлопотливая ферма",
+    "description": "Расти, собирай и продавай на уютной ферме",
+    "directory": "games/busy-farm",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/busy-farm/src",
+      "originalPath": "materials/expanded/busy-farm-source-b5ef771ecab3",
+      "archive": "games-part4.zip!/busy-farm/busy-farm-source.zip",
+      "codeModified": "2026-10-06T20:13:36+03:00"
+    },
+    "preview": {
+      "path": "games/busy-farm/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/busy-farm.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/busy-farm/releases/yandex",
+        "archive": "games-part4.zip!/busy-farm/busy-farm-yandex.zip",
+        "modified": "2026-10-06T20:22:58+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "candy-night",
+    "title": "Конфетная Ночь",
+    "description": "Хэллоуинская головоломка с конфетами",
+    "directory": "games/candy-night",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/candy-night/src",
+      "originalPath": "materials/expanded/candy-night-source-131124405fd5",
+      "archive": "games-part1.zip!/candy-night/candy-night-source.zip",
+      "codeModified": "2026-10-05T13:12:54+03:00"
+    },
+    "preview": {
+      "path": "games/candy-night/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/candy-night.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/candy-night/releases/yandex",
+        "archive": "games-part1.zip!/candy-night/candy-night-yandex.zip",
+        "modified": "2026-10-05T13:38:02+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "castaway-solitaire",
+    "title": "Пасьянс Робинзона",
+    "description": "1000 уровней пасьянса, стройка и расширение острова",
+    "directory": "games/castaway-solitaire",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/castaway-solitaire/src",
+      "originalPath": "materials/expanded/castaway-solitaire-source-0f07730aac4e",
+      "archive": "games-part2.zip!/castaway-solitaire/castaway-solitaire-source.zip",
+      "codeModified": "2026-10-05T16:31:28+03:00",
+      "lastEdited": "2026-11-16"
+    },
+    "preview": {
+      "path": "games/castaway-solitaire/preview/index.html",
+      "originalPath": "games/castaway-solitaire/dist",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-11-16T18:13:19.547Z",
+      "generated": false
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/castaway-solitaire/releases/yandex",
+        "archive": "games-part2.zip!/castaway-solitaire/castaway-solitaire-yandex.zip",
+        "modified": "2026-10-05T16:32:26+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Original releases and previous local versioned artifacts preserved. Local 2.2.1 VK/OK build; no upload."
+  },
+  {
+    "id": "castle-wrecker",
+    "title": "Разрушитель Замков",
+    "description": "Разрушай воксельные замки",
+    "directory": "games/castle-wrecker",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/castle-wrecker/src",
+      "originalPath": "materials/expanded/castle-wrecker-source-8a3fa7ae9971",
+      "archive": "games-part4.zip!/dev-kit.zip!/dev-kit/sources/castle-wrecker-source.zip",
+      "codeModified": "2026-10-04T19:11:40+03:00"
+    },
+    "preview": {
+      "path": "games/castle-wrecker/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/castle-wrecker.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false
+    },
+    "releases": [],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики. Исходники найдены во вложенном dev-kit; отдельной готовой Яндекс-сборки рядом нет. Точное соответствие старых модулей и HTML не подтверждено."
+  },
+  {
+    "id": "cloud-racers",
+    "title": "Облачные Гонки",
+    "description": "Гонки по облакам",
+    "directory": "games/cloud-racers",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/cloud-racers/src",
+      "originalPath": "materials/expanded/cloud-racers-source-598c730cbcc1",
+      "archive": "games-part4.zip!/cloud-racers/cloud-racers-source.zip",
+      "codeModified": "2026-10-04T19:23:42+03:00"
+    },
+    "preview": {
+      "path": "games/cloud-racers/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/cloud-racers.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/cloud-racers/releases/yandex",
+        "archive": "games-part4.zip!/cloud-racers/cloud-racers-yandex.zip",
+        "modified": "2026-10-04T19:23:42+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "crosswords",
+    "title": "Кроссворды. Классика",
+    "description": "Классические кроссворды",
+    "directory": "games/crosswords",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/crosswords/src",
+      "originalPath": "materials/expanded/crosswords-source-f623a95095d5",
+      "archive": "games-part2.zip!/crosswords/crosswords-source.zip",
+      "codeModified": "2026-10-10T22:57:58+03:00",
+      "lastEdited": "2026-11-16"
+    },
+    "preview": {
+      "path": "games/crosswords/preview/index.html",
+      "originalPath": "games/crosswords/dist",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-11-16T19:02:07.158Z",
+      "generated": false,
+      "bundleComparison": "locally rebuilt"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/crosswords/releases/yandex",
+        "archive": "games-part2.zip!/crosswords/crosswords-yandex.zip",
+        "modified": "2026-10-10T22:58:00+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Локальная версия 2.1.2: исходная компоновка поля, компактные вопросы и клавиатура справа; новый экран загрузки, 40 локаций и 1000+1000 уровней сохранены. На VK не загружалась."
+  },
+  {
+    "id": "dacha-domino",
+    "title": "Домино на даче",
+    "description": "Домино на даче",
+    "directory": "games/dacha-domino",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/dacha-domino/src",
+      "originalPath": "materials/expanded/dacha-domino-source-dc3ab0ddc01c",
+      "archive": "games-part3.zip!/dacha-domino/dacha-domino-source.zip",
+      "codeModified": "2026-10-07T06:53:10+03:00"
+    },
+    "preview": {
+      "path": "games/dacha-domino/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/dacha-domino.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/dacha-domino/releases/yandex",
+        "archive": "games-part3.zip!/dacha-domino/dacha-domino-yandex.zip",
+        "modified": "2026-10-07T06:53:12+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "durak-veranda",
+    "title": "Дурак на веранде",
+    "description": "Русская карточная игра «Дурак»",
+    "directory": "games/durak-veranda",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/durak-veranda/src",
+      "originalPath": "materials/expanded/durak-veranda-source-01b87e6f8bd0",
+      "archive": "games-part2.zip!/durak-veranda/durak-veranda-source.zip",
+      "codeModified": "2026-10-06T16:27:54+03:00"
+    },
+    "preview": {
+      "path": "games/durak-veranda/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/durak-veranda.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/durak-veranda/releases/yandex",
+        "archive": "games-part2.zip!/durak-veranda/durak-veranda-yandex.zip",
+        "modified": "2026-10-06T16:27:54+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "fireside-blocks",
+    "title": "Блоки у камина",
+    "description": "Уютные блоки у камина",
+    "directory": "games/fireside-blocks",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/fireside-blocks/src",
+      "originalPath": "materials/expanded/fireside-blocks-source-6ae5f999d872",
+      "archive": "games-part2.zip!/fireside-blocks/fireside-blocks-source.zip",
+      "codeModified": "2026-10-10T22:40:44+03:00",
+      "lastEdited": "2026-11-15"
+    },
+    "preview": {
+      "path": "games/fireside-blocks/preview/index.html",
+      "originalPath": "games/fireside-blocks/dist",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-11-15T15:05:04.794Z",
+      "generated": false,
+      "bundleComparison": "locally rebuilt"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/fireside-blocks/releases/yandex",
+        "archive": "games-part2.zip!/fireside-blocks/fireside-blocks-yandex.zip",
+        "modified": "2026-10-10T22:57:02+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "1000 levels; 48 whole room scenes, milestone progress through 3000 stars, daily calendar and personal statistics. Local VK/OK build, not uploaded. Details: ROOM_BACKGROUNDS_V2_5.md."
+  },
+  {
+    "id": "fishing",
+    "title": "Клёвая рыбалка",
+    "description": "Спокойная рыбалка с поплавком",
+    "directory": "games/fishing",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/fishing/src",
+      "originalPath": "materials/expanded/fishing-source-8a2250f00bb4",
+      "archive": "games-part4.zip!/fishing/fishing-source.zip",
+      "codeModified": "2026-10-10T12:55:56+03:00"
+    },
+    "preview": {
+      "path": "games/fishing/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/fishing.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/fishing/releases/yandex",
+        "archive": "games-part4.zip!/fishing/fishing-yandex.zip",
+        "modified": "2026-10-10T12:55:56+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "hungry-sinkhole",
+    "title": "Голодная Воронка",
+    "description": "Голодная воронка глотает город",
+    "directory": "games/hungry-sinkhole",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/hungry-sinkhole/src",
+      "originalPath": "materials/expanded/hungry-sinkhole-source-19e3487149d0",
+      "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/hungry-sinkhole/hungry-sinkhole-source.zip",
+      "codeModified": "2026-11-16T18:04:08.976Z",
+      "importedCodeModified": "2026-10-23T18:18:38+03:00"
+    },
+    "preview": {
+      "path": "games/hungry-sinkhole/preview/index.html",
+      "originalPath": "games/hungry-sinkhole/dist",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-11-16T18:05:06.664Z",
+      "generated": false,
+      "importedPreview": {
+        "originalPath": "games/hungry-sinkhole/releases/yandex",
+        "origin": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/hungry-sinkhole/hungry-sinkhole-yandex.zip",
+        "modified": "2026-10-23T18:26:28+03:00"
+      }
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/hungry-sinkhole/releases/yandex",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/hungry-sinkhole/hungry-sinkhole-yandex.zip",
+        "modified": "2026-10-23T18:26:28+03:00"
+      }
+    ],
+    "alternatives": [
+      {
+        "path": "materials/expanded/hungry-sinkhole-source-d32707f13015",
+        "archive": "games-part1.zip!/hungry-sinkhole/hungry-sinkhole-source.zip",
+        "codeModified": "2026-10-07T06:49:28+03:00"
+      }
+    ],
+    "note": "2.2.0: 192 собственные модели локаций (12 на каждую из 16 карт), всего 312 моделей. Большинство предметов и видов на каждой карте эксклюзивно; сохранены задания, поглощение и регенерация. 48 экспедиций. Локальная сборка, на VK не загружалась.",
+    "currentVk": {
+      "version": "2.2.0",
+      "path": "games/hungry-sinkhole/dist-vk",
+      "preview": "games/hungry-sinkhole/preview-vk/index.html",
+      "uploadKit": "games/hungry-sinkhole/deliverables/vk-upload-2.2.0",
+      "uploaded": false,
+      "prepared": "2026-11-16"
+    }
+  },
+  {
+    "id": "keep-the-light",
+    "title": "Не гаси свет",
+    "description": "Выживание пяти ночей в старом доме",
+    "directory": "games/keep-the-light",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/keep-the-light/src",
+      "originalPath": "materials/expanded/keep-the-light-source-e1dabdce2d9f",
+      "archive": "games-part3.zip!/keep-the-light/keep-the-light-source.zip",
+      "codeModified": "2026-10-06T04:16:14+03:00"
+    },
+    "preview": {
+      "path": "games/keep-the-light/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/keep-the-light.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/keep-the-light/releases/yandex",
+        "archive": "games-part3.zip!/keep-the-light/keep-the-light-yandex.zip",
+        "modified": "2026-10-06T04:16:14+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "kingdom-towers",
+    "title": "Башни Королевства",
+    "description": "Защити королевство от орды",
+    "directory": "games/kingdom-towers",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/kingdom-towers/src",
+      "originalPath": "materials/expanded/kingdom-towers-source-22fd4fb60813",
+      "archive": "games-part4.zip!/dev-kit.zip!/dev-kit/sources/kingdom-towers-source.zip",
+      "codeModified": "2026-10-04T19:12:20+03:00"
+    },
+    "preview": {
+      "path": "games/kingdom-towers/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/kingdom-towers.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false
+    },
+    "releases": [],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики. Исходники найдены во вложенном dev-kit; отдельной готовой Яндекс-сборки рядом нет. Точное соответствие старых модулей и HTML не подтверждено."
+  },
+  {
+    "id": "kitchen-rush",
+    "title": "Кухонный Переполох",
+    "description": "Готовь и обслуживай гостей на кухне",
+    "directory": "games/kitchen-rush",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/kitchen-rush/src",
+      "originalPath": "materials/expanded/kitchen-rush-source-94d18c28fa9f",
+      "archive": "games-part3.zip!/kitchen-rush/kitchen-rush-source.zip",
+      "codeModified": "2026-10-05T12:50:44+03:00"
+    },
+    "preview": {
+      "path": "games/kitchen-rush/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/kitchen-rush.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:08+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/kitchen-rush/releases/yandex",
+        "archive": "games-part3.zip!/kitchen-rush/kitchen-rush-yandex.zip",
+        "modified": "2026-10-05T12:50:46+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "magnat",
+    "title": "Магнат",
+    "description": "Монополия по городам России",
+    "directory": "games/magnat",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/magnat/src",
+      "originalPath": "materials/expanded/magnat-source-b792fa70442b",
+      "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/magnat/magnat-source.zip",
+      "codeModified": "2026-10-16T21:54:24+03:00"
+    },
+    "preview": {
+      "path": "games/magnat/preview/index.html",
+      "originalPath": "games/magnat/releases/yandex",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-16T22:03:02+03:00",
+      "generated": false
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/magnat/releases/yandex",
+        "archive": "ВСЕ_ИГРЫ.zip!/ВСЕ_ИГРЫ/magnat/magnat-yandex.zip",
+        "modified": "2026-10-16T22:03:02+03:00"
+      }
+    ],
+    "alternatives": [
+      {
+        "path": "materials/expanded/magnat-source-5ac05fbee3dc",
+        "archive": "games-part2.zip!/magnat/magnat-source.zip",
+        "codeModified": "2026-10-10T13:49:02+03:00"
+      }
+    ],
+    "note": "Превью собрано из более свежей готовой Яндекс-сборки: встроены ресурсы и убран внешний /sdk.js; игровой JS сохранён."
+  },
+  {
+    "id": "nardy-teahouse",
+    "title": "Нарды: Чайхана",
+    "description": "Длинные нарды и короткие в чайхане",
+    "directory": "games/nardy-teahouse",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/nardy-teahouse/src",
+      "originalPath": "materials/expanded/nardy-teahouse-source-5fec0648e778",
+      "archive": "games-part1.zip!/nardy-teahouse/nardy-teahouse-source.zip",
+      "codeModified": "2026-10-05T23:16:04+03:00"
+    },
+    "preview": {
+      "path": "games/nardy-teahouse/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/nardy-teahouse.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:10+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/nardy-teahouse/releases/yandex",
+        "archive": "games-part1.zip!/nardy-teahouse/nardy-teahouse-yandex.zip",
+        "modified": "2026-10-06T04:09:44+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "neon-tanks",
+    "title": "Неоновые Танки",
+    "description": "Танковая арена с прокачкой классов",
+    "directory": "games/neon-tanks",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/neon-tanks/src",
+      "originalPath": "materials/expanded/neon-tanks-source-dc640bcbf5c0",
+      "archive": "games-part4.zip!/neon-tanks/neon-tanks-source.zip",
+      "codeModified": "2026-10-05T12:36:26+03:00"
+    },
+    "preview": {
+      "path": "games/neon-tanks/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/neon-tanks.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:10+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/neon-tanks/releases/yandex",
+        "archive": "games-part4.zip!/neon-tanks/neon-tanks-yandex.zip",
+        "modified": "2026-10-05T13:06:18+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "sky-island",
+    "title": "Небесный островок",
+    "description": "Строй город на небесном островке",
+    "directory": "games/sky-island",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/sky-island/src",
+      "originalPath": "materials/expanded/sky-island-source-82fa3c3b228c",
+      "archive": "games-part4.zip!/dev-kit.zip!/dev-kit/sources/sky-island-source.zip",
+      "codeModified": "2026-10-04T19:27:26+03:00"
+    },
+    "preview": {
+      "path": "games/sky-island/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/sky-island.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:10+03:00",
+      "generated": false
+    },
+    "releases": [],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики. Исходники найдены во вложенном dev-kit; отдельной готовой Яндекс-сборки рядом нет. Точное соответствие старых модулей и HTML не подтверждено."
+  },
+  {
+    "id": "sky-parkour",
+    "title": "Небесный паркур",
+    "description": "Паркур по облакам",
+    "directory": "games/sky-parkour",
+    "kind": "single-html",
+    "source": {
+      "path": "games/sky-parkour/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/sky-parkour.html",
+      "archive": "ВСЕ_ИГРЫ.zip",
+      "codeModified": "2026-10-12T15:16:10+03:00"
+    },
+    "preview": {
+      "path": "games/sky-parkour/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/sky-parkour.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:10+03:00",
+      "generated": false
+    },
+    "releases": [],
+    "alternatives": [],
+    "note": "Модульные исходники в пяти архивах не найдены. Доступен автономный HTML со встроенным минифицированным JS; редактировать его можно напрямую."
+  },
+  {
+    "id": "survivor-mart",
+    "title": "Лавка выживших",
+    "description": "Торгуй днём, защищайся ночью",
+    "directory": "games/survivor-mart",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/survivor-mart/src",
+      "originalPath": "materials/expanded/survivor-mart-source-3b99f9a5c1a3",
+      "archive": "games-part1.zip!/survivor-mart/survivor-mart-source.zip",
+      "codeModified": "2026-10-06T20:54:54+03:00"
+    },
+    "preview": {
+      "path": "games/survivor-mart/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/survivor-mart.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:10+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/survivor-mart/releases/yandex",
+        "archive": "games-part1.zip!/survivor-mart/survivor-mart-yandex.zip",
+        "modified": "2026-10-06T20:54:56+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "whale-town",
+    "title": "Городок на ките",
+    "description": "Построй город на спине кита",
+    "directory": "games/whale-town",
+    "kind": "modular-source",
+    "source": {
+      "path": "games/whale-town/src",
+      "originalPath": "materials/expanded/whale-source-e0832d79931e",
+      "archive": "games-part4.zip!/whale-town/whale-source.zip",
+      "codeModified": "2026-10-10T13:16:36+03:00"
+    },
+    "preview": {
+      "path": "games/whale-town/preview/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/сайт-игры/games/whale-town.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T15:16:10+03:00",
+      "generated": false,
+      "bundleComparison": "identical"
+    },
+    "releases": [
+      {
+        "platform": "yandex",
+        "path": "games/whale-town/releases/yandex",
+        "archive": "games-part4.zip!/whale-town/whale-yandex.zip",
+        "modified": "2026-10-10T13:17:02+03:00"
+      }
+    ],
+    "alternatives": [],
+    "note": "Последний найденный автономный HTML. Дата упаковки превью не означает новую версию игровой логики."
+  },
+  {
+    "id": "milaya-igra",
+    "title": "Уютный кот",
+    "description": "Отдельная HTML-игра из папки «милая-игра»",
+    "directory": "games/milaya-igra",
+    "kind": "single-html",
+    "source": {
+      "path": "games/milaya-igra/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/милая-игра/index.html",
+      "archive": "ВСЕ_ИГРЫ.zip",
+      "codeModified": "2026-10-12T18:37:48+03:00"
+    },
+    "preview": {
+      "path": "games/milaya-igra/index.html",
+      "originalPath": "materials/ВСЕ_ИГРЫ/ВСЕ_ИГРЫ/милая-игра/index.html",
+      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "modified": "2026-10-12T18:37:48+03:00",
+      "generated": false
+    },
+    "releases": [],
+    "alternatives": [],
+    "note": "Самостоятельный читаемый HTML: разметка, стили и логика в index.html."
+  }
+]

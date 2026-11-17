@@ -1,0 +1,354 @@
+[
+  {
+    "id": "amsterdam",
+    "file": "postcards/amsterdam.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 681980,
+    "sha256": "f452dd3b0bcd756479ada24ee73b00e62789d7f27d6be895e270b5f6bce7bb68",
+    "sceneHashes": [
+      "f0499395f6ffb8b9dd555c3f1f54e27631e20da6820a5d7800f11f004f36db1a",
+      "2fa1eb561f26910fc8ec8d99ab13f64542eaa707decfc15c593c40e4494e91bf",
+      "b1549f06866dd6bd3d1c2021bd68af492190b1eca1ea687629ff90c401bfb015",
+      "9e47bd68c9a0ed804649089106660ef08d26113cbe4120730cc3d94e9b740ccd"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "barcelona",
+    "file": "postcards/barcelona.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 639560,
+    "sha256": "c5696fd402e5b335144c7ba89e2d3f4bc4caf40b82749d47ebc641c273cab9b1",
+    "sceneHashes": [
+      "ef09092e22a4be0b60025133768efadee54639ba1016e0bb837c3d42464481b9",
+      "758eaa795a1f4c39541587750b221f30dbcb32e6781101e8a9a3126995908d59",
+      "d0761453fa419c04b9399cdd5b9ee53952681d720c873aba40c39893230de941",
+      "ab010c3f51a72681ecca66509e06e36b2a9c3e6f4ee9fc59d66e92827a315fbd"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "cairo",
+    "file": "postcards/cairo.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 632084,
+    "sha256": "f2bcf09d687286a189ddaf4c78da992421d791ff659195fb40579cb07a6608b2",
+    "sceneHashes": [
+      "c0c94dc7eece5d22bf7ec3ea4777be27b4a02efd0259e9d75e56f94c9cbff2f0",
+      "95c51933d585359d0acc1a53b4542381b1d0f681eae299162a9d39a2d3755cb4",
+      "c2b5ecabe29d8f81273170063d4344f4816a6db6c78e8fb89fa13364cdac6de8",
+      "267ba9cd3c3e75b6d0aa4a9277a180d6ed7926fa1bb1a7c6fc8ac05867660adc"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "events",
+    "file": "postcards/events.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 704896,
+    "sha256": "c13be7ea609f250c9e81451010ec79808c85409643a1799c3321ce1f725d11ad",
+    "sceneHashes": [
+      "e5262a8ecdccc5444fa75d4ec5f3ed5741c5a1ef567561bebf7324767c76dfd6",
+      "0d70b93ad58e9d4f0ee55e8efc09b7c268c81c80491156c09a69e1685bebda7d",
+      "641c1c2ea84201bbe21225c6ea25b9e6777249eed26bed81808bd8ee1f0039d2",
+      "57ddf27d2975dd7c5c8802e1a428c0cb484e319af4387f065740a74571d75ca5"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "istanbul",
+    "file": "postcards/istanbul.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 663864,
+    "sha256": "1ed2487b5b7c339f7f19664e6d0a966c857e8f222a908c71a346d02a0411d548",
+    "sceneHashes": [
+      "db2edde3e50ace9e41f3f2ff77434f790143c117ba681298a9af693571206fdf",
+      "8798a9674735c8892bb626cd10fc2735c03aec769e4ecbbfeee912b95777ee9a",
+      "4929a83920d2d699606b88ca54fe09280b2e01b84e5d17035cff2608d5758580",
+      "5fdb5f3a8c71641e67a899ff39fdb7ec9f5286e88ff4d9997791a2ac672044de"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "kyoto",
+    "file": "postcards/kyoto.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 664644,
+    "sha256": "9f0e000f174c3049bcdd24aef855835c94d1688d6f9c59a150271699b1c90282",
+    "sceneHashes": [
+      "9c0c705a65936cb3659c3b762676f443b2cabfb0d63e70a172e0fd5f1542023c",
+      "8ae768cf06dbcfa2f23b8c5d2a81431b871e5ed67189a1451fdda9563a5c2495",
+      "55a510f8dc902be647a8deeff24d4f5615d92c6997d0924cd4a52488ad79a4e4",
+      "2a7c7196e1ec5591ab9209cfe91e8b3f27d85011254b1bbe28cae7f76951b126"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "lisbon",
+    "file": "postcards/lisbon.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 633488,
+    "sha256": "33d616a6987ab3df76f17b9cd5d999c5d5b5cb4a844a241131516b70e068fb1f",
+    "sceneHashes": [
+      "680f845df1db4f466ce16132d1b6b2045a6f25fd52a22ad35d2492e00aefe165",
+      "b458df3bdfa28461c4294730cd8770031b73abd8a1393aea975dd5c460d7a254",
+      "9d3b7cb0be5981eaf1c003d8768e836f58f4c871b28a10fc817ba5ef8f5d7ad8",
+      "658cafbe5e51da27f2493f4549044e6da2693a5216a3c0a1ec45abd1800ed4f2"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "london",
+    "file": "postcards/london.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 642470,
+    "sha256": "d6377708b1fbc21fe43de3a3ec0cbc18ab941ce718e6367765a3ffc78101e1d4",
+    "sceneHashes": [
+      "090e0f5eb677f5a011014109c38dd72c3a17f9a0d4da5883e99c05ddd54684b0",
+      "dcc46bfea473984aeb9f08dfe355444bd191a6d6ac05f40e0f1f5b0e4007b512",
+      "6fd49ab40ad5b0fb37de5c527823bea97f99a9fb1cb8904b2676b30ab38a27be",
+      "abe2bb020bded2ac49eb8761e70338e55f2dbaa5d099be2cd5dabfae32b7d494"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "marrakesh",
+    "file": "postcards/marrakesh.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 640638,
+    "sha256": "1c943cbd5d89baefae14becc363a22b979bb15ad4b8fa2e9707af0ea365d32d2",
+    "sceneHashes": [
+      "243384790bbc145c9ce15a08283b4ec260d402c357a2d2cb5be912faccadbfed",
+      "d527530b290b4feaf8342880afa2873eb67b419738c4d31f82e567097851bc63",
+      "2b335ffb4221f2238b574a286566689e105ac958cf953af6f2503977ca551aea",
+      "b5a5c60868b4a50f995633e2e315fa2ef92eddafa788f4a39d80cc974c39395c"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "moscow",
+    "file": "postcards/moscow.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 638158,
+    "sha256": "cf6da528c68f77e4166c4f381c9706ffd3c7b417d4d342d5d0f4c4bdbd8250e4",
+    "sceneHashes": [
+      "9c6c829c2efe10a30cd4172116ca42b1257b58db4c56ef90417010fc0ba9bffc",
+      "6041f78af078804698ad99e6841312161cfed9430f99aed411477af717e9a56d",
+      "555f0a1edb1e2001bf6a96190a2178ea053858cc1096fda48acc532c9b388ce4",
+      "9781193bc0436b2a607bbc6965ef126829c7bd64a4e75dc9d6ad1311eec7cbb6"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "newyork",
+    "file": "postcards/newyork.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 681102,
+    "sha256": "3b7f941e6cd860e1a4f38d877b06bdb3a42814fda0c0a24dcdfaa79c59fa1b02",
+    "sceneHashes": [
+      "5c25bb2507987aa786be7a7e27cc0a838724b66b8ff22117369f3b0b48da7bdb",
+      "97af4123f6e29e49d506c2727e7e4767315809ed9fdb394ddaa9f960c92cb97a",
+      "24a83dc4fb6e93b6efb754709e9425b5d754283e300c1438f61bac936573322e",
+      "808db15ecaa0dd97eaf4885159f6f0e17c4dbf4f22512da2c7d29fdb373fde1d"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "paris",
+    "file": "postcards/paris.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 674684,
+    "sha256": "a89b2137c464f6ada392bd9f6e5bf8c265ac9716800f0c8d830e41251e1d8877",
+    "sceneHashes": [
+      "62062fd224b96925ed9af7d4e52e6d45e4c969ed6ac9406e3236c586c223396a",
+      "540a9bd21a4050c2fa68f1e67e276f1ecbe4f5e64f94ab202d5e7ef6f8c01a22",
+      "d8e673f6cb64471f29b3c0d7b564d75c2e5b0529aaddde68ec092adcbff3ce14",
+      "53b3286510f8fd48dcd576ce89ed8ef9f407e12997eb2645816f616038af6d56"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "prague",
+    "file": "postcards/prague.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 585440,
+    "sha256": "03a30b2361060a1f9216ed407650e60a34558688645655981026dbf0023eb0bb",
+    "sceneHashes": [
+      "e9701063443584498da2af384abe8bd25350c10a41e5ae743c3b3cf2d0a12b97",
+      "14f5e8389d4f02aadb472dc7b9e4e1f7fd7e53ad14ef992c5dd5c2c2f4506543",
+      "1f8a819e9cc117fb02c50cf2e03d8abdf370e80bcf1e7f8cd77ea4235b16ff62",
+      "7320c71cf4c0431b73bb1a8737da399e5e703bbab24ed81a748ff9c86f25397c"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "rio",
+    "file": "postcards/rio.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 629128,
+    "sha256": "c119a01720b561703be999cd01c966b5b1ac281803369eed7bfbc916cc461e77",
+    "sceneHashes": [
+      "8ef5664d3d26b45739d24553d1d7ef54205076f81bafab8a0f9bae2daa102d94",
+      "b7b432a2e71cc2ea5ffdac23e0d2dfaad5f66e37b789996563f711e5ec992cf6",
+      "56eaba9fcf6514af69aacf1ac921bce2f5557ef8f71a4d8d9c829f7afef9db3e",
+      "e7912fb57f55d1c810e06b665f9270a7dc4e61064ba555e4cbfcbafef2b55a17"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "rome",
+    "file": "postcards/rome.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 632338,
+    "sha256": "c0f4530d9e3aad0823e78047549987d2842ee698ed0aa4de58feadc1ff4caad4",
+    "sceneHashes": [
+      "c5bdb9ce05aca866c43ff0cb4037dc1d7f0e225a867553634fa7fab7791ebce2",
+      "1c7c84bb23a214990bb511b34bc66835f467a26a2ecbaa2f37f83cd41bc7c97f",
+      "71b8dc414e08d896e79f2f7fe467842feddd50bfd929e3d246f97a0062f80d9c",
+      "31a2250ef66ad9625864c6fc6b7fd7cf3898c388853b6a98c2a866287b6c2dde"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "santorini",
+    "file": "postcards/santorini.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 577482,
+    "sha256": "d2faeb7f5cd83c02a76e21825ea7f75ed081361c2031597c1e9c2a0a8ca00ff5",
+    "sceneHashes": [
+      "95443bb64b922b46cfd58678a651bcfec76024d8a8f026c4dd0fe6ed1ec0dd33",
+      "bc66f94577e535c785924a9c781b0cd0acd918fac4b70847fbe7287c43119aaa",
+      "490e2cb289da876ee6f81acd2ecdf660585fbaec5d1da0840b9e6e79005485b8",
+      "fd7a2396d0d16d942892aaaec35b32d6039a7c29a9bf025f24d461342abe8f4f"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "singapore",
+    "file": "postcards/singapore.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 636236,
+    "sha256": "1b920afebb2fde23a44b4ef996b35d122ac4b3121e3190dabdf9f6f71243cc4b",
+    "sceneHashes": [
+      "18184ad4d495dc02880313a460005867b686a38964734979574cb1c03ed28937",
+      "5f80ab0a1724c179d6fc572503c2118ec1b7818e2def780b7b6bf36c376dbf37",
+      "7ae135279bc14e48ad94e2fd4ba10c6fa9c4f7cfa31436be5057c1f5066e1bb9",
+      "dc1c62818162d38576548fb86d17aeaaf663d6d5fab4e705268cb1154395c989"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "spb",
+    "file": "postcards/spb.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 659036,
+    "sha256": "7b21c09a583eb7041b6eb69dd9f89e39b0d0d979e41a1518db7b7b485a64ecb5",
+    "sceneHashes": [
+      "c7a79f8df1861faf707e448886519af776a0f275bffd810b1cfa7b36093feab3",
+      "90572747982bce4d64fcc7f1d952135a5da65ccbc692a003e8b2cbef15984897",
+      "624bee299395676fc9a249632fea2025cfca16dc3604cdf6e22b0ea3550c61b8",
+      "504c57e2fbcbf74582264515cbe9ff26e001968319237314d0629ea610f7ae16"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "sydney",
+    "file": "postcards/sydney.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 649042,
+    "sha256": "86bffb35ab4ab20bdb90755912d616399c1c7ea51e3b0f02f554c3ffc303f872",
+    "sceneHashes": [
+      "1157441a475384a28cd50c843b8124229e2252d3725ddbfff4a2ad93ad58da6f",
+      "bdcd19c2d8812c0c46ef71349ad9874732376df6a1f05f72d811c86fbaf412d9",
+      "3d2453c7b734501398f47cb5afd5ec0bb5a4480c3e0f6f23deb71e505fde7414",
+      "bf99600ea9291170910981d2e77cd9e2b292adc6a6de648a2fb92f01044de542"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "venice",
+    "file": "postcards/venice.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 646176,
+    "sha256": "d233562fa9d51d747ba9d3ead1498abbfdfbb5ee481cb78e8a7bac63ed4f0c72",
+    "sceneHashes": [
+      "8ea2997419be5051a4e96ba16eb4a2d95bdeabd44cfa080ed258bccc7acb3478",
+      "ea3d7d66a72c9a7dec9bd64372f7a23006e4ca22fe5029d8b00a995d39516562",
+      "7c94f2c63b053bba0d08901726abaa74c1ec74473c1aad79c1168a28dbbbeb80",
+      "bdd4f0a1e88b22c39e2e8b6964b71f20558c4e04348a2caeb262485b746c1929"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "vienna",
+    "file": "postcards/vienna.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 632326,
+    "sha256": "ba827121c4f7d94c3909ac67264bb06210fa9fecb2e2b6324a5dfda59ae14cfe",
+    "sceneHashes": [
+      "62959b0e84e80de775b002a86567d2aa6873e117043c60de3b7addbf4baa1bda",
+      "7e814db380da2d2c04e6e5fd6550f388f541a56e4871201b2b1e4e2eea646cf6",
+      "d408fe2553a8be3e4d72d37493824b14c0a668ac9019b9dcff3a521dbca793a4",
+      "ed4be48030f626a1365befcc71cf7739f3674f9e313a9df80bedca06d5fd0ad4"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  },
+  {
+    "id": "weekly",
+    "file": "postcards/weekly.webp",
+    "width": 1536,
+    "height": 1024,
+    "scenes": 4,
+    "bytes": 709164,
+    "sha256": "3856084311892c8851e5335c3b6a01728861465a32328d90dfc1e1c7fbac76cd",
+    "sceneHashes": [
+      "28e20f3ab9127178827cd4e3d6ed255556d5dd36c840183141a8d7baccef5efe",
+      "58d67d5cf58b96ce191a99e7139f153fe1a3195686fcd0be64da428624a13a3f",
+      "14f2c444bb90b9fd13d3c8634c3e40723c16f4a6d087cb438e980cc1fc221c60",
+      "14c58aac79498ca9e1a914802b491383d79a1452abdaedef3f1f428fe19a31e2"
+    ],
+    "origin": "Built-in image_gen, see art/postcards/generation.json"
+  }
+]

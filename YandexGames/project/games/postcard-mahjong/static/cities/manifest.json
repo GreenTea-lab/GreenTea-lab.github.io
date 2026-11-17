@@ -1,0 +1,182 @@
+[
+  {
+    "id": "amsterdam",
+    "file": "cities/amsterdam.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 617866,
+    "sha256": "2eb732432ba12b0689870a67305b14191dd7c08d13b22fbfbf1763405f8eb794",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "barcelona",
+    "file": "cities/barcelona.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 625588,
+    "sha256": "a9b58d7b6c762dcde1660e28b4b1892f14ca2ee6a4bca924685630dd095014d4",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "cairo",
+    "file": "cities/cairo.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 551486,
+    "sha256": "0a23c180081e5615203c111bf09247add8ebe2c9880d8cd8a2a2881f90baad8c",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "istanbul",
+    "file": "cities/istanbul.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 607522,
+    "sha256": "44cdf3735637d6087884da9e60948770e2c6541b6cb8f7bb4e386cbc6919694b",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "kyoto",
+    "file": "cities/kyoto.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 697980,
+    "sha256": "945d8d73dca007991e94dce571969e86935146ffef56690148d42f3090b51f1a",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "lisbon",
+    "file": "cities/lisbon.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 707942,
+    "sha256": "7df8a64ea02e1b73416c45e3e7632d1d9bd639c6ae8bdc2004ab55fd9fc68e96",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "london",
+    "file": "cities/london.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 641390,
+    "sha256": "714c1ae0f2c3f641c171b0a662b7d6f918a6556e4a6afc23e6ccc5b35b014d4d",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "marrakesh",
+    "file": "cities/marrakesh.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 580826,
+    "sha256": "b81d0423aa1140e939dbfc49e176289910555159e2b04083b9739d1b60a6808d",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "moscow",
+    "file": "cities/moscow.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 565354,
+    "sha256": "9fb587569bb12f0e483f5dc793e13828de533738e9a5bfb03830844cdd020ca9",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "newyork",
+    "file": "cities/newyork.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 588128,
+    "sha256": "34a5ce74161fc6be44ad33782b381b2b88fba138ad2a1e9bee4e91feea49423d",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "paris",
+    "file": "cities/paris.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 624792,
+    "sha256": "48cf9541820fcbb7959aeffeb1bb03a921aa8ece3e341a3f7267510d248044f7",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "prague",
+    "file": "cities/prague.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 583754,
+    "sha256": "50e66bb9d9251c3c72be6523e79e4f2b0fd5508c94684f00bd3e6fec3bc79cb6",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "rio",
+    "file": "cities/rio.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 626090,
+    "sha256": "270eea3e4e9dc3f6521f34dedeec5460c8fbc0923220962222b3c5cce936744a",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "rome",
+    "file": "cities/rome.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 649392,
+    "sha256": "2f9ade2691ad1e207bc6945518eccdbaefd02531bce6858d30d78a1f27a8e147",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "santorini",
+    "file": "cities/santorini.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 587288,
+    "sha256": "594cf283bbb06c87ec5fdb3d315b5e5f79f47c89a059e7e741f14142446c92f5",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "singapore",
+    "file": "cities/singapore.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 636526,
+    "sha256": "fb84d016043ca7045a8871ab0176850cae5dcbc73b748f44db2c6f82dd325561",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "spb",
+    "file": "cities/spb.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 575948,
+    "sha256": "555b81705d8294e0e6fa918bdc5570a30ae5d22a6d0ae4fcffe0fa3c8949f21a",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "sydney",
+    "file": "cities/sydney.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 665270,
+    "sha256": "e0923a3620c38ff846e4697b6f7d91f713856146eb57f49a43dcf000664a80fd",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "venice",
+    "file": "cities/venice.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 574712,
+    "sha256": "d7730e3afe27d4dea62054b716cc77007d12845e393f955ab2c7da63212c8d5a",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  },
+  {
+    "id": "vienna",
+    "file": "cities/vienna.webp",
+    "width": 1254,
+    "height": 1254,
+    "bytes": 670546,
+    "sha256": "8509b9873a2678972bc37d4248de9ecc2bfd5a566fbb803060a3c101b979a781",
+    "origin": "Built-in image_gen; full prompt in art/city-backgrounds/generation.json"
+  }
+]

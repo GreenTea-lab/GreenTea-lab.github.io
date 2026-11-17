@@ -1,0 +1,14 @@
+import { build } from 'esbuild';
+import { chromium } from 'playwright';
+import fs from 'fs';
+await build({ entryPoints: ['test/gallery/entry.js'], bundle: true, outfile: 'test/gallery/bundle.js', format: 'iife', logLevel: 'error' });
+fs.writeFileSync('test/gallery/index.html', '<html><body style="margin:0"><script src="bundle.js"></script></body></html>');
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'] });
+const p = await b.newPage({ viewport: { width: 1600, height: 900 } });
+p.on('pageerror', (e) => console.log('ERR', e.message));
+p.on('console', (m) => m.type() === 'error' && console.log('CONSOLE', m.text()));
+await p.goto('file://' + process.cwd() + '/test/gallery/index.html?w=' + (process.argv[2] || 'build'));
+await p.waitForFunction(() => document.title === 'done', null, { timeout: 60000 });
+await p.screenshot({ path: '/tmp/claude-0/-home-claude/fc31419c-4951-5c39-8720-5e89ab1869b0/scratchpad/gal_' + (process.argv[2] || 'build') + '.png' });
+await b.close();
+console.log('ok');

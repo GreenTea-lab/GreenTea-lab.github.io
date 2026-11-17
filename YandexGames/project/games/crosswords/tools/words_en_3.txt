@@ -1,0 +1,239 @@
+# Hard words
+ATOM|Smallest unit of an element
+MAGNET|It attracts iron
+LENS|Glass in a magnifier
+PRISM|It splits light into a rainbow
+LEVER|Archimedes' simple machine
+ORBIT|Path of a planet
+COMET|Icy body with a tail
+METEOR|Shooting star
+PLANET|Mars or Venus
+MARS|Red planet
+VENUS|Morning star planet
+JUPITER|Largest planet
+SATURN|Planet with rings
+GALAXY|Milky Way, for one
+ECLIPSE|When the Moon hides the Sun
+TELESCOPE|Instrument for viewing stars
+MICROSCOPE|Instrument for viewing tiny things
+BAROMETER|It measures air pressure
+EQUATOR|Line around the middle of the Earth
+GEYSER|Hot spring that shoots water
+LAVA|Molten rock from a volcano
+CRATER|Bowl-shaped hole on the Moon
+ATOLL|Ring-shaped coral island
+FJORD|Narrow sea inlet in Norway
+DELTA|Mouth of the Nile, or a Greek letter
+OASIS|Green spot in a desert
+SAVANNA|African grassland
+MONSOON|Seasonal rain wind
+TSUNAMI|Giant wave after an earthquake
+TYPHOON|Pacific hurricane
+OXYGEN|Gas we breathe
+CARBON|Element in diamonds
+HYDROGEN|Lightest element
+COPPER|Reddish metal for wires
+IRON|Metal for steel, or a laundry tool
+TIN|Metal for cans
+LEAD|Heavy grey metal
+MERCURY|Liquid metal, or a planet
+PLATINUM|Precious metal for a record award
+BRONZE|Third-place medal metal
+BRASS|Alloy of copper and zinc
+STEEL|Strong iron alloy
+GRANITE|Hard stone for monuments
+MARBLE|Stone for statues
+QUARTZ|Crystal in watches
+COAL|Black fuel from a mine
+PETROL|Fuel for cars
+NEWTON|Discoverer of gravity
+EINSTEIN|Theory of relativity scientist
+DARWIN|Author of On the Origin of Species
+EDISON|Inventor of the light bulb
+GALILEO|Astronomer who faced the Inquisition
+PLATO|Pupil of Socrates
+SOCRATES|Athenian philosopher who drank hemlock
+HOMER|Author of the Odyssey
+ODYSSEUS|Wily king of Ithaca
+ACHILLES|Hero with a weak heel
+HERCULES|Hero of twelve labours
+ZEUS|King of the Greek gods
+ATHENA|Goddess of wisdom
+APOLLO|God of the sun and music
+NEPTUNE|Roman god of the sea
+CUPID|Roman god of love
+PEGASUS|Winged horse
+TROY|City taken by a wooden horse
+SPHINX|Riddling creature in Egypt
+PHARAOH|Ruler of ancient Egypt
+MUMMY|Wrapped Egyptian body
+PAPYRUS|Egyptian paper
+COLOSSEUM|Arena in Rome
+GLADIATOR|Fighter in a Roman arena
+CAESAR|He came, saw and conquered
+NAPOLEON|Emperor defeated at Waterloo
+NELSON|Admiral of Trafalgar
+CHURCHILL|Wartime British prime minister
+LINCOLN|President of the Gettysburg Address
+VICTORIA|Queen of a whole era
+ELIZABETH|Queen on a famous jubilee
+DYNASTY|Line of rulers
+MONARCH|King or queen
+SCEPTRE|Royal staff
+ARMOUR|Knight's metal suit
+HELMET|Head protection
+FORTRESS|Strongly fortified place
+MOAT|Water ditch around a castle
+DUNGEON|Prison under a castle
+BANNER|Long flag
+EMBLEM|Symbol or badge
+ANTHEM|National song
+TREATY|Formal agreement between countries
+SENATE|Upper house of parliament
+PARLIAMENT|Lawmaking body at Westminster
+ELECTION|Vote for a government
+COUNCIL|Local governing body
+MAYOR|Head of a city
+AMBASSADOR|Envoy to a foreign country
+JURY|Twelve people in a court
+VERDICT|Decision of a jury
+WITNESS|Person who saw a crime
+ARCHIVE|Store of old records
+DIPLOMA|Certificate of study
+LECTURE|University talk
+PROFESSOR|University teacher
+STUDENT|University learner
+GRAMMAR|Rules of a language
+SYNONYM|Word with the same meaning
+ANTONYM|Word with the opposite meaning
+PROVERB|Short wise saying
+IDIOM|Phrase like raining cats and dogs
+METAPHOR|Figure of speech without like or as
+SONNET|Fourteen-line poem
+LIMERICK|Funny five-line poem
+BALLAD|Poem that tells a story
+SATIRE|Mocking humour
+COMEDY|Funny play
+TRAGEDY|Sad play
+DRAMA|Serious play
+PROLOGUE|Introduction to a play
+EPILOGUE|Ending part of a book
+SEQUEL|Follow-up film or book
+PLOT|Storyline
+HERO|Main character
+VILLAIN|Bad guy
+RIDDLE|Puzzling question
+ANAGRAM|Word made by rearranging letters
+CROSSWORD|Puzzle with across and down
+JIGSAW|Picture puzzle in pieces
+SUDOKU|Number puzzle in a grid
+SOLITAIRE|Card game for one
+DOMINOES|Game with spotted tiles
+CHECKERS|Draughts
+BISHOP|Chess piece that moves diagonally
+ROOK|Chess castle
+PAWN|Smallest chess piece
+CHECKMATE|End of a chess game
+BILLIARDS|Game with cues and pockets
+TENNIS|Game of Wimbledon
+GOLF|Game with clubs and eighteen holes
+CRICKET|Game with bats and wickets
+RUGBY|Game with an oval ball
+HOCKEY|Game with sticks and a puck
+BOXING|Sport with gloves in a ring
+FENCING|Sport with foils
+ROWING|Sport with oars
+SKIING|Winter sport on snowy slopes
+SKATING|Gliding on ice
+MARATHON|Race of 26 miles
+OLYMPICS|Games held every four years
+STADIUM|Sports arena
+TROPHY|Cup for the winner
+MEDAL|Award for an athlete
+CHAMPION|Winner
+REFEREE|Official in a football match
+COACH|Sports trainer, or a bus
+GOAL|Score in football
+RACKET|Tennis bat
+PUCK|Hockey disc
+WICKET|Stumps in cricket
+JOCKEY|Rider in a horse race
+PADDOCK|Field for horses
+GALLOP|Fastest pace of a horse
+STIRRUP|Footrest for a rider
+BRIDLE|Horse's headgear
+CARRIAGE|Horse-drawn vehicle
+SLEIGH|Santa's sledge
+CHIMNEY|Santa's way into the house
+STOCKING|Christmas gift sock
+WREATH|Ring of holly on the door
+HOLLY|Prickly Christmas plant
+MISTLETOE|Plant you kiss under
+REINDEER|Animal that pulls Santa's sleigh
+EASTER|Holiday with chocolate eggs
+CARNIVAL|Festival with parades
+FAIR|Event with rides and stalls
+CAROUSEL|Merry-go-round
+CIRCUS|Show with clowns and acrobats
+CLOWN|Funny performer with a red nose
+JUGGLER|Performer who tosses balls
+MAGICIAN|Performer of tricks
+PUPPET|Doll on strings
+BALLOON|Inflated rubber toy
+KITE|Toy that flies on a string
+CHAPEL|Small church
+ABBEY|Westminster church
+MONASTERY|Home of monks
+MONK|Religious brother
+NUN|Religious sister
+CANDLESTICK|Holder for a candle
+LANTERN|Portable lamp
+TELEGRAM|Old urgent message
+TYPEWRITER|Old machine with keys and ribbon
+GRAMOPHONE|Old record player
+RECORD|Vinyl disc
+CASSETTE|Tape in a plastic case
+TELEVISION|Box in the living room
+ANTENNA|It receives signals
+COMPUTER|Machine with a keyboard and screen
+KEYBOARD|Set of keys
+PRINTER|It puts text on paper
+CALCULATOR|Device for sums
+ABACUS|Counting frame with beads
+RULER|Straight edge for lines
+COMPASSES|Tool for drawing circles
+ERASER|Rubber for pencil marks
+INKWELL|Pot for ink
+DIARY|Daily journal
+TEXTBOOK|Book for study
+HOMEWORK|Work set for home
+EXAM|Test at school
+SPELLING|Writing words correctly
+TRIANGLE|Shape with three sides
+OVAL|Egg-like shape
+CUBE|Shape of a dice
+SPHERE|Ball shape
+CONE|Shape of an ice cream holder
+CYLINDER|Shape of a tin can
+ANGLE|Corner measured in degrees
+DEGREE|Unit of angle
+FRACTION|Half or a quarter
+PERCENT|Part in a hundred
+DOZEN|Twelve
+MILLION|Thousand thousands
+KILOGRAM|Thousand grams
+LITRE|Measure of milk
+METRE|Basic unit of length
+INCH|Twelfth of a foot
+MILE|Distance of 1760 yards
+POUND|British currency
+EURO|Currency of France and Germany
+DOLLAR|American currency
+WALLET|Holder for money
+PURSE|Small bag for coins
+SALARY|Monthly pay
+PENSION|Money in retirement
+DISCOUNT|Lower price
+RECEIPT|Proof of payment
+COUNTER|Shop table
+SHOWCASE|Glass display case

@@ -1,0 +1,13 @@
+import { Island } from '../../src/island.js';
+const c = document.getElementById('c');
+const isl = new Island(c, 'high');
+window.__isl = isl;
+const st = JSON.parse(new URLSearchParams(location.search).get('st') || '{}');
+isl.setStages(st);
+isl.resize(innerWidth, innerHeight);
+const v = new URLSearchParams(location.search);
+if (v.get('mode')) isl.mode = v.get('mode');
+if (v.get('cam')) Object.assign(isl.cam, JSON.parse(v.get('cam')));
+for (let i = 0; i < 30; i++) isl.update(0.1);
+isl.render();
+window.__ok = true;

@@ -1,0 +1,11 @@
+{
+  "name": "yandex-games-collection",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node tools/games.mjs serve",
+    "list": "node tools/games.mjs list",
+    "build": "node tools/games.mjs build",
+    "verify": "node --experimental-vm-modules --disable-warning=ExperimentalWarning tools/verify.mjs"
+  }
+}

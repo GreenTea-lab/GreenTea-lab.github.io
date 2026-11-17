@@ -1,0 +1,276 @@
+# Easy words. Format: WORD|clue
+CAT|Purring house pet
+DOG|Man's best friend
+COW|Farm animal that gives milk
+PIG|Pink farm animal that oinks
+HEN|Bird that lays eggs
+OWL|Wise night bird
+FOX|Sly red animal
+BEE|Insect that makes honey
+ANT|Tiny hard-working insect
+BAT|Flying mammal, or a cricket tool
+RAT|Large rodent
+EEL|Snake-like fish
+EGG|Breakfast food from a hen
+TEA|Drink served with scones
+JAM|Fruit spread for toast
+PIE|Apple dessert with a crust
+BUN|Small round bread roll
+HAM|Cured pork for sandwiches
+OAK|Tree that grows from an acorn
+ELM|Shade tree that lines old streets
+SUN|Star at the centre of our solar system
+SKY|Blue space above us
+SEA|Large body of salt water
+BAY|Body of water partly enclosed by land
+HAT|It sits on your head
+CAP|Hat with a peak
+BAG|Something you carry things in
+BED|Furniture for sleeping
+CUP|Mug for coffee
+POT|Cooking pan with a lid
+PAN|Frying utensil
+MAP|It shows the way
+PEN|Writing tool with ink
+BUS|Public transport with stops
+CAR|Four-wheeled vehicle
+VAN|Delivery vehicle
+KEY|It opens a lock
+ARM|Limb between shoulder and hand
+LEG|Limb you stand on
+EYE|Organ of sight
+EAR|Organ on the side of the head
+TOE|One of five on each foot
+LIP|Part of the mouth
+HORSE|Animal you ride in a saddle
+SHEEP|Woolly farm animal
+GOAT|Bearded farm animal
+DUCK|Quacking water bird
+GOOSE|Large honking bird
+MOUSE|Small rodent that loves cheese
+RABBIT|Long-eared animal that hops
+SQUIRREL|Bushy-tailed nut collector
+BEAR|Large furry animal that hibernates
+WOLF|Wild animal that howls at the moon
+DEER|Forest animal with antlers
+LION|King of the jungle
+TIGER|Big striped cat
+ZEBRA|Striped African horse
+GIRAFFE|Tallest animal on Earth
+ELEPHANT|Animal with a trunk
+MONKEY|Tree-climbing primate
+CAMEL|Ship of the desert
+WHALE|Largest mammal in the ocean
+SHARK|Ocean predator with a fin
+DOLPHIN|Clever sea mammal
+FROG|Green hopping amphibian
+SNAKE|Legless reptile
+TURTLE|Reptile with a shell
+SPIDER|Eight-legged web spinner
+BUTTERFLY|Colourful winged insect
+ROBIN|Bird with a red breast
+EAGLE|Large bird of prey
+PARROT|Talking bird
+SWAN|Graceful white water bird
+CROW|Large black bird
+PIGEON|City bird of the park square
+APPLE|Fruit that keeps the doctor away
+PEAR|Bell-shaped fruit
+PLUM|Purple fruit with a stone
+CHERRY|Small red fruit on a stalk
+GRAPE|Fruit that grows in bunches
+LEMON|Sour yellow fruit
+ORANGE|Citrus fruit and a colour
+BANANA|Long yellow fruit
+PEACH|Fuzzy summer fruit
+MELON|Large juicy fruit with a rind
+STRAWBERRY|Red berry served with cream at Wimbledon
+POTATO|Vegetable for chips and mash
+CARROT|Orange root vegetable
+ONION|Vegetable that makes you cry
+CABBAGE|Leafy vegetable for coleslaw
+TOMATO|Red fruit used as a vegetable
+CUCUMBER|Long green salad vegetable
+PEAS|Small green vegetables in pods
+BEANS|Baked on toast
+CORN|Yellow kernels on a cob
+BREAD|Baked loaf
+BUTTER|Spread made from cream
+CHEESE|Cheddar or Brie
+MILK|White drink from a cow
+SUGAR|Sweetener in tea
+SALT|White seasoning
+HONEY|Sweet food made by bees
+CAKE|Birthday treat with candles
+COOKIE|Sweet baked biscuit
+SOUP|Hot first course in a bowl
+SALAD|Dish of mixed leaves
+PIZZA|Italian dish with cheese and tomato
+COFFEE|Morning drink with caffeine
+JUICE|Drink squeezed from fruit
+WATER|Clear liquid we drink
+TABLE|Furniture you eat at
+CHAIR|Seat with a back
+SOFA|Comfy couch
+LAMP|Source of light on a desk
+CLOCK|It tells the time
+MIRROR|You see your reflection in it
+WINDOW|Glass opening in a wall
+DOOR|You open it to enter
+WALL|Side of a room
+ROOF|Top of a house
+FLOOR|You walk on it
+STAIRS|Steps between floors
+KITCHEN|Room where food is cooked
+GARDEN|Place to grow flowers
+FENCE|Barrier around a yard
+GATE|Door in a fence
+SPOON|Utensil for soup
+FORK|Utensil with prongs
+KNIFE|Utensil for cutting
+PLATE|Dish for food
+KETTLE|It boils water for tea
+TOWEL|You dry yourself with it
+SOAP|You wash your hands with it
+PILLOW|You rest your head on it
+BLANKET|Warm bed cover
+SHIRT|Top with buttons and a collar
+DRESS|One-piece garment for women
+SKIRT|Garment that hangs from the waist
+COAT|Warm outer garment
+JACKET|Short coat
+SCARF|You wrap it around your neck
+GLOVES|They keep your hands warm
+BOOTS|Tall shoes
+SOCKS|They go on your feet before shoes
+UMBRELLA|It keeps you dry in the rain
+WATCH|Clock on your wrist
+RING|Jewellery worn on a finger
+MOTHER|Mum
+FATHER|Dad
+SISTER|Female sibling
+BROTHER|Male sibling
+GRANDMA|Your mother's mother
+GRANDPA|Your father's father
+FAMILY|Parents and children together
+FRIEND|Someone you like and trust
+BABY|Newborn child
+DOCTOR|Person who treats the sick
+NURSE|Hospital helper in uniform
+TEACHER|Person who works in a classroom
+FARMER|Person who grows crops
+BAKER|Person who makes bread
+COOK|Person who makes meals
+PILOT|Person who flies a plane
+SAILOR|Person who works at sea
+POSTMAN|Person who delivers letters
+SCHOOL|Place where children learn
+BOOK|You read it
+LETTER|You post it in an envelope
+PENCIL|Writing tool with lead
+PAPER|You write on it
+DESK|Table for work or study
+LESSON|Class at school
+NEWSPAPER|Daily printed news
+RADIO|You listen to it
+PHONE|You call on it
+TRAIN|It runs on rails
+PLANE|It flies in the sky
+SHIP|Large boat
+BOAT|Small vessel on water
+BICYCLE|Two-wheeled vehicle with pedals
+TRUCK|Large goods vehicle
+WHEEL|Round part of a car
+ROAD|Way for cars
+BRIDGE|It crosses a river
+STREET|Road in a town
+TOWN|Place larger than a village
+CITY|Large town
+VILLAGE|Small country settlement
+PARK|Public green space
+SHOP|Place to buy things
+MARKET|Place with stalls
+BANK|Place to keep your money
+HOSPITAL|Place where the sick are treated
+CHURCH|Place of worship with a steeple
+MUSEUM|Place to see old things
+THEATRE|Place to see a play
+CINEMA|Place to see a film
+LIBRARY|Place to borrow books
+STATION|Place to catch a train
+RIVER|It flows to the sea
+LAKE|Body of water surrounded by land
+POND|Small lake in a park
+OCEAN|Atlantic or Pacific
+ISLAND|Land surrounded by water
+BEACH|Sandy shore
+HILL|Small mountain
+MOUNTAIN|Very high hill
+FOREST|Large area of trees
+FIELD|Open land on a farm
+MEADOW|Grassy field with wild flowers
+TREE|Tall plant with a trunk
+LEAF|Green part of a tree
+FLOWER|Rose or daisy
+ROSE|Red flower with thorns
+DAISY|White flower with a yellow centre
+TULIP|Spring flower from Holland
+GRASS|Green lawn plant
+SAND|Grains on a beach
+STONE|Small rock
+MOON|It shines at night
+STAR|Twinkling light in the night sky
+CLOUD|White puff in the sky
+RAIN|Water falling from clouds
+SNOW|White winter flakes
+WIND|Moving air
+STORM|Thunder and lightning
+RAINBOW|Arc of colours after rain
+FROST|Ice crystals on a cold morning
+WINTER|Coldest season
+SPRING|Season of new blossoms
+SUMMER|Hottest season
+AUTUMN|Season of falling leaves
+MORNING|Start of the day
+EVENING|End of the day
+NIGHT|Dark time
+WEEK|Seven days
+MONTH|About thirty days
+YEAR|Twelve months
+SUNDAY|Day of rest
+MONEY|Coins and notes
+PENNY|Small British coin
+GOLD|Precious yellow metal
+SILVER|Precious white metal
+RED|Colour of a fire engine
+BLUE|Colour of the sky
+GREEN|Colour of grass
+YELLOW|Colour of a lemon
+WHITE|Colour of snow
+BLACK|Colour of coal
+BROWN|Colour of chocolate
+PINK|Colour of a flamingo
+CIRCLE|Round shape
+SQUARE|Shape with four equal sides
+SONG|Music with words
+DANCE|Moving to music
+GAME|Something you play
+BALL|Round toy you kick or throw
+DOLL|Toy that looks like a person
+PUZZLE|Problem to solve for fun
+CARDS|Pack used for bridge or poker
+CHESS|Game with kings and queens
+PARTY|Celebration with friends
+GIFT|Present
+CANDLE|Wax light with a wick
+FIRE|It burns in the hearth
+SMOKE|It rises from a chimney
+HEART|Organ that pumps blood
+HAND|Part of the arm with fingers
+FINGER|One of five on a hand
+HEAD|Top of the body
+NOSE|Organ of smell
+MOUTH|You eat with it
+TOOTH|The dentist checks it
+HAIR|It grows on your head
+SMILE|Happy expression

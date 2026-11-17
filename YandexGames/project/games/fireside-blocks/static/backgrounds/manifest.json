@@ -1,0 +1,146 @@
+[
+  {
+    "id": "aurora",
+    "file": "backgrounds/aurora.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 580724,
+    "sha256": "bb9cb86157b7c69eab5f43457dba1a564f6d1638fdbe0ce189d7e97cb4cd235e",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "autumn",
+    "file": "backgrounds/autumn.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 203680,
+    "sha256": "404de5620e4ea16049941f33d1e114c71bb6b63a1527f0276f272dd50b406325",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "fair",
+    "file": "backgrounds/fair.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 342400,
+    "sha256": "7294b8e6a22f59979d6c0d5740f4c357473d112b3e08a4cac384b3e71067083d",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "forest",
+    "file": "backgrounds/forest.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 224480,
+    "sha256": "d6a8a6eeeb7409065bfa5666927f64ad6ed6b5798958a8057e13461d5845ba53",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "hearth-phone",
+    "file": "backgrounds/hearth-phone.webp",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 287576,
+    "sha256": "0d1d550fa3820192ad4827021b12998f5d580f7ea6ed3a7a7fcf9b76413c3da7",
+    "origin": "Built-in image_gen edit; art/v2-3/prompts.json"
+  },
+  {
+    "id": "hearth",
+    "file": "backgrounds/hearth.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 417428,
+    "sha256": "93ba19e44e3d0071cedfd3b4316310a4e7c86c53ed75fd4c396ced8d7e698020",
+    "origin": "Built-in image_gen edit; art/v2-3/prompts.json"
+  },
+  {
+    "id": "lavender",
+    "file": "backgrounds/lavender.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 533550,
+    "sha256": "13b9062faf301718db943b19663544fe45e16cdca74784d15c613cc1d36df4ba",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "library",
+    "file": "backgrounds/library.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 396228,
+    "sha256": "1878566ca636d14fc4d1ee90363916633a9ef797900c1120f5ca4b2ad432dbb3",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "night",
+    "file": "backgrounds/night.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 297968,
+    "sha256": "0102319adf3c371deb2100baccd82d1f03a956e9e3b84a8a745d28a0fe39a1e9",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "orchard",
+    "file": "backgrounds/orchard.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 598552,
+    "sha256": "3b19b096d748073569fd6f5d85f69682afb91aafd9a49b7ce412f45bf3139add",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "sea",
+    "file": "backgrounds/sea.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 155370,
+    "sha256": "f0a20cf6744d53386b98f81fd232d5a14158c04323a6d5eae68ea6df691ac6cc",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "spring",
+    "file": "backgrounds/spring.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 321306,
+    "sha256": "b62edaacdba05ad2f92a1aedee526cb566cd34b0df205ca72ce7f57369408f91",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "summer",
+    "file": "backgrounds/summer.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 403036,
+    "sha256": "f191693c7cfb8d07262ea61bfec7ef793cabf5d7f4d215c56cfee1c0dbccc738",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "tea",
+    "file": "backgrounds/tea.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 432686,
+    "sha256": "829e5457e7c792767bf175e6066e50bc62235fc963cdfc0a02daca5164f31bb2",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "winter",
+    "file": "backgrounds/winter.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 310136,
+    "sha256": "ed6a3273c956871bebbea8e5e812c6f749c2beb65d41a0d2721adce86d819b9a",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  },
+  {
+    "id": "workshop",
+    "file": "backgrounds/workshop.webp",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 409516,
+    "sha256": "5ac5424830e3857bf4cf3fda4886447331be9adef3ae144ccf06f48d99fde473",
+    "origin": "Built-in image_gen; full prompt in art/backgrounds/prompts.json"
+  }
+]

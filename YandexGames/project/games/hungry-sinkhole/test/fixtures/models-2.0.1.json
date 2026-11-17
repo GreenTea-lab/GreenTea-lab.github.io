@@ -1,0 +1,356 @@
+{
+  "models": [
+    {
+      "id": "cactus",
+      "triangles": 264
+    },
+    {
+      "id": "crystal",
+      "triangles": 40
+    },
+    {
+      "id": "mushroom",
+      "triangles": 400
+    },
+    {
+      "id": "pumpkin",
+      "triangles": 880
+    },
+    {
+      "id": "lollipop",
+      "triangles": 400
+    },
+    {
+      "id": "car",
+      "triangles": 824
+    },
+    {
+      "id": "van",
+      "triangles": 740
+    },
+    {
+      "id": "bus",
+      "triangles": 848
+    },
+    {
+      "id": "truck",
+      "triangles": 1176
+    },
+    {
+      "id": "person0",
+      "triangles": 1044
+    },
+    {
+      "id": "person1",
+      "triangles": 1044
+    },
+    {
+      "id": "person2",
+      "triangles": 1056
+    },
+    {
+      "id": "person3",
+      "triangles": 1044
+    },
+    {
+      "id": "knight",
+      "triangles": 332
+    },
+    {
+      "id": "peasant",
+      "triangles": 496
+    },
+    {
+      "id": "dog",
+      "triangles": 360
+    },
+    {
+      "id": "sheep",
+      "triangles": 1140
+    },
+    {
+      "id": "cow",
+      "triangles": 364
+    },
+    {
+      "id": "tree",
+      "triangles": 992
+    },
+    {
+      "id": "pine",
+      "triangles": 104
+    },
+    {
+      "id": "palm",
+      "triangles": 612
+    },
+    {
+      "id": "bush",
+      "triangles": 960
+    },
+    {
+      "id": "lamp",
+      "triangles": 112
+    },
+    {
+      "id": "bench",
+      "triangles": 108
+    },
+    {
+      "id": "hydrant",
+      "triangles": 264
+    },
+    {
+      "id": "bin",
+      "triangles": 156
+    },
+    {
+      "id": "mailbox",
+      "triangles": 76
+    },
+    {
+      "id": "cone",
+      "triangles": 72
+    },
+    {
+      "id": "barrel",
+      "triangles": 216
+    },
+    {
+      "id": "pump",
+      "triangles": 72
+    },
+    {
+      "id": "tlight",
+      "triangles": 404
+    },
+    {
+      "id": "busstop",
+      "triangles": 96
+    },
+    {
+      "id": "pot",
+      "triangles": 768
+    },
+    {
+      "id": "umbrella",
+      "triangles": 164
+    },
+    {
+      "id": "slide",
+      "triangles": 140
+    },
+    {
+      "id": "swing",
+      "triangles": 132
+    },
+    {
+      "id": "fountain",
+      "triangles": 1296
+    },
+    {
+      "id": "statue",
+      "triangles": 332
+    },
+    {
+      "id": "kiosk",
+      "triangles": 828
+    },
+    {
+      "id": "crate",
+      "triangles": 216
+    },
+    {
+      "id": "pallet",
+      "triangles": 240
+    },
+    {
+      "id": "forklift",
+      "triangles": 776
+    },
+    {
+      "id": "bollard",
+      "triangles": 200
+    },
+    {
+      "id": "buoy",
+      "triangles": 232
+    },
+    {
+      "id": "hay",
+      "triangles": 344
+    },
+    {
+      "id": "cart",
+      "triangles": 832
+    },
+    {
+      "id": "well",
+      "triangles": 216
+    },
+    {
+      "id": "stall",
+      "triangles": 1428
+    },
+    {
+      "id": "torch",
+      "triangles": 84
+    },
+    {
+      "id": "bike",
+      "triangles": 312
+    },
+    {
+      "id": "fence",
+      "triangles": 124
+    },
+    {
+      "id": "hedge",
+      "triangles": 588
+    },
+    {
+      "id": "sign",
+      "triangles": 60
+    },
+    {
+      "id": "ac",
+      "triangles": 272
+    },
+    {
+      "id": "tank",
+      "triangles": 132
+    },
+    {
+      "id": "antenna",
+      "triangles": 192
+    },
+    {
+      "id": "billboard",
+      "triangles": 192
+    },
+    {
+      "id": "flowers",
+      "triangles": 1608
+    },
+    {
+      "id": "table",
+      "triangles": 120
+    },
+    {
+      "id": "dumpster",
+      "triangles": 196
+    },
+    {
+      "id": "phone",
+      "triangles": 192
+    },
+    {
+      "id": "anchor",
+      "triangles": 280
+    },
+    {
+      "id": "sunbed",
+      "triangles": 132
+    },
+    {
+      "id": "lifeguard",
+      "triangles": 444
+    },
+    {
+      "id": "surfboard",
+      "triangles": 300
+    },
+    {
+      "id": "beachball",
+      "triangles": 1128
+    },
+    {
+      "id": "sandcastle",
+      "triangles": 376
+    },
+    {
+      "id": "crab",
+      "triangles": 960
+    },
+    {
+      "id": "icecart",
+      "triangles": 700
+    },
+    {
+      "id": "parasol",
+      "triangles": 208
+    },
+    {
+      "id": "snowman",
+      "triangles": 1228
+    },
+    {
+      "id": "xtree",
+      "triangles": 3472
+    },
+    {
+      "id": "snowpine",
+      "triangles": 176
+    },
+    {
+      "id": "sled",
+      "triangles": 168
+    },
+    {
+      "id": "penguin",
+      "triangles": 1020
+    },
+    {
+      "id": "gift",
+      "triangles": 372
+    },
+    {
+      "id": "horse",
+      "triangles": 144
+    },
+    {
+      "id": "bumper",
+      "triangles": 276
+    },
+    {
+      "id": "popcorn",
+      "triangles": 1696
+    },
+    {
+      "id": "balloons",
+      "triangles": 1032
+    },
+    {
+      "id": "candy",
+      "triangles": 336
+    },
+    {
+      "id": "gondola",
+      "triangles": 180
+    },
+    {
+      "id": "sakura",
+      "triangles": 1616
+    },
+    {
+      "id": "slantern",
+      "triangles": 220
+    },
+    {
+      "id": "plantern",
+      "triangles": 232
+    },
+    {
+      "id": "bamboo",
+      "triangles": 960
+    },
+    {
+      "id": "cat",
+      "triangles": 460
+    },
+    {
+      "id": "koi",
+      "triangles": 472
+    }
+  ]
+}

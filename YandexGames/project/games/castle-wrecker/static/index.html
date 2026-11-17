@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Разрушитель Замков</title>
+<style>
+@font-face{font-family:Nunito;font-weight:800;font-display:block;src:url(nunito-cyr.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+@font-face{font-family:Nunito;font-weight:800;font-display:block;src:url(nunito-lat.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2190-2193,U+2212,U+2215,U+FEFF,U+FFFD}
+:root{--ink:#4a2c14;--paper:#f8ebc8;--paper2:#efd9a6;--edge:#6b4423;--edgeD:#4a2c14;--red:#d4452f;--redD:#9c2e1e;--green:#62b84a;--greenD:#3f8a2e;--gold:#f5c534;--goldD:#b8861a;--blue:#4a8ad8;--blueD:#2e5e9c;--gray:#b9ad98}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;-webkit-touch-callout:none;background:#8fd3ff;font-family:Nunito,"Arial Rounded MT Bold",Arial,sans-serif;font-weight:800;color:var(--ink);-webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#ui{position:fixed;inset:0;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.layer{position:absolute;inset:0;pointer-events:none}
+.layer *{pointer-events:auto}
+.floats{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+button{font:inherit;color:inherit;border:0;cursor:pointer;background:none;padding:0}
+svg{display:block}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;transition:transform .08s}
+.btn:active{transform:translateY(2px) scale(.97)}
+.btn svg{width:24px;height:24px;flex:none}
+.big{min-width:150px;height:56px;padding:0 22px;border-radius:16px;font-size:21px;color:#fff;background:linear-gradient(#c79a5e,#a8743e);box-shadow:inset 0 -5px 0 rgba(0,0,0,.2),0 4px 0 var(--edgeD),0 8px 18px rgba(40,20,0,.3);text-shadow:0 2px 0 rgba(0,0,0,.3);border:3px solid var(--edgeD)}
+.big.green{background:linear-gradient(#7fd060,#53a63c);border-color:#2e6a1f;box-shadow:inset 0 -5px 0 rgba(0,0,0,.18),0 4px 0 #2e6a1f,0 8px 18px rgba(40,20,0,.3)}
+.big svg{width:26px;height:26px}
+.round{width:56px;height:56px;border-radius:50%;color:#fff;background:linear-gradient(#c79a5e,#a8743e);border:3px solid var(--edgeD);box-shadow:inset 0 -4px 0 rgba(0,0,0,.2),0 4px 0 var(--edgeD),0 6px 14px rgba(40,20,0,.3)}
+.round svg{width:28px;height:28px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
+.round.small{width:46px;height:46px}
+.round.small svg{width:22px;height:22px}
+.round.off{background:linear-gradient(#b8aa94,#968a76);opacity:.85}
+.round.off:after{content:"";position:absolute;left:10px;right:10px;top:50%;height:4px;background:#e04030;transform:rotate(-40deg);border-radius:2px}
+.chip{display:flex;align-items:center;gap:6px;background:linear-gradient(var(--paper),var(--paper2));border:3px solid var(--edge);border-radius:14px;padding:4px 12px 4px 6px;font-size:18px;box-shadow:0 3px 0 var(--edgeD),0 6px 14px rgba(40,20,0,.25);pointer-events:auto}
+.chip svg{width:26px;height:26px}
+.chip.stars svg{color:var(--gold);filter:drop-shadow(0 1px 0 var(--goldD))}
+.topbar{position:absolute;left:10px;right:10px;top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+.topbar>*{pointer-events:auto}
+/* меню */
+.screen{position:absolute;inset:0;pointer-events:none}
+.menu{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:radial-gradient(ellipse at 50% 40%,rgba(0,0,0,0) 40%,rgba(30,15,0,.25) 100%)}
+.logo{pointer-events:none;text-align:center;margin-top:-6vh}
+.logo-t{font-size:clamp(40px,8.5vw,84px);line-height:.95;color:#ffd84a;letter-spacing:1px;-webkit-text-stroke:6px #5a2a10;paint-order:stroke fill;text-shadow:0 7px 0 #5a2a10,0 12px 26px rgba(40,10,0,.5);max-width:92vw;transform:rotate(-2deg)}
+.play{height:70px;min-width:230px;font-size:28px}
+.row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap}
+/* карта */
+.map{background:linear-gradient(rgba(30,15,0,.15),rgba(30,15,0,.35))}
+.world-title{display:flex;align-items:center;gap:6px;background:linear-gradient(var(--paper),var(--paper2));border:3px solid var(--edge);border-radius:16px;padding:4px 6px;box-shadow:0 4px 0 var(--edgeD)}
+.world-title .wt{text-align:center;min-width:150px;font-size:19px;line-height:1.1}
+.world-title .wt small{display:flex;align-items:center;justify-content:center;gap:4px;font-size:14px;color:#8a6a40}
+.world-title .wt small svg{width:16px;height:16px;color:var(--gold)}
+.arrow{width:38px;height:38px;border-radius:10px;font-size:30px;line-height:1;color:#fff;background:var(--edge);padding-bottom:4px}
+.levels{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);display:grid;grid-template-columns:repeat(5,auto);gap:clamp(10px,2.4vw,22px)}
+.lvl{width:clamp(64px,13vw,92px);height:clamp(70px,14vw,100px);flex-direction:column;gap:2px;border-radius:18px 18px 40% 40%;background:linear-gradient(#f8ebc8,#e3c58a);border:4px solid var(--edge);box-shadow:inset 0 -6px 0 rgba(120,70,20,.2),0 5px 0 var(--edgeD),0 10px 18px rgba(40,20,0,.35)}
+.lvl .n{font-size:clamp(24px,4.6vw,34px);color:var(--edgeD);line-height:1}
+.lvl .n svg{width:26px;height:26px;color:#8a7a60}
+.lvl .st{display:flex;gap:1px}
+.lvl .st i{display:block;width:clamp(15px,3vw,20px);color:#c8b08a}
+.lvl .st i svg{width:100%;height:auto}
+.lvl .st i.on{color:var(--gold);filter:drop-shadow(0 1px 0 var(--goldD))}
+.lvl.locked{background:linear-gradient(#c8bca8,#a89c88);border-color:#6a604e;box-shadow:0 5px 0 #4a4234}
+.lvl.current{animation:pulse 1.2s ease-in-out infinite}
+.lvl.boss{background:linear-gradient(#ffd9a0,#e8a050)}
+.lvl .crown{position:absolute;top:-18px;width:34px}
+.lvl .crown svg{width:34px;height:auto}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.world-lock{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:8px;background:rgba(40,20,0,.75);color:#fff;padding:22px 30px;border-radius:20px;font-size:20px;pointer-events:auto}
+.world-lock svg{width:44px;height:44px}
+.gift{position:absolute;right:16px;bottom:16px;width:66px;height:66px;background:linear-gradient(#ff8a6a,#d4452f);animation:pulse 1.4s infinite}
+.gift svg{width:34px;height:34px}
+/* HUD */
+.hud{position:absolute;inset:0;pointer-events:none}
+.hud .tl{position:absolute;left:10px;top:10px;display:flex;align-items:center;gap:10px}
+.lvl-label{font-size:20px;color:#fff;-webkit-text-stroke:4px var(--edgeD);paint-order:stroke fill;pointer-events:none}
+.hud .score{position:absolute;left:50%;top:10px;transform:translateX(-50%);text-align:center;font-size:30px;color:#fff;-webkit-text-stroke:5px var(--edgeD);paint-order:stroke fill;line-height:1;pointer-events:none}
+.hud .score small{display:block;font-size:13px;-webkit-text-stroke:3px var(--edgeD)}
+.hud .tr{position:absolute;right:10px;top:10px}
+.chip.enemies b{font-size:22px}
+.hud .bottom{position:absolute;left:10px;right:10px;bottom:12px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;transition:opacity .2s}
+.hud.busy .bottom{opacity:.45;pointer-events:none}
+.hud.busy .bottom *{pointer-events:none}
+.tool{flex-direction:column;gap:2px;width:72px;height:66px;border-radius:16px;font-size:12px;color:#fff;background:linear-gradient(#c79a5e,#a8743e);border:3px solid var(--edgeD);box-shadow:0 4px 0 var(--edgeD),0 6px 14px rgba(40,20,0,.3);text-shadow:0 1px 0 rgba(0,0,0,.4)}
+.tool svg{width:32px;height:32px}
+.tool.on{background:linear-gradient(#ffd25a,#e0a020);color:var(--edgeD);text-shadow:none}
+.ammo{display:flex;gap:8px;align-items:flex-end;justify-content:center;flex-wrap:wrap;flex:1;min-width:0}
+.am{width:58px;height:58px;border-radius:50%;background:radial-gradient(circle at 50% 35%,#fff7e0,#e7cf9a);border:3px solid var(--edge);box-shadow:0 4px 0 var(--edgeD),0 6px 12px rgba(40,20,0,.3)}
+.am svg{width:40px;height:40px}
+.am b{position:absolute;right:-6px;bottom:-6px;min-width:24px;height:24px;border-radius:12px;background:var(--red);color:#fff;font-size:15px;line-height:20px;border:2px solid #fff;padding:0 4px}
+.am.sel{width:70px;height:70px;border-color:#ffd25a;box-shadow:0 0 0 3px var(--edgeD),0 4px 0 3px var(--edgeD),0 0 22px rgba(255,210,90,.9)}
+.am.sel svg{width:48px;height:48px}
+.am.empty{opacity:.4;filter:grayscale(1)}
+.am.boost{width:50px;height:50px;background:radial-gradient(circle at 50% 35%,#e0ffd0,#a8d890)}
+.am.boost svg{width:30px;height:30px}
+.am .plus{position:absolute;left:-6px;top:-6px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;border:2px solid #fff;display:flex;align-items:center;justify-content:center}
+.am .plus svg{width:14px;height:14px}
+.am.boost b{background:var(--green)}
+.flight-hint{position:absolute;left:50%;bottom:110px;transform:translateX(-50%) scale(.8);opacity:0;background:rgba(40,20,0,.8);color:#ffe27a;font-size:20px;padding:10px 20px;border-radius:14px;transition:.2s;pointer-events:none;white-space:nowrap}
+.flight-hint.show{opacity:1;transform:translateX(-50%) scale(1);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.7}}
+.banner{position:absolute;left:0;right:0;top:28%;text-align:center;pointer-events:none;animation:bannerA 2.6s ease forwards;z-index:5}
+.banner .bt{font-size:clamp(38px,8vw,64px);color:#fff;-webkit-text-stroke:6px var(--edgeD);paint-order:stroke fill;text-shadow:0 6px 0 var(--edgeD)}
+.banner .bs{display:inline-block;margin-top:6px;font-size:20px;color:#fff;background:var(--red);border:3px solid var(--redD);padding:4px 18px;border-radius:10px}
+@keyframes bannerA{0%{opacity:0;transform:scale(1.6)}12%{opacity:1;transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-30px)}}
+.toast{position:absolute;left:50%;top:18%;transform:translateX(-50%);background:rgba(40,20,0,.85);color:#fff;padding:10px 18px;border-radius:12px;font-size:17px;z-index:60;animation:bannerA 1.8s forwards;pointer-events:none}
+.floater{position:absolute;left:0;top:0;font-size:22px;color:#fff;-webkit-text-stroke:4px var(--edgeD);paint-order:stroke fill;white-space:nowrap;will-change:transform}
+.floater.kill{font-size:30px;color:#9cff6a;-webkit-text-stroke:5px #1e4a10}
+.floater.pts{font-size:18px}
+.pbody{max-height:calc(88vh - 64px);overflow-y:auto;overflow-x:hidden;display:flex;flex-direction:column;align-items:center;gap:12px;touch-action:pan-y;padding:2px 6px;align-self:stretch}
+/* покупки */
+.iap-box{display:flex;flex-direction:column;gap:8px;align-self:stretch}
+.iap-item{display:flex;align-items:center;gap:10px;background:#fff6dc;border:3px solid #d8b880;border-radius:14px;padding:8px}
+.iap-ic{width:48px;height:48px;flex:none;display:flex;align-items:center;justify-content:center}
+.iap-ic svg,.iap-ic img{width:48px;height:48px;object-fit:contain}
+.iap-tx{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;font-size:15px}
+.iap-tx small{font-size:12px;color:#8a6a40;line-height:1.2}
+.iap-buy{flex:none;min-width:84px;height:42px;padding:0 10px;border-radius:12px;font:inherit;font-size:17px;color:#fff;background:linear-gradient(#7fd060,#53a63c);border:3px solid #2e6a1f;box-shadow:0 3px 0 #2e6a1f;cursor:pointer}
+.iap-buy:disabled{opacity:.6}
+.iap-buy.owned{background:#e8dcc0;color:#8a6a40;border-color:#c8b08a;box-shadow:none;font-size:13px}
+.iap-price{display:inline-flex;align-items:center;gap:5px}
+.iap-price img{width:20px;height:20px}
+.iap-price i{font-style:normal;font-size:.8em}
+.chip.gold{cursor:pointer}
+/* окна */
+.modal-bg{position:absolute;inset:0;background:rgba(30,15,0,.45);display:flex;align-items:center;justify-content:center;pointer-events:auto;z-index:20;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.panel{position:relative;min-width:min(330px,92vw);max-width:94vw;max-height:88vh;overflow:auto;background:linear-gradient(var(--paper),var(--paper2));border:5px solid var(--edge);border-radius:22px;box-shadow:inset 0 0 0 3px #fff6dc,0 8px 0 var(--edgeD),0 18px 40px rgba(30,10,0,.5);padding:44px 22px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;animation:popIn .3s cubic-bezier(.3,1.6,.6,1);overflow:visible}
+@keyframes popIn{from{transform:scale(.6);opacity:0}}
+.ribbon{position:absolute;top:-24px;left:50%;transform:translateX(-50%);background:linear-gradient(#e85a40,#c03a26);color:#fff;font-size:24px;padding:8px 34px;border-radius:12px;border:4px solid var(--redD);box-shadow:0 4px 0 #6a1e10;white-space:nowrap;text-shadow:0 2px 0 rgba(0,0,0,.3)}
+.x{position:absolute;right:-14px;top:-14px;width:42px;height:42px;border-radius:50%;background:var(--red);color:#fff;border:3px solid #fff;box-shadow:0 3px 0 var(--redD)}
+.x svg{width:20px;height:20px}
+.col{display:flex;flex-direction:column;gap:12px;align-items:stretch}
+.stars-big{display:flex;gap:6px;align-items:flex-end}
+.stars-big i{display:block;width:70px;color:#cdb68c}
+.stars-big i:nth-child(2){width:90px;margin-bottom:12px}
+.stars-big i svg{width:100%;height:auto;filter:drop-shadow(0 3px 0 rgba(90,50,10,.4))}
+.stars-big i.on{color:var(--gold)}
+.stars-big i.pop{animation:starPop .5s cubic-bezier(.3,1.8,.6,1) both}
+@keyframes starPop{from{transform:scale(0) rotate(-90deg);color:#cdb68c}}
+.big-score{font-size:42px;line-height:1;color:var(--edgeD)}
+.line{font-size:16px;color:#8a6a40}
+.line.best{color:var(--red);animation:blink .8s infinite}
+.reward{display:flex;align-items:center;gap:8px;font-size:30px}
+.reward svg{width:36px;height:36px}
+.btn.ad{height:46px;padding:0 18px;border-radius:14px;color:#fff;font-size:17px;background:linear-gradient(#a070f0,#7a48d0);border:3px solid #4a2a8a;box-shadow:0 4px 0 #4a2a8a}
+.btn.ad.big{height:56px;font-size:20px}
+.lose-ic svg{width:90px;height:90px;transform:rotate(-8deg)}
+.sub{font-size:16px;color:#7a5a30;text-align:center;max-width:320px;line-height:1.3}
+.ammo-big svg{width:90px;height:90px;filter:drop-shadow(0 4px 0 rgba(0,0,0,.2))}
+.big-name{font-size:28px}
+.sec{align-self:stretch;font-size:16px;color:#8a6a40;border-bottom:2px dashed #c8a878;padding-bottom:4px}
+.skins{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.skin{display:flex;flex-direction:column;align-items:center;gap:6px;background:#fff6dc;border:3px solid #d8b880;border-radius:14px;padding:8px}
+.skin.eq{border-color:var(--green);background:#eaffdc}
+.skin .sw{display:grid;grid-template-columns:1fr 1fr;width:44px;height:44px;border-radius:10px;overflow:hidden;border:2px solid var(--edge)}
+.skin .nm{font-size:13px}
+.btn.small{height:36px;min-width:84px;padding:0 10px;border-radius:10px;font-size:14px;color:#fff;background:linear-gradient(#c79a5e,#a8743e);border:2px solid var(--edgeD);box-shadow:0 3px 0 var(--edgeD)}
+.btn.small svg{width:20px;height:20px}
+.btn.small.done{background:var(--green);border-color:var(--greenD);box-shadow:0 3px 0 var(--greenD)}
+.btn.small.sel{background:linear-gradient(#ffd25a,#e0a020);color:var(--edgeD)}
+.btn.gold-btn{background:linear-gradient(#ffe070,#e8b020);color:var(--edgeD);border-color:var(--goldD);box-shadow:0 3px 0 var(--goldD)}
+.btn.big.gold-btn{box-shadow:0 4px 0 var(--goldD)}
+.btn.small.ad{height:36px;font-size:14px;padding:0 10px}
+.booster{display:flex;align-items:center;gap:12px;align-self:stretch}
+.booster .bi svg{width:54px;height:54px}
+.booster .bt{flex:1;display:flex;flex-direction:column;gap:2px;font-size:16px}
+.booster small{font-size:12px;color:#8a6a40}
+.lb-list{display:flex;flex-direction:column;gap:6px;align-self:stretch;min-width:260px}
+.lb-row{display:flex;gap:10px;align-items:center;background:#fff6dc;border-radius:10px;padding:6px 10px;font-size:16px}
+.lb-row b{width:28px;color:var(--red)}
+.lb-row span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lb-row.me{background:#eaffdc}
+.gift-big svg{width:80px;height:80px;color:var(--red)}
+.hint{position:absolute;left:50%;bottom:24%;transform:translateX(-50%);width:min(440px,90vw);background:linear-gradient(var(--paper),var(--paper2));border:4px solid var(--edge);border-radius:18px;box-shadow:0 6px 0 var(--edgeD),0 12px 30px rgba(30,10,0,.4);padding:16px;display:flex;flex-direction:column;align-items:center;gap:12px;pointer-events:auto;z-index:15;animation:popIn .3s}
+.hint .ht{font-size:18px;text-align:center;line-height:1.3}
+.hint .btn.green{height:44px;padding:0 28px;border-radius:12px;color:#fff;background:linear-gradient(#7fd060,#53a63c);border:3px solid #2e6a1f;box-shadow:0 3px 0 #2e6a1f}
+.hint.arc{bottom:110px;left:12px;transform:none}
+.hand{width:60px;height:60px;position:relative}
+.hand i{position:absolute;left:18px;top:18px;width:24px;height:24px;border-radius:50%;background:#fff;border:4px solid var(--red);animation:handA 1.8s ease-in-out infinite}
+@keyframes handA{0%{transform:translate(-14px,10px) scale(1)}30%{transform:translate(-14px,10px) scale(.8)}70%{transform:translate(14px,-12px) scale(.8)}100%{transform:translate(14px,-12px) scale(1.3);opacity:0}}
+@media (max-width:560px){
+ .big{min-width:120px;height:50px;font-size:18px;padding:0 16px}
+ .play{height:62px;font-size:24px}
+ .tool{width:58px;height:58px;font-size:10px}
+ .tool svg{width:26px;height:26px}
+ .am{width:48px;height:48px}
+ .am svg{width:32px;height:32px}
+ .am.sel{width:58px;height:58px}
+ .am.sel svg{width:40px;height:40px}
+ .am.boost{width:42px;height:42px}
+ .levels{grid-template-columns:repeat(3,auto);top:56%}
+ .world-title .wt{min-width:110px;font-size:16px}
+ .chip{font-size:16px}
+ .hud .score{top:64px;font-size:26px}
+ .lvl-label{font-size:16px}
+ .skins{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-height:500px){
+ .levels{top:58%;gap:8px}
+ .lvl{width:62px;height:66px}
+ .panel{padding:36px 16px 14px;gap:8px}
+ .stars-big i{width:50px}
+ .stars-big i:nth-child(2){width:64px}
+ .big-score{font-size:32px}
+ .logo-t{font-size:48px}
+}
+#loader{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:linear-gradient(#6fbdf2 0%,#bfe6ff 55%,#dff2ff 100%);color:#fff;font:800 28px Nunito,Arial,sans-serif;z-index:10;-webkit-text-stroke:5px #4a2c14;paint-order:stroke fill;overflow:hidden}
+#loader svg{width:min(92vw,560px);height:auto;overflow:visible}
+#loader #lt{font-size:clamp(26px,6vw,40px);color:#ffd84a;text-shadow:0 5px 0 #4a2c14}
+#loader .ld{display:flex;gap:8px}
+#loader .ld i{width:12px;height:12px;border-radius:50%;background:#fff;border:3px solid #4a2c14;animation:ldp 1s ease-in-out infinite}
+#loader .ld i:nth-child(2){animation-delay:.15s}
+#loader .ld i:nth-child(3){animation-delay:.3s}
+@keyframes ldp{50%{transform:translateY(-8px)}}
+#loader .arm{transform-box:fill-box;transform-origin:50% 92%;animation:arm 2.4s ease-in infinite}
+@keyframes arm{0%,30%{transform:rotate(-62deg)}38%{transform:rotate(22deg)}48%{transform:rotate(14deg)}100%{transform:rotate(-62deg)}}
+#loader .rock{animation:rock 2.4s linear infinite;opacity:0}
+@keyframes rock{0%,36%{opacity:0;transform:translate(0,0)}37%{opacity:1;transform:translate(0,0)}50%{transform:translate(58px,-38px)}62%{transform:translate(112px,-50px)}74%{transform:translate(164px,-36px)}84%{opacity:1;transform:translate(204px,-2px)}85%,100%{opacity:0;transform:translate(204px,-2px)}}
+#loader .boom{transform-box:fill-box;transform-origin:center;animation:boom 2.4s ease-out infinite;opacity:0}
+@keyframes boom{0%,84%{opacity:0;transform:scale(.2)}86%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.8)}}
+#loader .gob{animation:gob 2.4s ease-in-out infinite}
+@keyframes gob{0%,80%{transform:translateY(0)}85%{transform:translateY(-10px)}90%{transform:translateY(0)}95%{transform:translateY(-5px)}}
+#loader .flag{transform-box:fill-box;transform-origin:0 50%;animation:flag 1s ease-in-out infinite alternate}
+@keyframes flag{to{transform:skewY(8deg) scaleX(.9)}}
+#loader .cl{animation:cl 14s linear infinite}
+@keyframes cl{from{transform:translateX(-40px)}to{transform:translateX(40px)}}
+</style>
+<!--SDK-->
+</head>
+<body oncontextmenu="return false">
+<div id="loader">
+<svg viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">
+  <!-- облака -->
+  <g class="cl" fill="#fff" opacity=".9"><rect x="20" y="22" width="46" height="12"/><rect x="30" y="14" width="24" height="10"/><rect x="290" y="30" width="56" height="12"/><rect x="304" y="20" width="26" height="12"/></g>
+  <!-- горы -->
+  <path d="M0 160 L60 104 L96 132 L150 84 L210 140 L260 100 L320 146 L400 110 L400 180 L0 180Z" fill="#9fb8c8"/>
+  <path d="M140 92 L150 84 L162 96 L154 94Z M252 106 L260 100 L270 110Z" fill="#fff"/>
+  <!-- земля -->
+  <rect x="0" y="172" width="400" height="58" fill="#6db34e"/>
+  <rect x="0" y="172" width="400" height="6" fill="#86c95e"/>
+  <g fill="#5aa043"><rect x="30" y="190" width="8" height="4"/><rect x="120" y="204" width="8" height="4"/><rect x="250" y="196" width="8" height="4"/><rect x="350" y="210" width="8" height="4"/></g>
+  <!-- деревья -->
+  <g><rect x="372" y="146" width="6" height="28" fill="#7a5232"/><rect x="360" y="124" width="30" height="28" fill="#4f9a3a"/><rect x="366" y="116" width="18" height="10" fill="#5cb848"/></g>
+  <g><rect x="12" y="150" width="6" height="24" fill="#7a5232"/><rect x="2" y="130" width="26" height="24" fill="#4f9a3a"/></g>
+  <!-- замок -->
+  <g>
+    <rect x="246" y="110" width="110" height="64" fill="#a7a49c"/>
+    <g fill="#8e8a82"><rect x="246" y="122" width="110" height="3"/><rect x="246" y="138" width="110" height="3"/><rect x="246" y="154" width="110" height="3"/><rect x="270" y="110" width="3" height="64"/><rect x="300" y="125" width="3" height="16"/><rect x="330" y="110" width="3" height="64"/></g>
+    <g fill="#a7a49c"><rect x="246" y="100" width="12" height="10"/><rect x="266" y="100" width="12" height="10"/><rect x="324" y="100" width="12" height="10"/><rect x="344" y="100" width="12" height="10"/></g>
+    <!-- ворота -->
+    <rect x="288" y="140" width="26" height="34" fill="#5e4127"/><rect x="288" y="140" width="26" height="4" fill="#3d2a1a"/><rect x="300" y="144" width="2" height="30" fill="#3d2a1a"/>
+    <!-- башни -->
+    <rect x="232" y="78" width="30" height="96" fill="#b8b4ab"/>
+    <rect x="340" y="78" width="30" height="96" fill="#b8b4ab"/>
+    <g fill="#9a968e"><rect x="232" y="100" width="30" height="3"/><rect x="232" y="126" width="30" height="3"/><rect x="340" y="100" width="30" height="3"/><rect x="340" y="126" width="30" height="3"/></g>
+    <path d="M228 80 L247 50 L266 80Z" fill="#c8503a"/><path d="M336 80 L355 50 L374 80Z" fill="#c8503a"/>
+    <path d="M247 50 L266 80 L256 80Z M355 50 L374 80 L364 80Z" fill="#a03a28"/>
+    <rect x="243" y="108" width="8" height="12" fill="#3d3a46"/><rect x="351" y="108" width="8" height="12" fill="#3d3a46"/>
+    <rect x="243" y="108" width="8" height="3" fill="#ffd24a"/><rect x="351" y="108" width="8" height="3" fill="#ffd24a"/>
+    <!-- флаги -->
+    <rect x="246" y="30" width="2" height="22" fill="#5e4127"/><path class="flag" d="M248 30 h16 l-4 6 l4 6 h-16Z" fill="#3f8a2e"/>
+    <rect x="354" y="30" width="2" height="22" fill="#5e4127"/><path class="flag" d="M356 30 h16 l-4 6 l4 6 h-16Z" fill="#8a2e2e"/>
+  </g>
+  <!-- гоблин на стене -->
+  <g class="gob">
+    <rect x="300" y="82" width="14" height="18" fill="#8a5a2b"/>
+    <rect x="298" y="64" width="18" height="18" fill="#74c24f"/>
+    <rect x="292" y="70" width="6" height="5" fill="#74c24f"/><rect x="316" y="70" width="6" height="5" fill="#74c24f"/>
+    <rect x="288" y="68" width="4" height="4" fill="#4f9a35"/><rect x="322" y="68" width="4" height="4" fill="#4f9a35"/>
+    <rect x="296" y="60" width="22" height="7" fill="#8e96a0"/><rect x="300" y="56" width="14" height="5" fill="#a6aeb8"/>
+    <rect x="292" y="54" width="4" height="6" fill="#f3ead2"/><rect x="318" y="54" width="4" height="6" fill="#f3ead2"/>
+    <rect x="301" y="71" width="4" height="4" fill="#fff"/><rect x="309" y="71" width="4" height="4" fill="#fff"/>
+    <rect x="303" y="72" width="2" height="3" fill="#222"/><rect x="309" y="72" width="2" height="3" fill="#222"/>
+    <rect x="302" y="77" width="10" height="2" fill="#3a1a12"/><rect x="303" y="77" width="2" height="2" fill="#fff6d0"/><rect x="309" y="77" width="2" height="2" fill="#fff6d0"/>
+    <rect x="296" y="84" width="4" height="8" fill="#74c24f"/><rect x="314" y="84" width="4" height="8" fill="#74c24f"/>
+    <rect x="318" y="76" width="2" height="22" fill="#6b4526"/><path d="M316 72 l4 -6 l4 6Z" fill="#c4ccd4"/>
+  </g>
+  <!-- катапульта -->
+  <g>
+    <rect x="40" y="160" width="76" height="8" fill="#9c6a3c"/>
+    <rect x="40" y="168" width="76" height="3" fill="#6b4526"/>
+    <rect x="52" y="122" width="8" height="40" fill="#9c6a3c"/><rect x="88" y="132" width="8" height="30" fill="#9c6a3c"/>
+    <path d="M56 124 L92 134 L92 140 L56 130Z" fill="#8a5a30"/>
+    <circle cx="54" cy="172" r="10" fill="#6b4526"/><circle cx="54" cy="172" r="4" fill="#6f7780"/>
+    <circle cx="102" cy="172" r="10" fill="#6b4526"/><circle cx="102" cy="172" r="4" fill="#6f7780"/>
+    <rect x="44" y="140" width="22" height="18" fill="#6f7780"/>
+    <!-- рычаг с ковшом -->
+    <g class="arm"><rect x="74" y="78" width="6" height="52" fill="#b07a45"/><rect x="66" y="70" width="22" height="10" fill="#6b4526"/><circle cx="77" cy="70" r="7" fill="#9a968c"/></g>
+    <rect x="72" y="124" width="10" height="10" fill="#6f7780"/>
+  </g>
+  <!-- летящий камень -->
+  <g class="rock"><circle cx="99" cy="74" r="7" fill="#9a968c" stroke="#6d6a62" stroke-width="2"/></g>
+  <g class="boom"><circle cx="304" cy="72" r="16" fill="#fff2c0"/><circle cx="304" cy="72" r="9" fill="#ffd040"/></g>
+</svg>
+<div id="lt">Castle Wrecker</div>
+<div class="ld"><i></i><i></i><i></i></div>
+</div>
+<script>try{if(/^(ru|be|kk|uk|uz)/i.test(navigator.language||""))document.getElementById("lt").textContent="Разрушитель Замков"}catch(e){}</script>
+<canvas id="c"></canvas>
+<div id="ui"></div>
+<script src="game.js"></script>
+</body>
+</html>

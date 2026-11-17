@@ -1,0 +1,12 @@
+import { chromium } from 'playwright';
+import { build } from 'esbuild';
+await build({ entryPoints: ['test/proto/entry.js'], bundle: true, outfile: 'test/proto/bundle.js', format: 'iife' });
+const [,, out = '/tmp/claude-0/isl.png', w = 1280, h = 720, q = ''] = process.argv;
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--allow-file-access-from-files'] });
+const p = await b.newPage({ viewport: { width: +w, height: +h } });
+p.on('pageerror', (e) => console.log('ERR', e.message));
+p.on('console', (m) => m.type() === 'error' && console.log('CONSOLE', m.text()));
+await p.goto('file://' + process.cwd() + '/test/proto/index.html?' + q);
+await p.waitForFunction(() => window.__ok, null, { timeout: 60000 });
+await p.screenshot({ path: out });
+await b.close();

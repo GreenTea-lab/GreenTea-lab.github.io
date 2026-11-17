@@ -1,0 +1,482 @@
+[
+  {
+    "key": "room-0000-wide",
+    "stars": 0,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 303838,
+    "sha256": "5aa71b2dd5cd539d07b915ac610f55e2cf0de2a58dc3aae4ec9dd833d4c24cb9",
+    "master": "art/v2-5/generated/room-0000-wide.png"
+  },
+  {
+    "key": "room-0000-phone",
+    "stars": 0,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 195772,
+    "sha256": "89494506939223a052d1ef7ae7da816513fe850e8a0a889aabc9a01c7538bea1",
+    "master": "art/v2-5/generated/room-0000-phone.png"
+  },
+  {
+    "key": "room-0003-wide",
+    "stars": 3,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 298308,
+    "sha256": "1aa0f811193cd754a435005dd788c74d4b5c4a6a7df026cba19ed540c156a076",
+    "master": "art/v2-5/generated/room-0003-wide.png"
+  },
+  {
+    "key": "room-0003-phone",
+    "stars": 3,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 199516,
+    "sha256": "9583072cf4b3b61565dfcceb3e46feef398adffeff4fb812ed6596fc827b7925",
+    "master": "art/v2-5/generated/room-0003-phone.png"
+  },
+  {
+    "key": "room-0008-wide",
+    "stars": 8,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 312954,
+    "sha256": "d14cafc69554bf73263a966fd37f4dc2e8747fd3b657c1cd49156a41bd234552",
+    "master": "art/v2-5/generated/room-0008-wide.png"
+  },
+  {
+    "key": "room-0008-phone",
+    "stars": 8,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 230844,
+    "sha256": "604d36558fd291c61f4b2d7ccc8b4028d558e2c46a2a2dcf4d622cc6870f233f",
+    "master": "art/v2-5/generated/room-0008-phone.png"
+  },
+  {
+    "key": "room-0014-wide",
+    "stars": 14,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 325826,
+    "sha256": "f1352302800890dd6427bcf7599db18d7b025ab92d690f8e61db6f01f39425b1",
+    "master": "art/v2-5/generated/room-0014-wide.png"
+  },
+  {
+    "key": "room-0014-phone",
+    "stars": 14,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 229676,
+    "sha256": "6e19c70c39f45f884d37dd641aeb2f02e3301f80df04a3564be082b2d1798dd1",
+    "master": "art/v2-5/generated/room-0014-phone.png"
+  },
+  {
+    "key": "room-0022-wide",
+    "stars": 22,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 321440,
+    "sha256": "bda9f68a815cb797e4bbb9d80f2b59b2a4b6b0e7ee6048cb808e2dda90dfca03",
+    "master": "art/v2-5/generated/room-0022-wide.png"
+  },
+  {
+    "key": "room-0022-phone",
+    "stars": 22,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 204610,
+    "sha256": "e032d173af12589e6de4eb05ebf4d3cc5c2e18f772848c5635985eb2642af464",
+    "master": "art/v2-5/generated/room-0022-phone.png"
+  },
+  {
+    "key": "room-0032-wide",
+    "stars": 32,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 312376,
+    "sha256": "641acfc023e4c0af43a25cb1f8256d6ae71bc1b9de2a9468645bee907bc2f74f",
+    "master": "art/v2-5/generated/room-0032-wide.png"
+  },
+  {
+    "key": "room-0032-phone",
+    "stars": 32,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 225792,
+    "sha256": "83082f0ea55f9dbd60f547eb076e7e28ad23799d000f141945e6c38413f926ea",
+    "master": "art/v2-5/generated/room-0032-phone.png"
+  },
+  {
+    "key": "room-0044-wide",
+    "stars": 44,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 313564,
+    "sha256": "fead609b3f87bb41ad761823c5c05517f3cbd9180a5a76a7bc9d04c7e4037057",
+    "master": "art/v2-5/generated/room-0044-wide.png"
+  },
+  {
+    "key": "room-0044-phone",
+    "stars": 44,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 221156,
+    "sha256": "8aad5702e2ea371c603d87c1c314b8f9e74eeafca6c715947dee3e9a3f4a859d",
+    "master": "art/v2-5/generated/room-0044-phone.png"
+  },
+  {
+    "key": "room-0058-wide",
+    "stars": 58,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 308838,
+    "sha256": "c80a9f9de98e90fcf4b27fa48ddae5e33b730b4a15874be4beb4f6613a8422a9",
+    "master": "art/v2-5/generated/room-0058-wide.png"
+  },
+  {
+    "key": "room-0058-phone",
+    "stars": 58,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 223550,
+    "sha256": "b27eef8c93309e9fc01bd4d7763e844d7f3d709b3204eb947c6a6b53c835e877",
+    "master": "art/v2-5/generated/room-0058-phone.png"
+  },
+  {
+    "key": "room-0074-wide",
+    "stars": 74,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 316056,
+    "sha256": "83d33a5a674797d3dd248030e7c6a95e3705f7ddf35e1def43483c4e431e2597",
+    "master": "art/v2-5/generated/room-0074-wide.png"
+  },
+  {
+    "key": "room-0074-phone",
+    "stars": 74,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 216238,
+    "sha256": "3a678d6754e7ba0f380f36a21ba0db1a6956850f23d424ce7f1d6c6449b682af",
+    "master": "art/v2-5/generated/room-0074-phone.png"
+  },
+  {
+    "key": "room-0092-wide",
+    "stars": 92,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 316550,
+    "sha256": "887feebdb5dc0168cf1af3a4586cd33e4e16aeb9cd9f2f8960504b0178e4a05e",
+    "master": "art/v2-5/generated/room-0092-wide.png"
+  },
+  {
+    "key": "room-0092-phone",
+    "stars": 92,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 244458,
+    "sha256": "e5c6fe44313954231f3f8a59310093971edf5057597246bdf5fdaafeafb3f32f",
+    "master": "art/v2-5/generated/room-0092-phone.png"
+  },
+  {
+    "key": "room-0112-wide",
+    "stars": 112,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 324990,
+    "sha256": "dd6c478fb2b2aab703676194271f7ac5749e346d363e1ec916b4f3e2c1da0e9a",
+    "master": "art/v2-5/generated/room-0112-wide.png"
+  },
+  {
+    "key": "room-0112-phone",
+    "stars": 112,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 230766,
+    "sha256": "69c10e1cb3b99be0de7e9fe8e94a07b70afea6826754f287f4a300bd91b0f0fd",
+    "master": "art/v2-5/generated/room-0112-phone.png"
+  },
+  {
+    "key": "room-0180-wide",
+    "stars": 180,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 319722,
+    "sha256": "182890ce90c31be4bdbfc0da3146ddcc9cbd05f3453896682a3d414ba2ecb63b",
+    "master": "art/v2-5/generated/room-0180-wide.png"
+  },
+  {
+    "key": "room-0180-phone",
+    "stars": 180,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 238042,
+    "sha256": "b34ba9ba64bb2fdc9a35d505d7ea501fb2ed983b4dd04c48120af2e5a858230d",
+    "master": "art/v2-5/generated/room-0180-phone.png"
+  },
+  {
+    "key": "room-0280-wide",
+    "stars": 280,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 323684,
+    "sha256": "705f7dcff95e373be558e75619c7e6de2f24dde5c7498f4d6ccf91e63f444e6c",
+    "master": "art/v2-5/generated/room-0280-wide.png"
+  },
+  {
+    "key": "room-0280-phone",
+    "stars": 280,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 231980,
+    "sha256": "387efe4466fb81e2f7b220dc0fc44886385749cf96df60e45834f036a9422acd",
+    "master": "art/v2-5/generated/room-0280-phone.png"
+  },
+  {
+    "key": "room-0400-wide",
+    "stars": 400,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 299404,
+    "sha256": "8eae466eb0acf1041798053b2281e0ac66d2143022303294f2bd2462aad0b6d8",
+    "master": "art/v2-5/generated/room-0400-wide.png"
+  },
+  {
+    "key": "room-0400-phone",
+    "stars": 400,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 253080,
+    "sha256": "abfef816218f237196f70d53267b8691de55767848e02f847b18438bdeaa2808",
+    "master": "art/v2-5/generated/room-0400-phone.png"
+  },
+  {
+    "key": "room-0550-wide",
+    "stars": 550,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 342596,
+    "sha256": "e3f1eaa2608745942590d730fd4fe05df34b6be583a51990b75380d588ecb3ec",
+    "master": "art/v2-5/generated/room-0550-wide.png"
+  },
+  {
+    "key": "room-0550-phone",
+    "stars": 550,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 241318,
+    "sha256": "1fb3b420e3724431e6ff40f10b2d6d35d419b81de1b9351e68e1942a44ef2724",
+    "master": "art/v2-5/generated/room-0550-phone.png"
+  },
+  {
+    "key": "room-0720-wide",
+    "stars": 720,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 328214,
+    "sha256": "4a7dc12ce7d829e80e2e073b85c48d4b7d05ffa391367c91179df15478306f83",
+    "master": "art/v2-5/generated/room-0720-wide.png"
+  },
+  {
+    "key": "room-0720-phone",
+    "stars": 720,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 249046,
+    "sha256": "d7f770247b5ab330f97c435385a95248eb8de5da75ea9d3d1d87e6e3d1da237c",
+    "master": "art/v2-5/generated/room-0720-phone.png"
+  },
+  {
+    "key": "room-0920-wide",
+    "stars": 920,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 322426,
+    "sha256": "605bc32f91398e60ae6ec57b79e99730774f597fdcac3b826fc05b169d022e4a",
+    "master": "art/v2-5/generated/room-0920-wide.png"
+  },
+  {
+    "key": "room-0920-phone",
+    "stars": 920,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 246734,
+    "sha256": "ff7de7557176ebc0394cec806c312a48b26464cf50cdb650beea093d787a56f9",
+    "master": "art/v2-5/generated/room-0920-phone.png"
+  },
+  {
+    "key": "room-1150-wide",
+    "stars": 1150,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 334474,
+    "sha256": "1dab6a44a1b4e1a75bdbe97fe52518ce14f810c916e1df480ad2f3707d71d8c2",
+    "master": "art/v2-5/generated/room-1150-wide.png"
+  },
+  {
+    "key": "room-1150-phone",
+    "stars": 1150,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 245650,
+    "sha256": "7d72d5bd739eccc78ff5d34119e80e1d585a32f72ecad7f23e42acb70d6d0f8b",
+    "master": "art/v2-5/generated/room-1150-phone.png"
+  },
+  {
+    "key": "room-1420-wide",
+    "stars": 1420,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 330344,
+    "sha256": "1ed71e937cf8d157952f9f9a13ee3c6d2cb33854d426d0c98aa4dfcb6e5250b9",
+    "master": "art/v2-5/generated/room-1420-wide.png"
+  },
+  {
+    "key": "room-1420-phone",
+    "stars": 1420,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 238472,
+    "sha256": "57bd6450d9a9466b44fe733e18e3f90eae67d516e1dd06c3f0e200239e2fedd7",
+    "master": "art/v2-5/generated/room-1420-phone.png"
+  },
+  {
+    "key": "room-1750-wide",
+    "stars": 1750,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 338352,
+    "sha256": "96bf0b26377ce445243933091021506531d2614c37ba147b2ce30c53712675af",
+    "master": "art/v2-5/generated/room-1750-wide.png"
+  },
+  {
+    "key": "room-1750-phone",
+    "stars": 1750,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 254560,
+    "sha256": "555c156b0ea34db4bb6acffdbee068252d1886a29454c3caffefc32568b019b9",
+    "master": "art/v2-5/generated/room-1750-phone.png"
+  },
+  {
+    "key": "room-2100-wide",
+    "stars": 2100,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 326926,
+    "sha256": "7283570e097d26674045db2c1964dfe420a2eb368be0ce43035932c380c6b201",
+    "master": "art/v2-5/generated/room-2100-wide.png"
+  },
+  {
+    "key": "room-2100-phone",
+    "stars": 2100,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 263606,
+    "sha256": "d005a9cb165acca3b37abdb601dc06c7456c2e84c00157abe4a77727990deaa8",
+    "master": "art/v2-5/generated/room-2100-phone.png"
+  },
+  {
+    "key": "room-2500-wide",
+    "stars": 2500,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 352298,
+    "sha256": "d3698594504d287ece87f07fdea372c2dfbc14dc15157c29d1ffa1903b1fd7a9",
+    "master": "art/v2-5/generated/room-2500-wide.png"
+  },
+  {
+    "key": "room-2500-phone",
+    "stars": 2500,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 265032,
+    "sha256": "06576c9b4aea1ecedcf96e7c1143e96c28c8154d04a798af814d1ff1cf9d2abe",
+    "master": "art/v2-5/generated/room-2500-phone.png"
+  },
+  {
+    "key": "room-2800-wide",
+    "stars": 2800,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 341130,
+    "sha256": "2c9e0985a032803c609f7fd9cb9ab4bba064d8b4d3c86221383ad30147244e56",
+    "master": "art/v2-5/generated/room-2800-wide.png"
+  },
+  {
+    "key": "room-2800-phone",
+    "stars": 2800,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 261124,
+    "sha256": "ddb47fd179eb758fe9507a106e6151fca0a030586a35cb11c4ab25d58fd2f32f",
+    "master": "art/v2-5/generated/room-2800-phone.png"
+  },
+  {
+    "key": "room-3000-wide",
+    "stars": 3000,
+    "orientation": "wide",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 330352,
+    "sha256": "bee526d703c7b53fdf6ba2354eb4596fe2da13df4a69e2e0ec18e6ccf7ed0b8f",
+    "master": "art/v2-5/generated/room-3000-wide.png"
+  },
+  {
+    "key": "room-3000-phone",
+    "stars": 3000,
+    "orientation": "phone",
+    "width": 1024,
+    "height": 1536,
+    "bytes": 264054,
+    "sha256": "eb158c17737d4a14862e67a3a764aa2349ebdd17f761cf67f01ddf28b8d4e6dc",
+    "master": "art/v2-5/generated/room-3000-phone.png"
+  }
+]

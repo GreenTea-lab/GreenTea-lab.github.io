@@ -1,0 +1,482 @@
+[
+  {
+    "id": "classic-meadow",
+    "mode": "level",
+    "name": {
+      "ru": "Ромашковый луг",
+      "en": "Daisy meadow"
+    },
+    "icon": "sunflower",
+    "color": "#6a9e62",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A sweeping meadow of daisies and soft rolling green hills, a winding footpath, old apple trees at the margins, distant rustic cottage, luminous early summer morning. Ivory petals, fresh sage and buttery sunlight."
+  },
+  {
+    "id": "classic-birches",
+    "mode": "level",
+    "name": {
+      "ru": "Берёзовая тропа",
+      "en": "Birch trail"
+    },
+    "icon": "sprout",
+    "color": "#638d66",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A graceful silver-birch forest beside a narrow clear stream, fern-covered banks and stepping stones, sun shafts through light leaves, a tranquil inviting trail into the distance."
+  },
+  {
+    "id": "classic-orchard",
+    "mode": "level",
+    "name": {
+      "ru": "Цветущий сад",
+      "en": "Blossoming orchard"
+    },
+    "icon": "flower",
+    "color": "#c87894",
+    "particles": "petal",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An old cherry orchard in full bloom, white and soft rose blossoms arching over a grassy path, a small wooden garden gate in the distance, petals and gentle spring morning light."
+  },
+  {
+    "id": "classic-riverside",
+    "mode": "level",
+    "name": {
+      "ru": "Речная деревня",
+      "en": "Riverside village"
+    },
+    "icon": "boat",
+    "color": "#ba8d50",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An idyllic riverside village with a little wooden footbridge, tiny honey-colored cottages among willows, reflections in still water, a distant chapel silhouette and mellow golden evening."
+  },
+  {
+    "id": "classic-sunflowers",
+    "mode": "level",
+    "name": {
+      "ru": "Золотое поле",
+      "en": "Golden fields"
+    },
+    "icon": "sunflower",
+    "color": "#c59b35",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A vast sunflower field bordering a quiet country lane, distant farm and low hills, wildflowers in foreground corners, glowing late-summer sunshine, painterly golden and olive palette."
+  },
+  {
+    "id": "classic-lavender",
+    "mode": "level",
+    "name": {
+      "ru": "Лавандовые холмы",
+      "en": "Lavender hills"
+    },
+    "icon": "flower",
+    "color": "#9979b0",
+    "particles": "petal",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: Rolling lavender fields in Provence with cypress trees, a stone farmhouse far away, an empty narrow winding path, warm apricot skies over layers of violet hills, inviting summer calm."
+  },
+  {
+    "id": "classic-forest-lake",
+    "mode": "level",
+    "name": {
+      "ru": "Лесное озеро",
+      "en": "Woodland lake"
+    },
+    "icon": "wave",
+    "color": "#4c9290",
+    "particles": "firefly",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A jewel-like woodland lake with clear emerald reflections, mossy rocks at the sides, a small wooden jetty, layered pine forest and soft sunrise mist, delicate warm light."
+  },
+  {
+    "id": "classic-lighthouse",
+    "mode": "level",
+    "name": {
+      "ru": "Маяк у моря",
+      "en": "Seaside lighthouse"
+    },
+    "icon": "wave",
+    "color": "#5c91ad",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A white lighthouse on a grassy coastal headland, curved sandy bay with calm turquoise sea, weathered path and wildflowers at the edges, fresh open sky with glowing sunset clouds."
+  },
+  {
+    "id": "classic-autumn-station",
+    "mode": "level",
+    "name": {
+      "ru": "Осенний полустанок",
+      "en": "Autumn station"
+    },
+    "icon": "leaf",
+    "color": "#b77d47",
+    "particles": "leaf",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A charming old countryside railway halt in autumn, a tiny empty station cottage under copper maples, a gently curving track disappearing into golden woodland, fallen leaves and warm afternoon light, no trains or signs."
+  },
+  {
+    "id": "classic-canal",
+    "mode": "level",
+    "name": {
+      "ru": "Тихий канал",
+      "en": "Quiet canal"
+    },
+    "icon": "boat",
+    "color": "#678f9a",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A peaceful old European canal with softly reflected pastel townhouses, a small arched stone bridge, flowering window boxes near the sides, early morning haze and luminous blue-green water, no people."
+  },
+  {
+    "id": "classic-windmill",
+    "mode": "level",
+    "name": {
+      "ru": "Ветряная мельница",
+      "en": "Old windmill"
+    },
+    "icon": "sprout",
+    "color": "#a68b56",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A historic wooden windmill above rolling rye fields, a rustic fence with cornflowers and poppies, a long open country path, layered clouds and warm sun after rain."
+  },
+  {
+    "id": "classic-mountain-valley",
+    "mode": "level",
+    "name": {
+      "ru": "Долина гор",
+      "en": "Mountain valley"
+    },
+    "icon": "mountain",
+    "color": "#7b9a8b",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An expansive alpine valley with a ribbon of river, flower-covered green slopes, distant snow-tipped mountains and a tiny stone bridge, clear luminous morning atmosphere and wide tranquil depth."
+  },
+  {
+    "id": "classic-waterfalls",
+    "mode": "level",
+    "name": {
+      "ru": "Изумрудный каскад",
+      "en": "Emerald cascades"
+    },
+    "icon": "wave",
+    "color": "#4e9a84",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A series of small emerald forest waterfalls descending into a clear still pool, mossy stone steps and lush ferns along the edges, sunlit spray and deeply layered tranquil tropical highland forest."
+  },
+  {
+    "id": "classic-alpine-chalet",
+    "mode": "level",
+    "name": {
+      "ru": "Домик над облаками",
+      "en": "Chalet above the clouds"
+    },
+    "icon": "mountain",
+    "color": "#7d95b1",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A cozy alpine chalet at the edge of a high meadow above a sea of clouds, warm windows, timber balcony and alpine flowers at the corners, pale rosy dawn illuminating distant peaks."
+  },
+  {
+    "id": "classic-snow-village",
+    "mode": "level",
+    "name": {
+      "ru": "Зимняя деревня",
+      "en": "Winter village"
+    },
+    "icon": "snow",
+    "color": "#7d99b4",
+    "particles": "snow",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A snow-covered little village under soft blue twilight, warm glowing cottage windows, an untouched winding snowy lane, spruce boughs framing the edges, golden lantern pools and gentle winter magic."
+  },
+  {
+    "id": "classic-frozen-lake",
+    "mode": "level",
+    "name": {
+      "ru": "Хрустальное озеро",
+      "en": "Crystal lake"
+    },
+    "icon": "snow",
+    "color": "#6e9dad",
+    "particles": "snow",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A pristine frozen mountain lake with pale turquoise ice, snowy birches and pines at its margins, soft pink sunrise on distant ridges, quiet translucent winter atmosphere and subtle sparkling snow."
+  },
+  {
+    "id": "classic-aurora-fjord",
+    "mode": "level",
+    "name": {
+      "ru": "Северный фьорд",
+      "en": "Northern fjord"
+    },
+    "icon": "aurora",
+    "color": "#537f99",
+    "particles": "firefly",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A majestic northern fjord under subtle teal and violet aurora, dark blue mountains, still mirror water and a tiny red fishing cabin with warm light near an edge, a calm starry northern night."
+  },
+  {
+    "id": "classic-lantern-street",
+    "mode": "level",
+    "name": {
+      "ru": "Улица фонарей",
+      "en": "Lantern street"
+    },
+    "icon": "lamp",
+    "color": "#ac8a61",
+    "particles": "firefly",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A warm enchanting cobblestone lane after gentle rain, old houses with glowing windows and amber street lanterns, climbing roses at the edges, soft reflections and a distant inviting archway, no people or signs."
+  },
+  {
+    "id": "classic-coastal-garden",
+    "mode": "level",
+    "name": {
+      "ru": "Сады над морем",
+      "en": "Gardens above the sea"
+    },
+    "icon": "flower",
+    "color": "#629b9b",
+    "particles": "petal",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: Terraced Mediterranean gardens above an azure sea, cream stone balustrades, bougainvillea and lemon trees, a calm tiled terrace leading to a distant coastal view, golden afternoon light and elegant painterly detail."
+  },
+  {
+    "id": "classic-dawn-valley",
+    "mode": "level",
+    "name": {
+      "ru": "Долина рассвета",
+      "en": "Valley of dawn"
+    },
+    "icon": "sunflower",
+    "color": "#bc8b7c",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A sweeping dawn valley with a meandering river and blossom-covered hills, a few very small distant hot-air balloons high in the apricot sky, gentle rose-gold mist and a peaceful open foreground path."
+  },
+  {
+    "id": "scholar-grand-library",
+    "mode": "adult",
+    "name": {
+      "ru": "Большая библиотека",
+      "en": "Grand library"
+    },
+    "icon": "books",
+    "color": "#8871a6",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An extraordinary historic library with two-storey curved bookcases, carved oak galleries, a domed skylight, a quiet broad reading table at the edges and open polished floor in the center, warm sunbeams and jewel-like book spines, no readable writing."
+  },
+  {
+    "id": "scholar-university",
+    "mode": "adult",
+    "name": {
+      "ru": "Университетский двор",
+      "en": "University courtyard"
+    },
+    "icon": "quill",
+    "color": "#9e8b67",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A historic university courtyard with elegant stone arcades, climbing ivy, a modest central fountain and an open walkway into a sunlit garden, honey limestone, deep green foliage and morning light."
+  },
+  {
+    "id": "scholar-glasshouse",
+    "mode": "adult",
+    "name": {
+      "ru": "Ботаническая оранжерея",
+      "en": "Botanical glasshouse"
+    },
+    "icon": "sprout",
+    "color": "#5c9c8b",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A magnificent Victorian botanical glasshouse with soaring iron-and-glass arches, exotic palms and ferns along the margins, a clear central path to a small reflecting pond, humid glowing sunlight and verdant layered depth."
+  },
+  {
+    "id": "scholar-observatory",
+    "mode": "adult",
+    "name": {
+      "ru": "Ночная обсерватория",
+      "en": "Night observatory"
+    },
+    "icon": "aurora",
+    "color": "#697da7",
+    "particles": "firefly",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: Inside a beautiful old astronomical observatory, a large antique brass telescope positioned at the side beneath an open dome, a luminous starry sky and distant moonlit mountains beyond, calm midnight blue and warm brass light, no people or writing."
+  },
+  {
+    "id": "scholar-atelier",
+    "mode": "adult",
+    "name": {
+      "ru": "Мастерская художника",
+      "en": "Painter’s atelier"
+    },
+    "icon": "quill",
+    "color": "#ba8e76",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An elegant sunlit painter’s atelier with tall north-facing windows, a blank canvas on an easel at one side, ceramic jars and paintbrushes at the corners, a few tasteful landscape studies, warm worn oak floor and a soft tranquil center."
+  },
+  {
+    "id": "scholar-antiquities",
+    "mode": "adult",
+    "name": {
+      "ru": "Галерея древностей",
+      "en": "Gallery of antiquities"
+    },
+    "icon": "books",
+    "color": "#b29a74",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A serene museum gallery of classical antiquities with marble columns, a few timeless statues and terracotta vessels along the sides, mosaic details near the edges and a wide open central aisle, luminous cream stone and soft museum skylight."
+  },
+  {
+    "id": "scholar-music-hall",
+    "mode": "adult",
+    "name": {
+      "ru": "Зал камерной музыки",
+      "en": "Chamber music hall"
+    },
+    "icon": "quill",
+    "color": "#a78272",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A refined intimate conservatory music room with a grand piano at the far side, arched windows opening to a garden, warm wood paneling, velvet chairs at the edges and a clear calm central floor, golden afternoon light, no sheet-music lettering."
+  },
+  {
+    "id": "scholar-map-room",
+    "mode": "adult",
+    "name": {
+      "ru": "Зал путешественников",
+      "en": "Travellers’ map room"
+    },
+    "icon": "boat",
+    "color": "#8b9b8d",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An atmospheric explorer’s map room with antique globes and rolled parchment maps at the sides, brass navigational instruments, tall windows overlooking a quiet harbor, a large empty oak chart table and warm ocean-blue light, no readable text."
+  },
+  {
+    "id": "scholar-science-lab",
+    "mode": "adult",
+    "name": {
+      "ru": "Кабинет открытий",
+      "en": "Cabinet of discoveries"
+    },
+    "icon": "books",
+    "color": "#769e9a",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A beautiful historical natural-science laboratory with elegant glass instruments, brass microscopes, carefully arranged mineral specimens at the edges, teal cabinets and bright tall windows, a broad clean working area and warm intellectual curiosity, no labels."
+  },
+  {
+    "id": "scholar-printshop",
+    "mode": "adult",
+    "name": {
+      "ru": "Старая типография",
+      "en": "Old printshop"
+    },
+    "icon": "quill",
+    "color": "#a58b68",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An atmospheric old letterpress workshop with a cast-iron printing press on one side, wooden drawers for metal type, stacks of blank cream paper and warm slanting window light, richly tactile ink-black, oak and ivory materials, no printed text."
+  },
+  {
+    "id": "scholar-sea-study",
+    "mode": "adult",
+    "name": {
+      "ru": "Кабинет у залива",
+      "en": "Study by the bay"
+    },
+    "icon": "wave",
+    "color": "#7698a0",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A scholar’s elegant seaside study with an open bay window looking over calm blue water and cliffs, bookshelves and a brass desk lamp at the sides, a warm oak desk and linen curtains, soft reflected daylight and thoughtful spacious atmosphere."
+  },
+  {
+    "id": "scholar-geometry-garden",
+    "mode": "adult",
+    "name": {
+      "ru": "Сад геометрии",
+      "en": "Garden of geometry"
+    },
+    "icon": "flower",
+    "color": "#859985",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: An elegant geometric sculpture garden with pale stone spheres, an armillary sphere and a graceful arch along the edges, clipped hedges, a reflecting pool and broad open stone path, balanced classical proportions and warm spring light, no diagrams or lettering."
+  },
+  {
+    "id": "scholar-natural-history",
+    "mode": "adult",
+    "name": {
+      "ru": "Музей природы",
+      "en": "Natural history museum"
+    },
+    "icon": "leaf",
+    "color": "#a8987c",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A luminous natural-history museum gallery with a large ammonite fossil, beautiful mineral cabinets and botanical specimen displays at the sides, tall windows and a calm open central aisle, warm limestone, amber glass and elegant oak, no labels."
+  },
+  {
+    "id": "scholar-bamboo-pavilion",
+    "mode": "adult",
+    "name": {
+      "ru": "Павильон мудрости",
+      "en": "Pavilion of wisdom"
+    },
+    "icon": "sprout",
+    "color": "#78947e",
+    "particles": "pollen",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A tranquil East Asian scholar’s garden with a small wooden pavilion by a reflective pond, a curving stone bridge, bamboo and Japanese maples at the sides, misty hills behind and a quiet open terrace, refined watercolor atmosphere, no text."
+  },
+  {
+    "id": "scholar-palace-archive",
+    "mode": "adult",
+    "name": {
+      "ru": "Дворцовый архив",
+      "en": "Palace archive"
+    },
+    "icon": "books",
+    "color": "#9a7c77",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A grand old palace archive with elegant carved doors, tall orderly book shelves, cream marble and muted burgundy details, a glowing stained-glass window far away, a broad clear central passage, refined and inviting rather than dusty or dark."
+  },
+  {
+    "id": "scholar-watchmaker",
+    "mode": "adult",
+    "name": {
+      "ru": "Мастерская времени",
+      "en": "Watchmaker’s workshop"
+    },
+    "icon": "quill",
+    "color": "#a88b5d",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A cozy master watchmaker’s atelier with antique clock mechanisms, tiny brass tools and glass domes at the sides, a broad polished walnut workbench, tall soft-lit window and rich brass, teal and honey colors, no readable clock numerals or text."
+  },
+  {
+    "id": "scholar-marine-observatory",
+    "mode": "adult",
+    "name": {
+      "ru": "Подводная станция",
+      "en": "Underwater observatory"
+    },
+    "icon": "wave",
+    "color": "#6099a6",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A wondrous elegant underwater observatory with a huge curved viewing window revealing calm turquoise ocean, kelp forest and small distant fish, warm wood and brass furnishings at the sides, a clear open interior floor, softly refracted blue sunlight, no technology screens or labels."
+  },
+  {
+    "id": "scholar-archaeology",
+    "mode": "adult",
+    "name": {
+      "ru": "Экспедиция в пустыню",
+      "en": "Desert expedition"
+    },
+    "icon": "mountain",
+    "color": "#bc9a68",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A beautiful peaceful archaeological expedition beside ancient sandstone ruins, a cream canvas tent with pottery and notebooks at an edge, a broad open path between weathered columns, distant dunes and a glowing rose-gold desert sunset, no people or readable text."
+  },
+  {
+    "id": "scholar-mountain-monastery",
+    "mode": "adult",
+    "name": {
+      "ru": "Терраса в горах",
+      "en": "Mountain terrace"
+    },
+    "icon": "mountain",
+    "color": "#8a98a0",
+    "particles": "dust",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A quiet historic mountain monastery terrace with stone arches and a few ancient books and a lantern at an edge, open views over misty blue mountain ranges, a graceful cypress and worn warm stone floor, tranquil luminous sunrise, no religious symbols or lettering."
+  },
+  {
+    "id": "scholar-planetarium",
+    "mode": "adult",
+    "name": {
+      "ru": "Звёздный атлас",
+      "en": "Celestial atlas"
+    },
+    "icon": "aurora",
+    "color": "#8173a3",
+    "particles": "firefly",
+    "prompt": "Use case: stylized-concept. Asset type: full-bleed illustrated location background for a premium cozy crossword game, landscape 1536x1024. Style: beautiful mature hand-painted storybook environment, refined gouache and painterly digital illustration, rich natural materials, atmospheric depth, graceful lighting, tasteful details, not childish or flat. Compose a coherent immersive full environment, with a softly detailed central 55% and stronger decorative detail toward the sides. Central area must stay readable behind a crossword grid; do NOT paint any grid or UI. Main vistas should remain meaningful when center-cropped to a tall mobile screen. No people, no words, no letters, no numbers, no signage, no logos, no watermark, no split panels, no collage. Scene: A magnificent cozy celestial-atlas hall with a circular domed ceiling showing subtle star constellations without labels, a brass armillary sphere near one side and rich midnight-blue bookshelves, warm golden lamps, an open calm central floor and a magical scholarly atmosphere."
+  }
+]

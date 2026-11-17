@@ -1,0 +1,203 @@
+# New hard words for chapters 9-12. Format: WORD|clue
+ELEGY|Sad poem of mourning
+SIMILE|Comparison using like or as
+IRONY|Saying the opposite of what is meant
+PARODY|Funny imitation of a work
+DIALOGUE|Conversation between characters
+MONOLOGUE|Long speech by one character
+ANTHOLOGY|Collection of selected writings
+MEMOIR|Author's account of their own life
+MANUSCRIPT|Handwritten or typed text before printing
+PALETTE|Board where a painter mixes colors
+LANDSCAPE|Painting of natural scenery
+FRESCO|Painting on wet plaster
+MOSAIC|Picture made of small tiles
+WATERCOLOR|Paint thinned with water
+ENGRAVING|Print made from a cut plate
+SCULPTOR|Maker of statues
+REMBRANDT|Dutch painter of The Night Watch
+PICASSO|Spanish cubist painter
+MONET|French painter of water lilies
+DALI|Mustached surrealist who painted melting clocks
+LOUVRE|Paris museum with the Mona Lisa
+SONATA|Piece for one or two instruments
+OPERETTA|Light musical comedy
+CANTATA|Vocal piece with instruments
+OVERTURE|Orchestral opening of an opera
+CONCERTO|Work for solo instrument and orchestra
+CONDUCTOR|Leads an orchestra with a baton
+CELLO|Large bowed instrument held between the knees
+BASSOON|Low woodwind with a double reed
+TROMBONE|Brass instrument with a slide
+OBOE|Woodwind with a double reed and a piercing tone
+CLARINET|Woodwind with a single reed
+BEETHOVEN|Composer who kept writing after going deaf
+VIVALDI|Composer of The Four Seasons
+SCHUBERT|Austrian composer of Ave Maria
+TOLSTOY|Author of War and Peace
+ODYSSEY|Epic of a long voyage home
+ILIAD|Epic of the Trojan War
+OTHELLO|Moor of Venice in Shakespeare
+MACBETH|Scottish king driven by ambition
+FAUST|Scholar who sold his soul
+CRUSOE|Castaway on a desert island
+GULLIVER|Traveler among tiny Lilliputians
+DRACULA|Count from Transylvania
+POSEIDON|Greek god of the sea
+MINOTAUR|Half-man, half-bull in a labyrinth
+CYCLOPS|One-eyed giant
+TITAN|Giant of an older generation of gods
+OLYMPUS|Mountain home of the Greek gods
+ACROPOLIS|Ancient citadel above Athens
+PANTHEON|Roman temple to all gods
+LEGION|Large unit of Roman soldiers
+SAMURAI|Japanese warrior
+KIMONO|Traditional Japanese robe
+ORIGAMI|Japanese paper folding
+PAGODA|Tiered Asian tower
+TOURNAMENT|Medieval contest of knights
+ARMOR|Metal suit of a knight
+TURRET|Small tower on a castle
+MINSTREL|Wandering medieval singer
+VIKING|Norse seafaring raider
+GALLEON|Large old Spanish sailing ship
+COLUMBUS|Sailed west in 1492
+MAGELLAN|Led the first voyage around the world
+WATERLOO|Site of Napoleon's final defeat
+GAGARIN|First human in space
+SPUTNIK|First artificial satellite
+METEORITE|Space rock that reaches the ground
+NEBULA|Cloud of gas and dust in space
+MERIDIAN|Line running from pole to pole
+LATITUDE|Distance north or south of the equator
+CONTINENT|One of seven great landmasses
+ATMOSPHERE|Air that surrounds the Earth
+HYGROMETER|Measures humidity
+CYCLONE|Rotating storm with low pressure center
+CLIMATE|Long-term weather pattern
+TORNADO|Funnel of wind touching the ground
+EARTHQUAKE|Shaking of the ground
+AVALANCHE|Sliding mass of snow
+PROTON|Positive particle in the nucleus
+NEUTRON|Neutral particle in the nucleus
+ELECTRON|Negative particle around the nucleus
+MOLECULE|Group of atoms bonded together
+QUANTUM|Smallest packet of energy
+VACUUM|Space with no air
+GRAVITY|Force that pulls things down
+INERTIA|Tendency to keep moving
+FRICTION|Force that resists sliding
+PENDULUM|Weight swinging on a string
+PULLEY|Wheel with a rope for lifting
+TURBINE|Spinning engine driven by water or steam
+GENERATOR|Makes electric current
+CAPACITOR|Stores an electric charge
+DIODE|Lets current flow one way
+TRANSISTOR|Tiny electronic switch
+PROCESSOR|Brain of a computer
+PIXEL|Tiny dot of a screen image
+ALGORITHM|Step-by-step method for a task
+CELL|Basic unit of life
+GENE|Unit of heredity
+CHROMOSOME|Carrier of genes
+SKELETON|Bony framework of the body
+VERTEBRA|One bone of the spine
+LUNGS|Breathing organs
+LIVER|Largest gland in the body
+HEMOGLOBIN|Red protein in blood
+VITAMIN|Nutrient needed in tiny amounts
+IMMUNITY|Body's defense against disease
+VACCINE|Shot that prevents disease
+PENICILLIN|First antibiotic
+EPIDEMIC|Widespread outbreak of disease
+DIAGNOSIS|Doctor's naming of an illness
+PHARMACY|Shop that sells medicine
+SURGEON|Doctor who operates
+LOGIC|Science of correct reasoning
+AXIOM|Statement accepted without proof
+THEOREM|Statement that must be proved
+HYPOTHESIS|Proposed explanation to test
+FORMULA|Rule written in symbols
+EQUATION|Statement that two things are equal
+DIAMETER|Line through the center of a circle
+HYPOTENUSE|Longest side of a right triangle
+PARALLEL|Lines that never meet
+PERIMETER|Distance around a shape
+VOLUME|Space inside a solid
+ECONOMY|System of production and trade
+BUDGET|Plan for income and spending
+INFLATION|General rise in prices
+DIVIDEND|Share of profit paid to owners
+STOCK|Share in a company
+BANKNOTE|Paper money
+TARIFF|Tax on imported goods
+INVOICE|Bill for goods sold
+AUCTION|Sale to the highest bidder
+DEFICIT|Shortfall of money
+ANTIQUE|Valuable old object
+COLLECTION|Group of items gathered together
+GAMBIT|Opening sacrifice in chess
+RELAY|Race passing a baton
+BIATHLON|Skiing combined with shooting
+SLALOM|Ski race between gates
+CURLING|Ice sport with granite stones
+BOBSLED|Fast sled in an icy channel
+BARBELL|Heavy weight for lifting
+WARSAW|Polish capital
+ISTANBUL|City on two continents
+BEIJING|Capital of China
+DELHI|Indian capital
+BANGKOK|Capital of Thailand
+SYDNEY|Australian city with a famous opera house
+OTTAWA|Capital of Canada
+HAVANA|Capital of Cuba
+GERMANY|Country with the Rhine
+FINLAND|Land of a thousand lakes
+ICELAND|Island of ice and fire
+ARGENTINA|Land of tango
+AUSTRALIA|Continent of kangaroos
+EUCALYPTUS|Tree whose leaves koalas eat
+BAOBAB|African bottle-shaped tree
+JASMINE|Fragrant white flower
+DAFFODIL|Yellow trumpet-shaped spring flower
+LILAC|Spring shrub with fragrant clusters
+PEONY|Large fragrant June bloom
+CLOVER|Three-leaved plant for luck when it has four
+LOTUS|Sacred water flower
+ASPEN|Tree with trembling leaves
+POPLAR|Tall slender tree
+CEDAR|Fragrant evergreen
+SPRUCE|Christmas tree evergreen
+ASH|Tree with winged seeds
+BEECH|Smooth gray-barked tree
+CYPRESS|Dark slender evergreen of graveyards
+BAMBOO|Giant grass used for panda food
+SEQUOIA|Giant California redwood
+BOULDER|Huge rounded rock
+PEBBLE|Small smooth stone
+GRAVEL|Small stones for paths
+LIMESTONE|Rock made from shells
+TOPAZ|Yellow or blue gemstone
+OPAL|Milky gem with flashing colors
+JADE|Green stone prized in China
+ALUMINUM|Light metal for cans
+NICKEL|Metal and a five-cent coin
+TITANIUM|Strong light metal
+SULFUR|Yellow element that smells of rotten eggs
+NITROGEN|Most of the air is this gas
+HELIUM|Gas in party balloons
+NEON|Gas for glowing signs
+CHLORINE|Pool disinfectant gas
+SODIUM|Metal in table salt
+CALCIUM|Mineral in bones
+PHOSPHORUS|Element that glows in the dark
+URANUS|Planet tilted on its side
+PLUTO|Dwarf planet
+SUNSET|Daily end of daylight
+SUNRISE|Daily start of daylight
+TWILIGHT|Dim light after sunset
+DAWN|First light of morning
+MIDNIGHT|Twelve at night
+SOLSTICE|Longest or shortest day of the year
+EQUINOX|Day and night of equal length
+SEASON|Spring, summer, autumn or winter

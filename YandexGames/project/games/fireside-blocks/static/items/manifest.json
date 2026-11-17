@@ -1,0 +1,146 @@
+[
+  {
+    "id": "leaf",
+    "atlas": "items-a",
+    "cell": 0,
+    "bytes": 35026
+  },
+  {
+    "id": "acorn",
+    "atlas": "items-a",
+    "cell": 1,
+    "bytes": 28448
+  },
+  {
+    "id": "mushroom",
+    "atlas": "items-a",
+    "cell": 2,
+    "bytes": 31788
+  },
+  {
+    "id": "snowflake",
+    "atlas": "items-a",
+    "cell": 3,
+    "bytes": 36754
+  },
+  {
+    "id": "mitten",
+    "atlas": "items-a",
+    "cell": 4,
+    "bytes": 29060
+  },
+  {
+    "id": "ornament",
+    "atlas": "items-a",
+    "cell": 5,
+    "bytes": 26374
+  },
+  {
+    "id": "tulip",
+    "atlas": "items-a",
+    "cell": 6,
+    "bytes": 30368
+  },
+  {
+    "id": "daisy",
+    "atlas": "items-a",
+    "cell": 7,
+    "bytes": 28582
+  },
+  {
+    "id": "ladybug",
+    "atlas": "items-a",
+    "cell": 8,
+    "bytes": 31226
+  },
+  {
+    "id": "strawberry",
+    "atlas": "items-a",
+    "cell": 9,
+    "bytes": 32482
+  },
+  {
+    "id": "cherry",
+    "atlas": "items-a",
+    "cell": 10,
+    "bytes": 29372
+  },
+  {
+    "id": "butterfly",
+    "atlas": "items-a",
+    "cell": 11,
+    "bytes": 29414
+  },
+  {
+    "id": "shell",
+    "atlas": "items-b",
+    "cell": 0,
+    "bytes": 25632
+  },
+  {
+    "id": "starfish",
+    "atlas": "items-b",
+    "cell": 1,
+    "bytes": 24856
+  },
+  {
+    "id": "anchor",
+    "atlas": "items-b",
+    "cell": 2,
+    "bytes": 26996
+  },
+  {
+    "id": "bagel",
+    "atlas": "items-b",
+    "cell": 3,
+    "bytes": 29722
+  },
+  {
+    "id": "gingerbread",
+    "atlas": "items-b",
+    "cell": 4,
+    "bytes": 25996
+  },
+  {
+    "id": "honey",
+    "atlas": "items-b",
+    "cell": 5,
+    "bytes": 28278
+  },
+  {
+    "id": "owl",
+    "atlas": "items-b",
+    "cell": 6,
+    "bytes": 28394
+  },
+  {
+    "id": "pinecone",
+    "atlas": "items-b",
+    "cell": 7,
+    "bytes": 25242
+  },
+  {
+    "id": "fern",
+    "atlas": "items-b",
+    "cell": 8,
+    "bytes": 31212
+  },
+  {
+    "id": "star",
+    "atlas": "items-b",
+    "cell": 9,
+    "bytes": 22760
+  },
+  {
+    "id": "moon",
+    "atlas": "items-b",
+    "cell": 10,
+    "bytes": 24678
+  },
+  {
+    "id": "lantern",
+    "atlas": "items-b",
+    "cell": 11,
+    "bytes": 22588
+  }
+]

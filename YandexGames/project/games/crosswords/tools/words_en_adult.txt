@@ -1,0 +1,244 @@
+# Words for the "Scholars' Club" section. Format: WORD|clue
+TOLSTOY|Author of War and Peace
+DICKENS|Author of Oliver Twist and Great Expectations
+AUSTEN|Author of Pride and Prejudice
+BRONTE|Surname of the sisters who wrote Jane Eyre and Wuthering Heights
+HEMINGWAY|Author of The Old Man and the Sea
+FITZGERALD|Author of The Great Gatsby
+ORWELL|Author of 1984 and Animal Farm
+HUXLEY|Author of Brave New World
+BRADBURY|Author of Fahrenheit 451
+SALINGER|Author of The Catcher in the Rye
+STEINBECK|Author of The Grapes of Wrath
+FAULKNER|Author of The Sound and the Fury
+NABOKOV|Author of Lolita
+KAFKA|Author of The Trial and The Metamorphosis
+CAMUS|Author of The Stranger
+FLAUBERT|Author of Madame Bovary
+BALZAC|Author of The Human Comedy
+DANTE|Author of The Divine Comedy
+HOMER|Poet of the Iliad and the Odyssey
+ODYSSEY|Epic poem about a long journey home
+ILIAD|Epic poem about the siege of Troy
+HAMLET|Danish prince who asks "to be or not to be"
+MACBETH|Scottish play about a murderous ambition
+OTHELLO|Shakespearean general undone by jealousy
+SONNET|Fourteen-line poem
+STANZA|A group of lines in a poem
+EPILOGUE|Concluding section of a book
+PROLOGUE|Introductory section of a story
+METAPHOR|Figure of speech that says one thing is another
+IRONY|Saying the opposite of what you mean
+ALLEGORY|Story with a hidden second meaning
+OXYMORON|Contradictory pair such as "deafening silence"
+PARADOX|Seemingly absurd statement that may be true
+PALINDROME|Word that reads the same backward
+ANAGRAM|Word formed by rearranging another's letters
+SYNTAX|Rules of sentence structure
+ETYMOLOGY|Study of word origins
+LEXICON|The vocabulary of a language
+REMBRANDT|Dutch painter of The Night Watch
+VERMEER|Painter of Girl with a Pearl Earring
+VELAZQUEZ|Spanish painter of Las Meninas
+MONET|Painter of Water Lilies and Impression, Sunrise
+DEGAS|Impressionist famous for ballet dancers
+CEZANNE|Post-impressionist who painted apples and Mont Sainte-Victoire
+PICASSO|Co-founder of Cubism who painted Guernica
+MATISSE|Fauvist painter of The Dance
+DALI|Surrealist with melting clocks
+KLIMT|Austrian painter of The Kiss
+WARHOL|Pop artist who painted soup cans
+FRESCO|Painting on wet plaster
+MOSAIC|Picture made of small tiles
+SCULPTOR|One who carves or models statues
+RENAISSANCE|The "rebirth" of art and learning in Europe
+BAROQUE|Ornate style of the 17th century
+CUBISM|Art movement of fragmented geometric forms
+VIVALDI|Composer of The Four Seasons
+CHOPIN|Polish composer of nocturnes and polonaises
+MOZART|Composer of The Magic Flute
+BEETHOVEN|Deaf composer of nine symphonies
+SCHUBERT|Composer who left an unfinished symphony
+BRAHMS|German composer of a famous lullaby
+VERDI|Composer of La Traviata and Aida
+PUCCINI|Composer of Tosca and Madama Butterfly
+ROSSINI|Composer of The Barber of Seville
+WAGNER|Composer of the Ring cycle
+HANDEL|Composer of the Messiah
+MAHLER|Composer of "Symphony of a Thousand"
+BASSOON|Low double-reed woodwind
+OBOE|Double-reed woodwind that gives the orchestra its tuning note
+CELLO|Bowed string instrument held between the knees
+CRESCENDO|Gradual increase in loudness
+OVERTURE|Orchestral opening of an opera
+SYMPHONY|Large work for orchestra
+CONCERTO|Work for a soloist and orchestra
+FUGUE|Contrapuntal form favored by Bach
+SOPRANO|Highest female singing voice
+BARITONE|Male voice between tenor and bass
+ENTROPY|Measure of disorder in a system
+NEWTON|Unit of force named after a scientist
+KEPLER|Astronomer of planetary motion laws
+GALILEO|Italian who saw Jupiter's moons through a telescope
+COPERNICUS|Astronomer who put the Sun at the center
+DARWIN|Author of On the Origin of Species
+PASTEUR|French chemist who pioneered vaccination and pasteurization
+CURIE|Scientist awarded Nobels in both physics and chemistry
+EINSTEIN|Author of the theory of relativity
+TESLA|Inventor associated with alternating current
+FARADAY|Discoverer of electromagnetic induction
+FLEMING|Discoverer of penicillin
+MENDEL|Monk who studied peas and heredity
+HELIUM|Light inert gas used in balloons
+HYDROGEN|The lightest element
+TUNGSTEN|Metal with the highest melting point
+MERCURY|Liquid metal at room temperature
+ISOTOPE|Atom variant with a different neutron count
+PROTON|Positive particle in the nucleus
+NEUTRON|Uncharged particle in the nucleus
+ELECTRON|Negative particle orbiting the nucleus
+PHOTON|Particle of light
+CATALYST|Substance that speeds up a reaction without being used up
+ENZYME|Protein that speeds up reactions in the body
+GENOME|Complete set of an organism's genes
+INSULIN|Hormone that regulates blood sugar
+ADRENALINE|Hormone behind the "fight or flight" response
+CORTISOL|The stress hormone
+DOPAMINE|Neurotransmitter linked to reward
+SEROTONIN|Mood-regulating neurotransmitter
+MELATONIN|Hormone that governs sleep
+HEMOGLOBIN|Oxygen-carrying protein in red blood cells
+ANTIBODY|Protein that fights a specific invader
+VACCINE|Preparation that trains the immune system
+ANTIBIOTIC|Drug that kills bacteria
+BAROMETER|Instrument that measures air pressure
+SEISMOGRAPH|Instrument that records earthquakes
+PERIGEE|Moon's closest point to Earth
+APOGEE|Orbit's farthest point from Earth
+ZENITH|Point in the sky directly overhead
+NEBULA|Cloud of gas and dust in space
+QUASAR|Extremely bright, distant galactic core
+PULSAR|Rapidly spinning neutron star
+ECLIPSE|Sun or Moon briefly hidden in shadow
+ECLIPTIC|Sun's apparent path through the stars
+METEORITE|Space rock that reaches the ground
+VERSAILLES|Palace of the Sun King near Paris
+BASTILLE|Paris prison stormed in 1789
+NAPOLEON|Emperor defeated at Waterloo
+WATERLOO|Final battle of Napoleon
+TRAFALGAR|1805 naval battle won by Nelson
+NELSON|Admiral who fell at Trafalgar
+CHURCHILL|Prime minister of Britain in World War II
+LINCOLN|President who issued the Emancipation Proclamation
+CAESAR|Roman dictator killed on the Ides of March
+CICERO|Roman orator of the Catiline speeches
+CLEOPATRA|Last queen of Ptolemaic Egypt
+PHARAOH|Ruler of ancient Egypt
+SARCOPHAGUS|Stone coffin
+HIEROGLYPH|Symbol of ancient Egyptian writing
+GLADIATOR|Roman arena fighter
+COLOSSEUM|Roman amphitheater
+PARTHENON|Temple of Athena on the Acropolis
+ACROPOLIS|Fortified hill above Athens
+SPARTA|Greek city famed for its warriors
+TROJAN|Citizen of Priam's city
+VIKING|Norse seafarer and raider
+CRUSADE|Medieval holy war
+FEUDAL|Describing a medieval system of lords and vassals
+TREATY|Formal agreement between nations
+ARMISTICE|Agreement to stop fighting
+EVEREST|Highest mountain on Earth
+HIMALAYA|Mountain range containing Everest
+ANDES|Longest mountain range on land
+AMAZON|River with the greatest flow in the world
+MISSISSIPPI|Mark Twain's river
+DELTA|Fan-shaped river mouth
+FJORD|Steep-sided sea inlet in Norway
+ATOLL|Ring-shaped coral island
+GEYSER|Hot spring that erupts
+MONSOON|Seasonal wind bringing heavy rain to South Asia
+TYPHOON|Tropical cyclone of the western Pacific
+SAVANNA|Grassland dotted with trees
+SAHARA|World's largest hot desert
+BOSPHORUS|Strait that divides Istanbul
+GIBRALTAR|Strait between Europe and Africa
+VENICE|City of canals on a lagoon
+FLORENCE|Italian city of the Medici
+PRAGUE|Capital on the Vltava
+BUDAPEST|Capital formed from Buda and Pest
+WARSAW|Capital on the Vistula
+LISBON|Capital of Portugal on the Tagus
+VIENNA|Capital of Austria and of waltzes
+MADRID|Capital of Spain
+INFLATION|Rising prices and falling purchasing power
+DEFLATION|General fall in prices
+DEFAULT|Failure to repay a debt
+DIVIDEND|Share of profit paid to shareholders
+MORTGAGE|Loan secured by a house
+BANKRUPT|Unable to pay debts
+MONOPOLY|Market controlled by one seller
+AUCTION|Sale to the highest bidder
+FUTURES|Contracts to buy or sell at a later date
+SURPLUS|Amount left over after expenses
+NOTARY|Official who certifies documents
+PROSECUTOR|Lawyer who brings the case against the accused
+VERDICT|Jury's decision
+JUROR|Member of a jury
+AMNESTY|Pardon for a group of offenders
+PARLIAMENT|Legislative assembly
+REFERENDUM|Direct vote on a single question
+ALIBI|Proof you were elsewhere
+SUBPOENA|Court order to appear as a witness
+PLATO|Author of The Republic
+ARISTOTLE|Tutor of Alexander the Great
+SOCRATES|Philosopher who drank hemlock
+KANT|Author of the Critique of Pure Reason
+DESCARTES|Thinker of "I think, therefore I am"
+NIETZSCHE|Philosopher of the Übermensch
+STOIC|Philosopher who taught calm endurance
+SKEPTIC|One who doubts everything
+DILEMMA|Choice between two unwelcome options
+AXIOM|Statement accepted without proof
+THEOREM|Statement that can be proved
+HYPOTHESIS|Testable scientific guess
+POSTULATE|Assumption taken as a basis for reasoning
+FREUD|Founder of psychoanalysis
+AMNESIA|Loss of memory
+PHOBIA|Irrational and intense fear
+HITCHCOCK|Director of Psycho and Vertigo
+KUBRICK|Director of 2001: A Space Odyssey
+SCORSESE|Director of Taxi Driver
+FELLINI|Italian director of La Dolce Vita
+CHAPLIN|Silent-film star with a bowler hat and cane
+CASABLANCA|Classic film with "Here's looking at you, kid"
+PRIMA|Leading ballerina, as in prima ___
+PIROUETTE|Spin on one foot in ballet
+HARLEQUIN|Diamond-patterned comic character of commedia dell'arte
+PANTOMIME|Acting without words
+DIRECTOR|Person in charge of making a film
+SCREENPLAY|Written script of a film
+MORTGAGE|Loan to buy a home
+LEASING|Long-term rental with an option to buy
+TACHOMETER|Gauge of engine revolutions
+ALTERNATOR|Car part that generates electricity
+SOMMELIER|Wine steward
+CABERNET|Red grape variety
+ESPRESSO|Strong coffee made under pressure
+CAPPUCCINO|Coffee with a milk-foam cap
+TIRAMISU|Italian coffee-flavored dessert
+BECHAMEL|White sauce of French cuisine
+PARMESAN|Hard Italian cheese
+RISOTTO|Creamy Italian rice dish
+GAZPACHO|Cold Spanish tomato soup
+PAELLA|Spanish rice dish with seafood
+BORDEAUX|French wine region
+VERMOUTH|Aromatized wine used in martinis
+PELICAN|Bird with a pouched bill
+NARWHAL|Arctic whale with a long tusk
+ALBATROSS|Seabird with the longest wingspan
+CONDOR|Giant vulture of the Andes
+EDELWEISS|Alpine flower and emblem
+LAVENDER|Purple fragrant flower of Provence
+BAOBAB|African tree with a huge swollen trunk
+SEQUOIA|Giant redwood of California
+EUCALYPTUS|Tree whose leaves koalas eat

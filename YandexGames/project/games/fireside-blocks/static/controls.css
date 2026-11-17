@@ -1,0 +1,158 @@
+/* Тёплая эмаль, резное дерево и латунь — палитра каминной комнаты. */
+#ui {
+  --control-top:#f0cc8b;
+  --control-mid:#d8a460;
+  --control-low:#b77c3e;
+  --control-edge:#71431f;
+  --control-rim:#f6dba0;
+  --control-ink:#39200f;
+  --control-depth:5px;
+  --control-text-shadow:0 1px 0 #ffe3ad99;
+}
+#ui :is(.bigbtn,.midbtn,.smallbtn,.tile,.boost,.round,.chip,.iap-buy) {
+  color:var(--control-ink);
+  border:2px solid var(--control-edge);
+  background:
+    radial-gradient(ellipse at 28% 0%,#ffdc9a38,transparent 65%),
+    repeating-linear-gradient(174deg,#4b250a00 0px,#4b250a00 5px,#4b250a08 6px,#4b250a00 8px),
+    linear-gradient(180deg,var(--control-top),var(--control-mid) 48%,var(--control-low));
+  box-shadow:
+    inset 0 2px 1px #ffe8b985,
+    inset 2px 0 3px #ffe5af45,
+    inset -2px 0 3px #2b130625,
+    inset 0 -4px 5px #2c140536,
+    inset 0 0 0 2px #f4ce8733,
+    0 var(--control-depth) 0 var(--control-edge),
+    0 calc(var(--control-depth) + 7px) 18px #1c0b0755;
+  text-shadow:var(--control-text-shadow);
+  transition:transform .12s ease,filter .12s ease,box-shadow .12s ease;
+}
+#ui .bigbtn {--control-depth:8px;border-radius:22px}
+#ui :is(.bigbtn,.midbtn).green {
+  --control-top:#64a077;--control-mid:#3d7959;--control-low:#275640;
+  --control-edge:#1f3c2b;--control-ink:#fff0d2;
+  --control-text-shadow:0 2px 1px #173322b3;
+}
+#ui :is(.bigbtn,.midbtn).honey {
+  --control-top:#f1c174;--control-mid:#da9643;--control-low:#b6742e;
+  --control-edge:#7b461d;--control-ink:#3b210c;
+}
+#ui .midbtn.blue {
+  --control-top:#6f9dba;--control-mid:#49748e;--control-low:#344f70;
+  --control-edge:#273c51;--control-ink:#fff0d7;
+  --control-text-shadow:0 2px 1px #192c4599;
+}
+#ui .bigbtn .bt {text-shadow:var(--control-text-shadow)}
+#ui .bigbtn.honey .bt {text-shadow:0 1px 0 #ffe4ad99}
+#ui .bigbtn::before {
+  content:"";position:absolute;inset:4px;border:1px solid #fbdba452;
+  border-radius:16px;box-shadow:inset 0 1px 1px #ffefc733;
+  pointer-events:none;
+}
+#ui .bigbtn::after {
+  left:7px;right:7px;top:4px;height:31%;border-radius:16px 16px 28px 28px;
+  background:linear-gradient(180deg,#ffe8af55,#ffdea00d);pointer-events:none;
+}
+#ui .tile {
+  position:relative;--control-ink:#fff0d6;
+  --control-text-shadow:0 2px 1px #28150d99;
+  --control-depth:6px;
+}
+#ui .tile::before {
+  content:"";position:absolute;inset:4px;border-radius:14px;
+  border:1px solid #ffdc9960;box-shadow:inset 0 0 0 1px #361c1226;
+  pointer-events:none;
+}
+#ui .tile>svg {
+  padding:4px;border-radius:14px;
+  background:radial-gradient(ellipse at 35% 20%,#f7dca6,#d3a369 75%,#a9743f);
+  box-shadow:inset 0 1px 1px #fff0c3b3,inset 0 -2px 2px #6a3c2444,0 2px 2px #32180d55;
+}
+#ui .tile[data-a="gift"] {
+  --control-top:#b56b4d;--control-mid:#974a36;--control-low:#713125;--control-edge:#542419;
+}
+#ui .tile[data-a="challenge"] {
+  --control-top:#9b8654;--control-mid:#786334;--control-low:#5c4828;--control-edge:#44331d;
+}
+#ui .tile[data-a="journey"] {
+  --control-top:#659a8b;--control-mid:#3e786b;--control-low:#28564e;--control-edge:#1c3b34;
+}
+#ui .tile[data-a="styles"] {
+  --control-top:#a7787c;--control-mid:#87515e;--control-low:#613a4a;--control-edge:#492a36;
+}
+#ui .tile[data-a="store"] {
+  --control-top:#c99b5b;--control-mid:#a47037;--control-low:#7d4f29;--control-edge:#5a351c;
+}
+#ui .tile[data-a="settings"] {
+  --control-top:#7d96a6;--control-mid:#556d80;--control-low:#3d4d66;--control-edge:#2a3447;
+}
+#ui .boost {
+  --control-depth:5px;--control-ink:#ffefd2;--control-text-shadow:0 2px 1px #24160eaa;
+}
+#ui .boost[data-id="hint"] {
+  --control-top:#e1b35f;--control-mid:#c38d36;--control-low:#9e682b;
+  --control-edge:#72451e;--control-ink:#36200b;--control-text-shadow:0 1px 0 #ffe8a88a;
+}
+#ui .boost[data-id="undo"] {
+  --control-top:#75a0a6;--control-mid:#477780;--control-low:#305561;--control-edge:#233d48;
+}
+#ui .boost[data-id="hammer"] {
+  --control-top:#bd805c;--control-mid:#9b5a40;--control-low:#733d30;--control-edge:#54291e;
+}
+#ui .boost[data-id="shuffle"] {
+  --control-top:#90a77a;--control-mid:#668452;--control-low:#425d39;--control-edge:#30432b;
+}
+#ui .boost>svg {filter:drop-shadow(0 1px 0 #ffe6af88) drop-shadow(0 2px 1px #25160f55)}
+#ui .boost.on {outline:3px solid #e8ab5c;outline-offset:1px}
+#ui .bdg {
+  background:linear-gradient(#eaca83,#bf8e3f);border-color:#7a5225;color:#3e250f;
+  box-shadow:inset 0 1px 0 #ffe6af,0 2px 3px #21150966;text-shadow:0 1px 0 #ffe6a68a;
+}
+#ui :is(.round,.chip) {--control-top:#f3d7a0;--control-mid:#e4be80;--control-low:#c39555;--control-edge:#80512b;--control-depth:4px}
+#ui .chip .plus {background:linear-gradient(#6d9867,#365d3d);border:1px solid #35502c;box-shadow:inset 0 1px 0 #d5e6a47a,0 2px 0 #42502a;color:#fff0cc}
+#ui .goal {
+  background:linear-gradient(#f3d9a7,#ddbb82 72%,#c3965b);border-color:#82532d;
+  box-shadow:inset 0 2px 0 #fff0c6aa,inset 0 -3px 4px #8a5c2b30,0 4px 0 #6b4222,0 7px 10px #25110b33;
+}
+#ui .goal.done {background:linear-gradient(#d6dfad,#a7bd82);border-color:#52673c}
+#ui .sign {
+  background:
+    repeating-linear-gradient(176deg,#21110800 0px,#21110800 6px,#3c1d0a20 7px,#b2763f0a 9px),
+    radial-gradient(ellipse at 20% 0%,#e9b36942,transparent 68%),
+    linear-gradient(165deg,#af7747,#82502e 52%,#57341d);
+  border-color:#4a2916;
+  box-shadow:inset 0 3px 1px #edc38a88,inset 3px 0 3px #e8b37955,inset 0 -5px 6px #2d160c88,inset 0 0 0 3px #c68e5166,0 9px 0 #3b2113,0 17px 28px #1d0c0880;
+}
+#ui .sign-t {color:#ffe5b4;text-shadow:0 2px 0 #6e431f,0 4px 1px #2c170e,0 7px 12px #21130c44}
+#ui .sign-s {color:#f4c988;text-shadow:0 1px 1px #2a150b}
+#ui .mpanel,#ui .lpanel {
+  background:radial-gradient(ellipse at 20% 0%,#fff1ce88,transparent 65%),linear-gradient(150deg,#f6e1b9,#ebd0a3);
+  border-color:#704624;
+  box-shadow:inset 0 2px 1px #fff0c5, inset 0 0 0 3px #cfa368,inset 0 -5px 8px #b4804438,0 9px 0 #452915,0 22px 48px #1d100b80;
+}
+#ui .mhead b,#ui .ltitle {color:#56351b;text-shadow:0 1px 0 #fff0cc}
+#ui .stab {
+  background:linear-gradient(#e6c596,#cda16c);border-color:#aa7848;
+  box-shadow:inset 0 1px 0 #fff0c68a,inset 0 -2px 3px #80512533,0 3px 0 #986438;color:#644529;
+}
+#ui .stab.on {background:linear-gradient(#6c9c80,#3f6e57);border-color:#30523c;color:#fff0ce;box-shadow:inset 0 1px 0 #d4e4aa88,inset 0 -3px 4px #18342255,0 3px 0 #24412e;text-shadow:0 1px 1px #263b27}
+#ui .lvl {
+  background:linear-gradient(150deg,#e9c58b,#d6a465 55%,#ba8347);border-color:#865129;
+  box-shadow:inset 0 2px 0 #ffedbfbb,inset 0 -4px 5px #78451a33,inset 0 0 0 2px #efca8e66,0 5px 0 #70411f;
+}
+#ui .lvl.done {background:linear-gradient(150deg,#d4dbaa,#a7bd80 65%,#87a064);border-color:#6b7447;box-shadow:inset 0 2px 0 #eef2caaa,inset 0 -4px 5px #53643844,0 5px 0 #4b5b32}
+#ui .lvl.cur {background:linear-gradient(150deg,#f9d892,#e4ae51 60%,#c58a36);border-color:#956023;outline:2px solid #f3c064;outline-offset:1px;box-shadow:inset 0 2px 0 #fff0c4,inset 0 -4px 5px #8a5c2c44,0 5px 0 #815023,0 8px 16px #ad6e3233}
+#ui .lvl.locked {background:linear-gradient(#cdb28c,#b3936e);border-color:#94704b;box-shadow:inset 0 1px 0 #ecd6af88,0 3px 0 #7e5c3b}
+#ui :is(.scard,.album-card,.mission-card,.decor-next) {background:linear-gradient(145deg,#efd4a7,#dfbc88);border-color:#b98a54}
+#ui .scard.on {background:linear-gradient(145deg,#d4dcae,#b3c88e);border-color:#6d884d}
+#ui :is(.bigbtn,.midbtn,.smallbtn,.tile,.boost,.round,.chip,.iap-buy):active:not(:disabled) {
+  transform:translateY(4px);
+  box-shadow:inset 0 2px 4px #321c1b22,inset 0 1px 0 #ffe7b066,inset 0 -2px 2px #29170b33,0 2px 0 var(--control-edge),0 5px 8px #21120d55;
+}
+#ui :is(.smallbtn,.midbtn,.iap-buy):disabled {opacity:.55;filter:saturate(.65);box-shadow:inset 0 1px 0 #ffebbf66,0 3px 0 var(--control-edge)}
+#ui button:focus-visible {outline:3px solid #ffe1a2;outline-offset:3px}
+#ui .tile.ready {animation:gift-warm 2.4s ease-in-out infinite}
+@keyframes gift-warm{50%{box-shadow:inset 0 2px 1px #ffe8b985,inset 0 -4px 5px #2c140536,0 6px 0 var(--control-edge),0 10px 20px #dd8d3f55}}
+@media(hover:hover){#ui button:not(:disabled):hover{filter:brightness(1.07) saturate(1.04)}#ui .tile:hover{transform:translateY(-1px)}}
+@media(max-height:520px) and (min-width:600px){#ui .boost{--control-depth:3px}#ui .boost>svg{filter:drop-shadow(0 1px 0 #f0d6a688)}}
+@media(prefers-reduced-motion:reduce){#ui button,#ui .tile.ready{animation:none!important;transition:none!important}}

@@ -1,0 +1,25 @@
+{
+  "name": "fireside-blocks",
+  "version": "2.5.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@vkontakte/vk-bridge": "2.15.5",
+    "esbuild": "^0.28.2",
+    "playwright": "1.63"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test:release": "node test/release.mjs",
+    "test:balance": "node test/balance.mjs",
+    "test:art": "node test/art.mjs",
+    "test:expansion": "node test/expansion.mjs",
+    "test:calendar": "node test/calendar.mjs",
+    "test:refinement": "node test/refinement.mjs",
+    "test:cosmetics": "node test/cosmetics.mjs",
+    "test:room": "node test/room.mjs",
+    "test:robustness": "node test/robustness.mjs",
+    "test:retention": "node test/retention.mjs",
+    "test:personal-records": "node test/personal-records.mjs"
+  }
+}

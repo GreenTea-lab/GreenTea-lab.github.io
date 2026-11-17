@@ -1,0 +1,10 @@
+import { chromium } from 'playwright';
+import path from 'path';
+const which = process.argv[2], out = process.argv[3], cloth = process.argv[4];
+const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome', args: ['--allow-file-access-from-files'] });
+const p = await b.newPage({ viewport: { width: 1400, height: 900 } });
+p.on('pageerror', (e) => console.log('ERR', e.message));
+await p.goto('file://' + path.resolve('test/proto/index.html'));
+await p.evaluate(async ([w, c]) => { window.cloth = c; await window.go(w); }, [which, cloth]);
+await p.locator('#c').screenshot({ path: out });
+await b.close();

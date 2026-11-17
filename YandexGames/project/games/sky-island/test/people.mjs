@@ -1,0 +1,20 @@
+import { run, done } from './shot.mjs';
+const errs = await run({ w: 900, h: 700, debug: {}, steps: async (page) => {
+  const G = (f) => page.evaluate(f);
+  await page.waitForTimeout(1200);
+  await G(() => { const g = window.__game; const E = window.__E; g.ui.closeModal(); g.s.tut = { welcome: true, claimed: true, done: true };
+    g.s.buildings = [{ id: 1, type: 'hut', x: 11, z: 12, lvl: 3 }, { id: 2, type: 'cottage', x: 13, z: 11, lvl: 2 }, { id: 3, type: 'sawmill', x: 13, z: 13, lvl: 2 }]; g.s.nextId = 4;
+    for (const k of [...g.world.objs.keys()]) g.world.removeObj(k); g.world.sync(g.s, Date.now()); g.people = [];
+    g.ctl.focus(0, 0); g.ctl.tDist = 6; g.ctl.tPhi = 1.05; });
+  await page.waitForTimeout(4000);
+  await G(() => { const g = window.__game; g.ui.closeModal(); g.ctl.focus(0, 0); g.ctl.tDist = 5; g.ctl.tPhi = 1.1; });
+  await page.waitForTimeout(2500);
+  await G(() => window.__game.ui.closeModal());
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: 'shots/people.png' });
+  await G(() => { const g = window.__game; g.ctl.tDist = 26; g.ctl.tPhi = 1.45; g.ctl.tTheta = 0.6; });
+  await page.waitForTimeout(3000);
+  await page.screenshot({ path: 'shots/vines.png' });
+  console.log(await G(() => window.__game.people.length));
+}});
+done(errs);

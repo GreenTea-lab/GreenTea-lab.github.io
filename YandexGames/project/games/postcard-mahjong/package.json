@@ -1,0 +1,30 @@
+{
+  "name": "postcard-mahjong",
+  "version": "2.3.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test:endless": "node test/endless.mjs",
+    "test:travel": "node test/travel.mjs",
+    "test:postcard-art": "node test/postcard-art.mjs",
+    "test:moderation": "node test/moderation.mjs",
+    "test:progression": "node test/progression.mjs",
+    "test:expansion": "node test/expansion.mjs",
+    "test:art": "node test/art.mjs",
+    "test:tiles": "node test/tiles.mjs",
+    "test:skins": "node test/skins.mjs",
+    "test:collections": "node test/collections.mjs",
+    "test:loader": "node test/loader.mjs",
+    "test:balance": "node test/balance.mjs",
+    "test:variety": "node test/variety.mjs",
+    "test:journal": "node test/journal.mjs",
+    "test:stories": "node test/stories.mjs",
+    "test:records": "node test/records.mjs"
+  },
+  "dependencies": {
+    "@vkontakte/vk-bridge": "2.15.5",
+    "esbuild": "^0.28.2",
+    "playwright": "1.63"
+  }
+}

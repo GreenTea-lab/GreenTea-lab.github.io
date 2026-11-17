@@ -1,0 +1,22 @@
+import { run, done } from './shot.mjs';
+process.env.MOCK_SDK = 1;
+const errs = await run({ debug: {}, steps: async (page) => {
+  const G = (f) => page.evaluate(f);
+  await G(() => { const m = window.__game.scene.getScene('Menu'); m.scene.start('Game'); });
+  await page.waitForTimeout(1000);
+  await G(() => { const g = window.__game.scene.getScene('Game'); g.kills = 300; g.t = 200; g.die(); });
+  await page.waitForTimeout(1200);
+  await G(() => window.__game.scene.getScene('Game').die());
+  await page.waitForTimeout(1500);
+  let b0 = await G(() => window.__game.scene.getScene('Hud').ovL.items.filter(o => o.label && o.label.text).map(o => [o.label.text, o.c.x, o.c.y]));
+  const no = b0.find(b => b[0].startsWith('No'));
+  await page.mouse.click(no[1], no[2]);
+  await page.waitForTimeout(1500);
+  const btns = await G(() => window.__game.scene.getScene('Hud').ovL.items.filter(o => o.label && o.label.text).map(o => [o.label.text, o.c.x, o.c.y]));
+  console.log(JSON.stringify(btns));
+  const mb = btns.find(b => b[0] === 'MENU');
+  await page.mouse.click(mb[1], mb[2]);
+  await page.waitForTimeout(1500);
+  console.log('menu', await G(() => window.__game.scene.isActive('Menu')), await G(() => JSON.stringify(window.__calls.slice(-5))));
+}});
+done(errs);

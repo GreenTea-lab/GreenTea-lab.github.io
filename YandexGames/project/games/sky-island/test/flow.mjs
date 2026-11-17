@@ -1,0 +1,44 @@
+import { run, done } from './shot.mjs';
+const out = '/tmp/claude-0/-home-claude/fc31419c-4951-5c39-8720-5e89ab1869b0/scratchpad/sif_';
+const errs = await run({ w: 390, h: 844, mobile: true, dpr: 2, debug: {}, steps: async (page) => {
+  const G = (f, a) => page.evaluate(f, a);
+  await page.waitForFunction(() => window.__game && window.__game.rates && window.__E);
+  // имитация: игрок был офлайн 3 часа вчера
+  await G(() => { const g = window.__game; g.save = () => {}; const d0 = JSON.parse(g.serialize()); d0.ts = Date.now() - 3 * 3600 * 1000; const d = new Date(); d.setDate(d.getDate() - 1); d0.streak = { day: 2, last: `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}` }; localStorage.setItem('sky_islet_save_v1', JSON.stringify(d0)); });
+  await page.reload();
+  await page.waitForFunction(() => window.__game && window.__game.rates);
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: out + '1offline.png' });
+  console.log('offline modal', await G(() => document.querySelector('.modal h2') && document.querySelector('.modal h2').textContent));
+  await G(() => document.querySelector('.modal [data-a="x2"]').click());
+  await page.waitForTimeout(1500);
+  await page.screenshot({ path: out + '2streak.png' });
+  console.log('next modal', await G(() => document.querySelector('.modal h2') && document.querySelector('.modal h2').textContent));
+  await G(() => document.querySelector('.modal [data-a="take"]') && document.querySelector('.modal [data-a="take"]').click());
+  await page.waitForTimeout(500);
+  // выбор здания и карточка на телефоне
+  await G(() => { const g = window.__game; g.s.coins = 1e6; g.s.wood = 1e5; g.s.stone = 1e5; g.select(g.s.buildings.find(b => b.type === 'farm')); });
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: out + '3sheet.png' });
+  await G(() => { const g = window.__game; g.upgrade(g.s.buildings.find(b => b.type === 'farm')); });
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: out + '4building.png' });
+  await G(() => document.querySelector('.sheet [data-a="ad"]').click());
+  await page.waitForTimeout(1800);
+  console.log('farm lvl', await G(() => { const f = window.__game.s.buildings.find(b => b.type === 'farm'); return f.lvl + ' build=' + (f.build > Date.now()); }));
+  await G(() => { window.__game.deselect(); window.__game.startPlace('d', 'flowers'); });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: out + '5place.png' });
+  await G(() => { window.__game.cancelPlace(); window.__game.ui.lbModal(); });
+  await page.waitForTimeout(800);
+  await page.screenshot({ path: out + '6lb.png' });
+  await G(() => { const g = window.__game; g.ui.closeModal(); g.s.earned = 5e6; g.ui.islandModal(); });
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: out + '7migrate.png' });
+  await G(() => document.querySelector('.modal [data-a="mig"]').click());
+  await page.waitForTimeout(1500);
+  console.log('after migrate', await G(() => JSON.stringify({ f: window.__game.s.feathers, b: window.__game.s.buildings.length, plots: window.__game.s.plots.length, cr: Math.round(window.__game.s.crystals) })));
+  await page.screenshot({ path: out + '8after.png' });
+  console.log(await G(() => (window.__calls || []).join(' | ')));
+}});
+done(errs);

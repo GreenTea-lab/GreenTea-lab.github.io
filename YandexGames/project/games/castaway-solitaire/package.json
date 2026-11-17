@@ -1,0 +1,25 @@
+{
+  "name": "castaway-solitaire",
+  "version": "2.2.1",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@fontsource/lobster": "^5.3.0",
+    "@fontsource/nunito": "^5.3.0",
+    "@vkontakte/vk-bridge": "2.15.5",
+    "esbuild": "^0.28.2",
+    "playwright": "1.63",
+    "three": "^0.186.1"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test:release": "node test/release.mjs",
+    "test:logic": "node test/logic-release.mjs",
+    "test:expansion": "node test/expansion.mjs",
+    "test:art": "node test/art-release.mjs",
+    "test:living": "node test/living-island.mjs",
+    "test:controls": "node test/controls.mjs",
+    "test:orbit": "node test/orbit-cards.mjs",
+    "test:transitions": "node test/transitions.mjs"
+  }
+}

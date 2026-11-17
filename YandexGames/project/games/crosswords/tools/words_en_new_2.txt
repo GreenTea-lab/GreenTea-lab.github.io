@@ -1,0 +1,120 @@
+# New medium words for chapters 9-12. Format: WORD|clue
+FOG|White haze hanging over the ground
+DRIZZLE|Very fine light rain
+BLIZZARD|Heavy snowstorm with strong wind
+SNOWDRIFT|Heap of snow piled by the wind
+RAVINE|Deep narrow valley
+TRAIL|Path through the woods
+SWAMP|Wet, soggy land with reeds
+MARSH|Low wetland with grasses
+HEATHER|Purple-flowered moorland shrub
+DAM|Wall that holds back a river
+RAPIDS|Fast, rough stretch of river
+PENINSULA|Land surrounded by water on three sides
+STRAIT|Narrow channel between two seas
+CAVERN|Large underground cave
+CLIFF|Steep rock face above the sea
+RIDGE|Long narrow mountain top
+TUNDRA|Cold treeless plain
+TIDE|Rise and fall of the sea
+BREEZE|Gentle wind
+HARBOR|Safe place for boats by the shore
+GLOBE|Round model of the Earth
+ATLAS|Book of maps
+PLATFORM|Where you wait for the train
+TUNNEL|Passage dug under a mountain
+AIRPORT|Place where planes take off
+PARACHUTE|Opens after a jump from a plane
+TRAM|Streetcar on rails
+SUBWAY|Underground railway
+CROSSWALK|Where pedestrians cross the street
+GARAGE|Shelter for a car
+AXE|Splits logs
+PLIERS|Gripping tool for wire
+DRILL|Makes holes in walls
+SHOVEL|Digs the soil
+WELL|Hole dug to reach water
+BEEHIVE|Home of honey bees
+COOP|House for chickens
+SCARECROW|Straw figure that frightens birds
+STARLING|Glossy bird that mimics sounds
+LARK|Songbird that sings high in the sky
+WOODPECKER|Bird that drums on tree trunks
+CUCKOO|Bird that lays eggs in others' nests
+MOOSE|Giant antlered deer of the north
+STAG|Male deer with antlers
+HIPPO|Huge river animal
+RHINO|Horned animal with thick skin
+TORTOISE|Slow animal with a shell
+SQUID|Sea animal with ten arms
+BUMBLEBEE|Fuzzy flying insect
+STEW|Slow-cooked meat and vegetables
+BAGEL|Ring-shaped bread with a hole
+CROISSANT|Flaky French crescent
+PRETZEL|Knot-shaped salty bread
+BROWNIE|Chewy chocolate square
+CUPCAKE|Tiny frosted cake
+JELLY|Wobbly fruit dessert
+SYRUP|Thick sweet liquid for pancakes
+PORRIDGE|Hot oat breakfast
+CEREAL|Breakfast served with milk
+OATMEAL|Porridge made from rolled oats
+OMELET|Beaten eggs folded over a filling
+HAMBURGER|Patty in a bun
+SPAGHETTI|Long thin pasta
+LASAGNA|Layered Italian pasta bake
+RAVIOLI|Stuffed pasta squares
+RISOTTO|Creamy Italian rice dish
+SUSHI|Japanese rice and raw fish
+CURRY|Spicy sauce of Indian cooking
+BEET|Deep red root vegetable
+TURNIP|Round pale root vegetable
+HAZELNUT|Round nut in chocolate spread
+VANILLA|Sweet flavor from orchid pods
+SAFFRON|Costly golden spice
+PICKLE|Cucumber kept in brine
+SKILLET|Frying pan
+SAUCEPAN|Deep pot with a long handle
+TEAPOT|Brews and pours tea
+TOASTER|Browns bread slices
+BLENDER|Mixes smoothies
+LADLE|Big spoon for soup
+WHISK|Beats eggs
+COLANDER|Bowl with holes for draining pasta
+GRATER|Shreds cheese
+PLATTER|Large dish for serving
+GOBLET|Stemmed drinking cup
+PITCHER|Jug for pouring water
+TABLECLOTH|Covers the dining table
+NAPKIN|Wipes lips at dinner
+PANTRY|Small room for food storage
+CELLAR|Cool underground storage room
+ATTIC|Space under the roof
+PORCH|Covered entrance to a house
+SHUTTERS|Hinged covers beside a window
+FIREPLACE|Hearth for a log fire
+COTTAGE|Small cozy country house
+MANSION|Very large house
+BASEMENT|Floor below ground level
+STAIRCASE|Steps connecting floors
+BALCONY|Platform sticking out from a wall
+CURTAIN|Hangs beside a window
+CARPET|Thick floor covering
+MATTRESS|Padded part of a bed
+WARDROBE|Tall cupboard for clothes
+DRESSER|Chest of drawers
+BROOM|Sweeps the floor
+BASKET|Woven container
+MITTENS|Winter hand covers with a thumb
+VEST|Sleeveless top
+APPAREL|Another word for clothing
+SANDALS|Open summer shoes
+ZIPPER|Fastener with teeth
+THIMBLE|Protects a finger when sewing
+KNITTING|Making fabric with two needles
+EMBROIDERY|Decorative stitching
+LACE|Delicate openwork fabric
+VELVET|Soft fabric with a short pile
+SILK|Smooth fabric from cocoons
+WOOL|Fleece from sheep
+LINEN|Cloth woven from flax
