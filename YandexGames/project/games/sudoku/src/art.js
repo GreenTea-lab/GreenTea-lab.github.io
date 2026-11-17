@@ -29,6 +29,7 @@ export class Backdrop {
     const theme = settings.theme === 'dawn' ? 'dawn' : 'night';
     const mode = settings.background || 'living';
     this.root.hidden = settings.theme === 'contrast' || mode === 'classic';
+    document.documentElement.dataset.art = !this.root.hidden && this.loaded ? 'true' : 'false';
     this.root.dataset.theme = theme;
     if (this.theme !== theme || this.mode !== mode) {
       this.theme = theme; this.mode = mode; this.sequence = 0;
@@ -41,9 +42,13 @@ export class Backdrop {
     try { await img.decode(); } catch { return; }
     if (token !== this.token) return;
     const next = 1 - this.active;
+    if (!this.loaded || this.reduced) this.layers[next].style.transition = 'none';
     this.layers[next].style.backgroundImage = `url("${ART[key]}")`;
     this.layers[next].classList.add('visible');
     this.layers[this.active].classList.remove('visible');
     this.active = next;
+    this.loaded = true;
+    document.documentElement.dataset.art = this.root.hidden ? 'false' : 'true';
+    requestAnimationFrame(() => requestAnimationFrame(() => { this.layers[next].style.transition = ''; }));
   }
 }

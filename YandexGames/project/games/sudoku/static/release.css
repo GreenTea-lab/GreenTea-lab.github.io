@@ -1,6 +1,7 @@
 /* Release polish: preserve typography, palette, board and original logo geometry. */
 #ambient-background{position:fixed;inset:0;pointer-events:none;overflow:hidden;opacity:.94;transition:opacity 1s}
 #ambient-background[hidden]{display:none}
+:root[data-art="true"] #sky{opacity:0}
 .ambient-layer{position:absolute;inset:-2%;background-size:cover;background-position:center;opacity:0;transition:opacity 3s ease;animation:landscape-drift 48s ease-in-out infinite alternate;will-change:opacity}
 .ambient-layer.visible{opacity:1}
 #ambient-background::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at center,rgba(12,17,42,.32),rgba(12,17,42,.08) 68%),linear-gradient(0deg,rgba(12,17,42,.48),transparent 70%)}
@@ -22,7 +23,7 @@
 .background-options .seg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem;background:transparent;padding:0}
 .background-options button{min-height:2.6rem;background:var(--glass)}
 .gwrap{gap:1rem;padding-bottom:1.4rem}
-#garden .inner{max-width:66rem}
+#garden .inner{width:min(66rem,100%);max-width:66rem}
 .garden-heading{display:flex;align-items:center;justify-content:space-between;padding:.2rem .4rem;gap:1rem}
 .garden-heading small{color:var(--muted);font-size:.95rem;letter-spacing:.05em}
 .garden-heading h2{font-family:"Yeseva One",Georgia,serif;font-weight:400;font-size:1.9rem;line-height:1.1;margin:.25rem 0}
@@ -49,6 +50,9 @@
 .garden-light{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
 .garden-light>span{color:var(--muted)}
 .garden-light .seg{flex:1;max-width:32rem}
+.garden-light .seg{background:var(--panel);box-shadow:inset 0 0 0 1px var(--panelLine)}
+.garden-light .seg button{color:var(--ink)}
+.garden-light .seg button.on{color:var(--goldInk)}
 .garden-light .seg button{font-size:.95rem;min-height:2.4rem;min-width:0}
 .garden-meter{padding:.7rem 1rem;border-radius:1rem;background:var(--panel);box-shadow:inset 0 0 0 1px var(--panelLine)}
 .garden-meter>div:first-child{display:flex;justify-content:space-between;gap:1rem;color:var(--muted);font-size:1rem;margin-bottom:.5rem}
@@ -99,6 +103,16 @@
 :root[data-gtheme="dawn"] .b-gold{background:linear-gradient(155deg,#ffe8b6,#f1c66d 45%,#d7a142);color:#39250b}
 @media(hover:hover){.btn:not(:disabled):hover,.qrow:hover,.gi:hover{transform:translateY(-1px)}.garden-walk-exit:hover{transform:translateX(-50%) translateY(-1px)}}
 @media(max-width:520px){.garden-heading h2{font-size:1.5rem}.garden-light{display:block}.garden-light>span{display:block;margin-bottom:.4rem}.garden-light .seg{max-width:none}.garden-light .seg button{font-size:.86rem}.glist{grid-template-columns:repeat(2,minmax(0,1fr))}.gi{font-size:.92rem;gap:.35rem;padding:.5rem}.gi svg:first-child{width:2.1rem;height:2.1rem}.gi>svg:last-child{width:.8rem;height:.8rem}.gnext{padding:.75rem}.gnext .btn{width:100%;margin-top:.2rem}.garden-next-icon{width:3.5rem;height:3.5rem}.garden-next-icon svg{width:3.4rem;height:3.4rem}}
+@media(max-height:540px) and (min-width:650px){
+  body.wide #game{font-size:15px}
+  body.wide #game .bar{padding:.35em .7em}
+  body.wide .gbody{gap:1em;padding:0 1em .8em}
+  body.wide .gright{width:clamp(16rem,36vw,22rem);min-height:0;gap:.55em}
+  body.wide .tools{display:flex;gap:.4em}
+  body.wide .tool{height:3.2em;flex-direction:column;font-size:.83em}
+  body.wide .pad{flex:1;min-height:0;grid-template-rows:repeat(3,minmax(0,1fr));gap:.4em}
+  body.wide .num{height:100%;aspect-ratio:auto;font-size:1.65em;min-height:0}
+}
 :root[data-motion="reduced"] *, :root[data-motion="reduced"] *::before, :root[data-motion="reduced"] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
 :root[data-motion="reduced"] .garden-sparkles{display:none}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.garden-sparkles{display:none}}

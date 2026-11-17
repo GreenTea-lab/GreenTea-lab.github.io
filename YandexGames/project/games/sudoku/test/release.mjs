@@ -60,13 +60,16 @@ for (const [name,w,h,mobile] of [['small',360,640,true],['phone',390,844,true],[
     await page.waitForFunction(()=>window.__app&&!document.getElementById('boot'));
     await page.locator('.m-play').click();
     assert.equal(await page.evaluate(i=>window.__app.board.vals[i],target[0]),target[1],'Immediate reload retains last move');
+    await page.waitForTimeout(450);
     const layouts=await page.evaluate(()=>{
       const b=document.querySelector('.board').getBoundingClientRect();
       const nums=[...document.querySelectorAll('.num')].map(n=>n.getBoundingClientRect());
-      return b.width>100&&b.left>=-1&&b.right<=innerWidth+1&&nums.every(r=>r.left>=-1&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1);
+      const rect=r=>({x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right});
+      return {ok:b.width>100&&b.left>=-1&&b.right<=innerWidth+1&&nums.every(r=>r.left>=-1&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1),board:rect(b),nums:nums.map(rect)};
     });
-    assert(layouts,`Board/keypad fit ${name}`);
     await page.screenshot({path:`test/out/release/${name}-game.png`});
+    fs.writeFileSync(`test/out/release/${name}-layout.json`,JSON.stringify(layouts,null,2));
+    assert(layouts.ok,`Board/keypad fit ${name}: ${JSON.stringify(layouts)}`);
     await page.evaluate(()=>{const A=window.__app;A.openStore('skins');});
     assert.equal(await page.locator('.skin').count(),14);
     await page.screenshot({path:`test/out/release/${name}-skins.png`});

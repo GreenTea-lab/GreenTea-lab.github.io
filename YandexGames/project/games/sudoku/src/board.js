@@ -96,7 +96,7 @@ export class Board {
   }
   show(on) {
     this.el.classList.toggle('hidden', !on);
-    if (on) requestAnimationFrame(() => this.layout());
+    if (on) { this.layout(); requestAnimationFrame(() => this.layout()); }
   }
   setCoins(n, bump) {
     const c = this.q('.g-coins');
