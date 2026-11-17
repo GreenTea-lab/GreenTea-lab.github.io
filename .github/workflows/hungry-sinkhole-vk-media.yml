@@ -1,0 +1,38 @@
+name: Hungry Sinkhole 2.3.1 media
+on:
+  push:
+    branches: [codex/hungry-sinkhole-vk-media-231]
+permissions:
+  contents: read
+jobs:
+  capture:
+    strategy:
+      fail-fast: false
+      matrix:
+        direction: [landscape, portrait]
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: YandexGames/project/games/hungry-sinkhole
+    env:
+      GAME_TESTS_REMOTE: '1'
+      CLOUD_CHROME: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: npm ci
+      - run: npm run build
+      - name: Capture released build
+        env:
+          NODE_OPTIONS: --import=./test/cloud-browser.mjs
+        run: node tools/capture-vk-231.mjs ${{ matrix.direction }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: hungry-sinkhole-vk-231-${{ matrix.direction }}
+          path: |
+            YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/screenshots/
+            YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/*.json
+            YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/*.mp4
+            YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/*.jpg
+          retention-days: 14
