@@ -39,7 +39,7 @@ async function start() {
     audio.suspend(why);
     if (game.state === 'play' && !game.paused && !game.ui.modalOpen) game.pause(true);
   };
-  const go = (why) => {game.backgroundHolds.delete(why);audio.resume(why);};
+  const go = (why) => {game.backgroundHolds.delete(why);audio.resume(why);if(!game.backgroundHolds.size&&game.state==='play'&&game.paused&&!game.ui.modalOpen)game.ui.showPause();};
   // звук не играет, пока вкладка/фрейм без фокуса (требование 1.3)
   window.addEventListener('blur', () => stop('blur'));
   window.addEventListener('focus', () => go('blur'));

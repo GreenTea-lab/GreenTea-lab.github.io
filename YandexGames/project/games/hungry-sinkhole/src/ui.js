@@ -11,7 +11,8 @@ import { slidersHTML, bindSliders, volumeCss } from './volume.js';
 import { canEatHole } from './sim.js';
 import { pickIcon, PICK_COL } from './render.js';
 import { ensureDaily, questsReady, giftReady, giftDay, takeGift, GIFTS } from './daily.js';
-import { MODES } from './game.js';
+import { MODES,endlessMode } from './game.js';
+import {openCollection,openWorkshop,openFestival,openDailyChallenge} from './offline-ui.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const hex = (c) => '#' + c.toString(16).padStart(6, '0');
@@ -107,6 +108,7 @@ export class UI {
     this.screen = 'menu';
     this._clearLabels();
     this.stickEl.style.display = 'none';
+    this.clearLocalSticks();document.body.classList.remove('duel-mode');
     const d = save.data;
     const touch = matchMedia('(pointer:coarse)').matches;
     this.scr.innerHTML = `
@@ -117,7 +119,8 @@ export class UI {
         <div class="modes">${MODES.map((m) => `<button class="mode ${d.mode === m ? 'on' : ''}" data-m="${m}"><b>${esc(t('mode_' + m))}</b><small>${esc(t('mode_' + m + '_d'))}</small></button>`).join('')}</div>
         <div class="maps">${MAPS.map((m) => this._mapCard(m)).join('')}</div>
         <button class="expedition-entry" id="expeditions">${I.flag}<span><b>${esc(t('expeditions'))}</b><small>${esc(t('expeditionD'))}</small></span><i>›</i></button>
-        <button class="btn big play" id="play">${I.play}<span>${esc(t('play'))}</span></button>
+        <div class="offline-nav"><button class="btn mid blue" id="daily-challenge">${I.clock}<span>${esc(t('dailyChallenge'))}</span></button><button class="btn mid violet" id="album">${I.star}<span>${esc(t('album'))}</span></button><button class="btn mid green" id="workshop">${I.up}<span>${esc(t('workshop'))}</span></button><button class="btn mid" id="festival">${I.gift}<span>${esc(t('festival'))}</span></button></div>
+        <div class="play-slot"><button class="btn big play" id="play">${I.play}<span>${esc(t('play'))}</span></button></div>
         <div class="row side">
           <button class="btn mid violet" id="skins">${I.skin}<span>${esc(t('skins'))}</span></button>
           <button class="btn mid green" id="ups">${I.up}<span>${esc(t('upgrades'))}</span></button>
@@ -127,6 +130,10 @@ export class UI {
       </div>`;
     this._menuTop();
     this._btn('#expeditions',()=>this.openExpeditions());
+    this._btn('#daily-challenge',()=>openDailyChallenge(this));
+    this._btn('#album',()=>openCollection(this));
+    this._btn('#workshop',()=>openWorkshop(this));
+    this._btn('#festival',()=>openFestival(this));
     this._btn('.mode', (b) => {
       d.mode = b.dataset.m;
       save.write(false);
@@ -218,17 +225,21 @@ export class UI {
     this.screen = 'hud';
     this._clearLabels();
     const mode = this.g.mode;
-    const solo = mode === 'solo' || mode === 'expedition';
-    const zen = mode === 'zen';
+    const solo = mode === 'solo' || mode === 'expedition'||mode==='daily';
+    const zen = endlessMode(mode),duel=mode==='duel',daily=mode==='daily';
+    this.boardExpanded=false;
+    this.clearLocalSticks();document.body.classList.toggle('duel-mode',duel);
     this.scr.innerHTML = `
       <div class="hud-time"><div class="htime">${I.clock}<b id="time">${fmtTime(this.g.time)}</b></div><div class="feed" id="feed"></div></div>
       <div class="hud-me"><div class="chip pts">${I.hole}<b id="pts">0</b></div>${mode === 'royale' ? '<div class="left" id="left"></div>' : ''}${mode === 'solo' ? `<div class="prog"><div class="bar big"><i id="pct"></i></div><small id="pctT">0%</small></div>` : ''}<div class="effs" id="effs"></div></div>
-      <div class="hud-r"><div class="row r2">${zen ? `<button class="round small" id="fin">${I.flag}</button>` : ''}<button class="round small" id="pause">${I.pause}</button></div>${solo || zen ? '' : '<div class="lboard" id="board"></div>'}</div>
-      <div class="mission-hud" id="mission"></div><div class="world-hint">${esc(t(solo?'finiteHint':mode==='battle'||mode==='royale'?'scoreHint':'regenHint'))}</div>
+      <div class="hud-r"><div class="row r2">${zen ? `<button class="round small" id="fin">${I.flag}</button>` : ''}<button class="round small" id="pause">${I.pause}</button></div>${solo || zen || duel ? '' : '<div class="lboard" id="board"></div><button class="board-toggle" id="board-toggle" aria-expanded="false" aria-controls="board" aria-label="'+esc(t('expandTop'))+'"><span aria-hidden="true">⌄</span></button>'}</div>
+      <div class="mission-hud" id="mission"></div><div class="world-hint">${esc(t(duel?'duelHint':daily?'dailyHint':mode==='rain'?'rainHint':solo?'finiteHint':mode==='battle'||mode==='royale'?'scoreHint':'regenHint'))}</div>
+      ${duel?'<div class="split-divider"></div><div class="duel-score p1" id="p1"></div><div class="duel-score p2" id="p2"></div>':''}
       <div class="tut" id="tut"></div>
       <div class="death" id="death"></div>`;
     this._btn('#pause', () => this.g.pause(true));
     this._btn('#fin', () => this.g.finishZen());
+    this._btn('#board-toggle',b=>{this.boardExpanded=!this.boardExpanded;b.setAttribute('aria-expanded',String(this.boardExpanded));b.setAttribute('aria-label',t(this.boardExpanded?'collapseTop':'expandTop'));b.querySelector('span').textContent=this.boardExpanded?'⌃':'⌄';this.boardKey='';this.hudT=0;this.frame(0);});
     this.boardKey = '';
     this.effKey = '';
   }
@@ -257,7 +268,7 @@ export class UI {
     // на экране итогов подписи и очки не должны лезть поверх карточки
     const hide = this.screen === 'result' ? 'none' : '';
     if (this.lbl.style.display !== hide) this.lbl.style.display = this.popL.style.display = hide;
-    if (g.sim && (this.screen === 'hud' || this.screen === 'menu')) this._labels();
+    if (g.sim && (this.screen === 'hud' || this.screen === 'menu')&&g.mode!=='duel') this._labels();
     this._goldArrow();
     // всплывающие очки
     for (let i = this.pops.length - 1; i >= 0; i--) {
@@ -276,6 +287,8 @@ export class UI {
     this.hudT -= dt;
     if (this.hudT > 0) return;
     this.hudT = 0.1;
+    if(g.second)for(const [i,h]of [g.me,g.second].entries()){const el=this.scr.querySelector('#p'+(i+1));if(el)el.textContent=t('player'+(i+1))+' · '+fmt(h.pts)+(h.alive?'':' · '+t('respawnIn',{n:Math.ceil(h.respawnT)}));}
+    if(g.challenge){const el=this.scr.querySelector('#mission');if(el)el.textContent=t('dailyChallenge')+' · '+t('target',{n:g.stats.eaten+' / '+g.challenge.target});}
     if(g.expedition){const l=g.expedition,st=g.stats,el=this.scr.querySelector('#mission');
       const goal=(key,n,v)=>'<span class="'+(v>=n?'done':'')+'">'+esc(t(key,{n:v+' / '+n}))+'</span>';
       const html='<b>'+esc(t('expedition',{n:l.id}))+'</b>'+goal('target',l.target,st.eaten)+(l.cars?goal('targetCars',l.cars,st.cars):'')+(l.trees?goal('targetTrees',l.trees,st.trees):'')+(l.crates?goal('targetCrates',l.crates,st.crates):'')+'<small>'+esc(t('missionStars',{a:Math.ceil(l.target*1.35),b:Math.ceil(l.target*1.75)}))+'</small>';
@@ -309,10 +322,12 @@ export class UI {
     const board = this.scr.querySelector('#board');
     if (board) {
       const rank = g.ranking();
-      const top = rank.slice(0, 10);
+      const compact=window.innerWidth<=640||matchMedia('(pointer:coarse)').matches;
+      const limit=compact&&!this.boardExpanded?5:10;
+      const top = rank.slice(0, limit);
       const mi = rank.indexOf(g.me);
-      if (mi >= 10) top.push(g.me);
-      const key = top.map((h) => h.id + ':' + h.pts + ':' + h.alive).join(',');
+      if (mi >= limit&&(!compact||this.boardExpanded)) top.push(g.me);
+      const key = limit+':'+top.map((h) => h.id + ':' + h.pts + ':' + h.alive).join(',');
       if (key !== this.boardKey) {
         this.boardKey = key;
         board.innerHTML = top
@@ -336,7 +351,7 @@ export class UI {
   _goldArrow() {
     const g = this.g, G = g.sim && g.sim.gold;
     const a = this.garrow;
-    if (this.screen !== 'hud' || !G || G.st === 2 || !g.me || !g.me.alive) {
+    if (this.screen !== 'hud' || g.mode==='duel' || !G || G.st === 2 || !g.me || !g.me.alive) {
       if (a.style.display !== 'none') a.style.display = 'none';
       return;
     }
@@ -478,9 +493,16 @@ export class UI {
     el.firstChild.style.transform = `translate(${s.dx}px,${s.dy}px)`;
   }
 
+  clearLocalSticks(){for(const el of this.localStickEls||[])el.remove();this.localStickEls=[];}
+  localStick(player,s){
+    this.localStickEls ||= [];
+    let el=this.localStickEls[player];if(!el){el=document.createElement('div');el.className='local-stick p'+(player+1);el.innerHTML='<i></i>';document.body.appendChild(el);this.localStickEls[player]=el;}
+    el.style.display=s.on&&this.screen==='hud'?'block':'none';el.style.transform=`translate(${s.x0}px,${s.y0}px)`;el.firstChild.style.transform=`translate(${s.dx}px,${s.dy}px)`;
+  }
+
   // ---------- пауза ----------
   showPause() {
-    this.modal(t('pause'), `<div class="col">${slidersHTML(save.data.settings, { music: t('music'), sound: t('sounds') })}${this._fastToggle()}<div class="row"><button class="btn big green" id="res">${I.play}<span>${esc(t('resume'))}</span></button></div>${this.g.mode === 'zen' ? `<div class="row"><button class="btn mid green" id="zfin">${I.flag}<span>${esc(t('finish'))}</span></button></div>` : ''}<div class="row"><button class="btn mid blue" id="rst">${I.again}<span>${esc(t('restart'))}</span></button><button class="btn mid violet" id="men">${I.home}<span>${esc(t('menu'))}</span></button></div></div>`, () => this.g.pause(false));
+    this.modal(t('pause'), `<div class="col">${slidersHTML(save.data.settings, { music: t('music'), sound: t('sounds') })}${this._fastToggle()}<div class="row"><button class="btn big green" id="res">${I.play}<span>${esc(t('resume'))}</span></button></div>${endlessMode(this.g.mode) ? `<div class="row"><button class="btn mid green" id="zfin">${I.flag}<span>${esc(t('finish'))}</span></button></div>` : ''}<div class="row"><button class="btn mid blue" id="rst">${I.again}<span>${esc(t('restart'))}</span></button><button class="btn mid violet" id="men">${I.home}<span>${esc(t('menu'))}</span></button></div></div>`, () => this.g.pause(false));
     const m = this.mroot;
     bindSliders(m, save.data.settings, () => save.write());
     this._bindFast(m);
@@ -531,9 +553,9 @@ export class UI {
     this.closeModal();
     this.screen = 'result';
     this.stickEl.style.display = 'none';
-    const solo = res.mode === 'solo' || res.mode === 'expedition';
-    const zen = res.mode === 'zen';
-    const head = res.expedition
+    const solo = res.mode === 'solo' || res.mode === 'expedition'||res.mode==='daily';
+    const zen = endlessMode(res.mode);
+    const head = res.duel?'<b class="rtitle">'+esc(res.duel.winner?t('duelWin',{n:res.duel.winner}):t('duelDraw'))+'</b>':res.challenge?'<b class="rtitle">'+esc(t(res.challenge.won?'dailyWin':'missionFail'))+'</b>':res.expedition
       ? '<div class="rstars">'+[1,2,3].map(k=>'<span class="st lg">'+(res.stars>=k?I.star:I.starOff)+'</span>').join('')+'</div><b class="rtitle">'+esc(t(res.stars?'missionWin':'missionFail'))+'</b>'
       : zen
       ? `<div class="rzen">${I.flag}</div><b class="rtitle">${esc(t('zenResult', { n: fmtTime(res.time) }))}</b>`
@@ -554,8 +576,9 @@ export class UI {
       ${res.newBest ? `<div class="newbest">${esc(t('newBest'))}</div>` : ''}
       <div class="rstats"><div><small>${esc(t('points'))}</small><b>${fmt(res.pts)}</b></div><div><small>${esc(t('eatenCount'))}</small><b>${fmt(res.eaten)}</b></div>${solo || zen ? '' : `<div><small>${esc(t('kills'))}</small><b>${res.kills}</b></div>`}<div><small>${esc(t('bestSize'))}</small><b>${res.maxR.toFixed(1)} м</b></div></div>
       ${table}
-      <div class="rreward"><span>${esc(t('reward'))}</span><span class="chip">${I.coin}<b>+${fmt(res.coins * (res.doubled ? 2 : 1))}</b></span>${res.doubled ? '' : `<button class="btn mid green" id="x2">${I.ad}<span>${esc(t('x2'))}</span></button>`}</div>
+      <div class="rreward"><span>${esc(t('reward'))}</span><span class="chip">${I.coin}<b>+${fmt(res.coins * (res.doubled ? 2 : 1))}</b></span>${res.doubled || res.coins<=0 ? '' : `<button class="btn mid green" id="x2">${I.ad}<span>${esc(t('x2'))}</span></button>`}</div>
       ${lv}${mp}
+      ${res.offline?'<div class="offline-result">'+esc(t('festivalEarned',{n:res.offline.points}))+(res.offline.dailyReward?' · '+esc(t('dailyRewardGot')):'')+'<small>'+Object.entries(res.offline.loot).filter(([,n])=>n>0).map(([k,n])=>esc(t('ing_'+k))+' +'+n).join(' · ')+'</small></div>':''}
       ${res.mastery?'<div class="rlvl">'+esc(t('masteryReward'))+'</div>':''}
       ${res.expedition && res.stars && res.expedition<EXPEDITIONS.length?'<button class="btn mid green" id="nextmission">'+I.flag+'<span>'+esc(t('nextMission'))+'</span></button>':''}
       ${solo?'<button class="btn mid blue" id="freewalk">'+I.hole+'<span>'+esc(t('freeWalk'))+'</span></button>':''}
@@ -614,9 +637,10 @@ export class UI {
         if (cur) btn = `<button class="sbtn on" disabled>${esc(t('chosen'))}</button>`;
         else if (own) btn = `<button class="sbtn" data-pick="${s.id}">${esc(t('choose'))}</button>`;
         else if(s.mastery)btn='<button class="sbtn reward-lock" disabled>'+I.lock+'<small>'+esc(t('masteryNeed',{map:t('map_'+s.mastery)}))+'</small></button>';
+        else if(s.craft||s.festival)btn='<button class="sbtn reward-lock" disabled>'+I.lock+'<small>'+esc(s.craft?t('craftSkinNeed',{n:s.craft}):t('festivalSkinNeed'))+'</small></button>';
         else if (s.ad) btn = `<button class="sbtn ad" data-ad="${s.id}">${I.ad}${esc(t('watchAd', { a: d.adSkins[s.id] || 0, b: s.ad }))}</button>`;
         else btn = `<button class="sbtn buy ${d.coins < s.price ? 'poor' : ''}" data-buy="${s.id}">${I.coin}${fmt(s.price)}</button>`;
-        return `<div class="skin ${cur ? 'cur' : ''}"><div class="sprev" style="--ring:${ringCss};--wall:${hex(s.wall)};--glow:${hex(s.glow)}"><i></i></div><b>${esc(t((s.mastery?'skin_':'sk_') + s.id))}</b>${btn}</div>`;
+        return `<div class="skin ${cur ? 'cur' : ''}"><div class="sprev" style="--ring:${ringCss};--wall:${hex(s.wall)};--glow:${hex(s.glow)}"><i></i></div><b>${esc(t((s.mastery||s.craft||s.festival?'skin_':'sk_') + s.id))}</b>${btn}</div>`;
       }).join('')}</div>`;
     };
     const m = this.modal(t('skins'), render());
@@ -642,7 +666,7 @@ export class UI {
       save.write();
       redraw();
     } else if (act === 'buy') {
-      if(s.mastery)return;
+      if(s.mastery||s.craft||s.festival)return;
       if (d.coins < s.price) {
         audio.play('deny');
         this.toast(t('notEnough'));

@@ -57,13 +57,13 @@ export function bindSliders(root, st, save) {
 // CSS ползунков; T — цвета темы
 export function volumeCss(T) {
   return `
-.vol-box{display:flex;flex-direction:column;gap:14px;align-self:stretch;min-width:min(320px,80vw)}
+.vol-box{display:flex;flex-direction:column;gap:14px;align-self:stretch;min-width:0;width:100%}
 .vol-row{display:flex;align-items:center;gap:10px;font-size:17px}
 .vol-ic{width:28px;height:28px;flex:none;display:flex;align-items:center;justify-content:center;color:${T.accent}}
 .vol-ic svg,.vol-ic img{width:28px;height:28px}
 .vol-l{min-width:72px}
 .vol-v{min-width:48px;text-align:right;font-size:15px;color:${T.muted}}
-.vol-in{-webkit-appearance:none;appearance:none;flex:1;height:30px;background:transparent;touch-action:none;margin:0;--p:50%}
+.vol-in{-webkit-appearance:none;appearance:none;flex:1;min-width:0;width:0;height:30px;background:transparent;touch-action:none;margin:0;--p:50%}
 .vol-in::-webkit-slider-runnable-track{height:10px;border-radius:6px;background:linear-gradient(90deg,${T.accent} var(--p),${T.track} var(--p))}
 .vol-in::-moz-range-track{height:10px;border-radius:6px;background:${T.track}}
 .vol-in::-moz-range-progress{height:10px;border-radius:6px;background:${T.accent}}

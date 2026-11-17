@@ -1,5 +1,20 @@
 // Скины дыр, улучшения, карты и награды
 export const SKINS = [
+  {id:'metroSteel',price:0,mastery:'metro',rim:[0xb6c8db,0x416799],wall:0x22334a,glow:0x7acaff},
+  {id:'cityBrick',price:0,mastery:'town',rim:[0xf08c69,0xffe0a3],wall:0x402e2d,glow:0xffc292},
+  {id:'coralPearl',price:0,mastery:'beach',rim:[0xffb39c,0x78e4dc,0xfff2dd],wall:0x25414a,glow:0x8fffee},
+  {id:'portAnchor',price:0,mastery:'port',rim:[0x355f9c,0xf7df9a],wall:0x192a40,glow:0x89c9ff},
+  {id:'snowCrystal',price:0,mastery:'winter',rim:[0xe6faff,0x829ee8],wall:0x283853,glow:0xc7edff,stars:true},
+  {id:'royalRuby',price:0,mastery:'castle',rim:[0xc95c75,0xffd471],wall:0x382339,glow:0xff98bf},
+  {id:'fairWheel',price:0,mastery:'fair',rim:[0xffa06b,0xaa9aff,0x8ce8d3],wall:0x3c2c53,glow:0xffd6fa,spin:true},
+  {id:'jadeGate',price:0,mastery:'japan',rim:[0x80c8b0,0xffd1dc,0xfff3d8],wall:0x253832,glow:0xc7ffe6},
+  {id:'artisanLeaf',price:0,craft:4,rim:[0x6acb8c,0xf8dfac],wall:0x233d30,glow:0xafffc8},
+  {id:'artisanCopper',price:0,craft:8,rim:[0xd49463,0x91c9b3],wall:0x3b2c29,glow:0xffc095},
+  {id:'artisanCandy',price:0,craft:12,rim:[0xffabd5,0xa5e4ff,0xffe6a2],wall:0x3f2e53,glow:0xffc8ee},
+  {id:'festivalBloom',price:0,festival:true,rim:[0xffaedb,0x93e1b1],wall:0x352c44,glow:0xffcaee},
+  {id:'festivalSun',price:0,festival:true,rim:[0xffd47e,0xff9469],wall:0x403323,glow:0xffeea6},
+  {id:'festivalMoon',price:0,festival:true,rim:[0xa6a8ff,0x8de2df],wall:0x252641,glow:0xc0c6ff,stars:true},
+  {id:'festivalFrost',price:0,festival:true,rim:[0xc7efff,0xc9b9ff],wall:0x253349,glow:0xd5fbff,stars:true},
   {id:'desert',price:0,mastery:'oasis',rim:[0xf0c878,0x66c9c6],wall:0x43362a,glow:0x8aeee0},
   {id:'petal',price:0,mastery:'botanical',rim:[0xffd4e0,0x8dd9b0],wall:0x303846,glow:0xc9ffe1},
   {id:'harvest',price:0,mastery:'farm',rim:[0xf3c66b,0x81ac51],wall:0x343323,glow:0xffe49c},
@@ -31,7 +46,7 @@ export const SKINS = [
   { id: 'sunset', price: 4000, rim: [0xff7a3a, 0xff4a8a, 0x9a5ae0], wall: 0x2a1030, glow: 0xff9a6a },
   { id: 'neon', price: 6000, rim: [0x3affd0, 0xff3ad0], wall: 0x101020, glow: 0x7affea, spin: true },
   { id: 'carnival', price: 0, ad: 4, rim: [0xe84a3a, 0xffd24a, 0x3f8fe8, 0x5cc06a], wall: 0x2a2a3a, glow: 0xffe070, spin: true },
-].sort((a, b) => (a.mastery ? 2e6 : a.ad ? 1e6 + a.ad : a.price) - (b.mastery ? 2e6 : b.ad ? 1e6 + b.ad : b.price)); // по цене, скины за видео в конце
+].sort((a, b) => (a.mastery||a.craft||a.festival ? 2e6 : a.ad ? 1e6 + a.ad : a.price) - (b.mastery||b.craft||b.festival ? 2e6 : b.ad ? 1e6 + b.ad : b.price)); // по цене, скины за видео в конце
 
 // постоянные улучшения за монеты: стартовый размер, скорость, затягивание, время в одиночном режиме
 export const UPGRADES = [

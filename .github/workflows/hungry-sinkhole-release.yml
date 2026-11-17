@@ -1,0 +1,71 @@
+name: Hungry Sinkhole release checks
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'YandexGames/project/games/hungry-sinkhole/**'
+      - '.github/workflows/hungry-sinkhole-release.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hungry-sinkhole-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: YandexGames/project/games/hungry-sinkhole
+    env:
+      GAME_TESTS_REMOTE: '1'
+      CLOUD_CHROME: /usr/bin/google-chrome
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - run: npm ci
+      - name: Node physics, SDK, collections and game modes
+        run: |
+          npm run test:audit
+          node test/audit-adaptation.mjs
+          npm run test:offline
+      - id: build
+        run: npm run build
+      - name: Remote Chrome
+        run: |
+          if [ ! -x "$CLOUD_CHROME" ]
+          then
+            npx playwright install --with-deps chrome
+          fi
+      - name: Platform flows and responsive screenshots
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          NODE_OPTIONS: --import=./test/cloud-browser.mjs
+        run: npm run test:release
+      - name: Loading and live menu
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          NODE_OPTIONS: --import=./test/cloud-browser.mjs
+        run: npm run test:loading
+      - name: Offline features and mobile top toggle
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          NODE_OPTIONS: --import=./test/cloud-browser.mjs
+        run: npm run test:offline-browser
+      - name: Cloud ad cancellation and duplicate callbacks
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          NODE_OPTIONS: --import=./test/cloud-browser.mjs
+        run: node test/cloud-ads.mjs
+      - name: All maps, GPU memory and real rendered frame timings
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          NODE_OPTIONS: --import=./test/cloud-browser.mjs
+        run: node test/cloud-audit.mjs
+      - name: Preserve reports and screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: hungry-sinkhole-qa-${{ github.sha }}
+          path: YandexGames/project/games/hungry-sinkhole/test-results/
+          retention-days: 14

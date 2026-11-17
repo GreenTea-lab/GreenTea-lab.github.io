@@ -1,3 +1,4 @@
+import './remote-browser.mjs';
 // Тестовый прогон: node test/shot.mjs <name> <w> <h> <mobile?> <script>
 import { chromium } from 'playwright';
 import http from 'http';

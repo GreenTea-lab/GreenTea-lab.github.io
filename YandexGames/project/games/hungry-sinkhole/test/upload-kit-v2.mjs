@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import assert from 'node:assert/strict';
-const kit=path.resolve('deliverables/vk-upload-2.2.1'),cfgFile=kit+'/vk-hosting-config.json',original=fs.readFileSync(cfgFile,'utf8');
+const kit=path.resolve('deliverables/vk-upload-2.2.2'),cfgFile=kit+'/vk-hosting-config.json',original=fs.readFileSync(cfgFile,'utf8');
 const run=(args)=>spawnSync(process.execPath,args,{cwd:kit,encoding:'utf8',windowsHide:true});
 const report={networkCalls:false,modes:[]};
 try{
@@ -17,6 +17,10 @@ try{
  assert.ok(themes.maps.every(m=>m.exclusivePercent>75&&m.exclusiveKindsPercent>50));
  for(const map of new Set(themes.maps.map(m=>m.map)))assert.ok(fs.existsSync(kit+'/theme-inspection/'+map+'.png'));
  assert.ok(fs.existsSync(kit+'/theme-inspection/overview.html'));report.themeSamples=themes.maps.length;
+ assert.equal(release.features.liveMenu,true);assert.equal(release.features.animatedLoading,true);
+ const loading=JSON.parse(fs.readFileSync(kit+'/qa/history-2.2.1/loading-menu.json'));assert.equal(loading.screens.length,5);assert.ok(loading.mapSwitch&&loading.singleFileStarts&&loading.retryOnBundleFailure&&loading.freezesOnBlurAndModal);assert.deepEqual(loading.errors,[]);
+ assert.ok(fs.existsSync(kit+'/loading-menu/loading-desktop.png'));report.loadingScreensPresent=true;report.browserValidation=release.validation.browser;
+ const core=JSON.parse(fs.readFileSync(kit+'/qa/audit/core.json'));const sdk=JSON.parse(fs.readFileSync(kit+'/qa/audit/sdk.json'));assert.equal(core.checks.length,15);assert.equal(sdk.checks.length,7);report.nodeChecks=core.checks.length+sdk.checks.length;
 }finally{fs.writeFileSync(cfgFile,original);}
 fs.copyFileSync('test-results/media-validation.json',kit+'/media-validation.json');
 fs.writeFileSync('test-results/upload-kit-v2.json',JSON.stringify(report,null,2)+'\n');console.log(report);

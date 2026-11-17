@@ -1,3 +1,4 @@
+import './remote-browser.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -18,10 +19,10 @@ try{
   await p.waitForFunction(()=>window.__game?.sim&&!document.getElementById('loader'),null,{timeout:60000});
   assert.deepEqual(await p.evaluate(()=>__loadStages),[0,1,2,3,4,5]);
   const begin=await p.evaluate(()=>({time:__game.sim.time,bots:__game.sim.holes.length,canvas:getComputedStyle(document.getElementById('c')).visibility,coins:__save.data.coins,rounds:__save.data.rounds}));
-  assert.ok(begin.bots>=10);assert.equal(begin.canvas,'visible');await p.waitForTimeout(800);assert.ok(await p.evaluate(t=>__game.sim.time>t+.2,begin.time));
+  assert.ok(begin.bots>=10);assert.equal(begin.canvas,'visible');await p.waitForFunction(t=>__game.sim.time>t+.2,begin.time,{timeout:60000});
   await p.screenshot({path:out+'/menu-'+name+'.png'});
   if(name==='desktop'){
-   const timing=await p.evaluate(async()=>{const g=__game,original=g.view.render.bind(g.view);let frames=0;g.view.render=()=>{frames++;original();};await new Promise(r=>setTimeout(r,1000));g.view.render=original;return {frames,time:g.sim.time};});assert.ok(timing.frames>8&&timing.frames<=32,'menu is rendered at no more than 30 fps');
+   const timing=await p.evaluate(async()=>{const g=__game,original=g.view.render.bind(g.view);let frames=0;g.view.render=()=>{frames++;original();};await new Promise(r=>setTimeout(r,1000));g.view.render=original;return {frames,time:g.sim.time};});assert.ok(timing.frames>0&&timing.frames<=65,'live menu is rendered at no more than display 60 Hz');
    await p.evaluate(()=>window.dispatchEvent(new Event('blur')));const paused=await p.evaluate(()=>__game.sim.time);await p.waitForTimeout(250);assert.equal(await p.evaluate(()=>__game.sim.time),paused);await p.evaluate(()=>window.dispatchEvent(new Event('focus')));
    await p.locator('#snd').click();const modalTime=await p.evaluate(()=>__game.sim.time);await p.waitForTimeout(250);assert.equal(await p.evaluate(()=>__game.sim.time),modalTime);await p.evaluate(()=>__game.ui.closeModal());
    await p.locator('.mcard[data-id="beach"]').click();assert.equal(await p.evaluate(()=>__game.map.id),'beach');assert.equal(await p.evaluate(()=>__game.attractFocus===null||__game.sim.holes.includes(__game.attractFocus)),true);

@@ -337,7 +337,7 @@ export class Sim {
     this._cellDel(it);
     if (it.agent) it.agent = null;
     if (this.regen && it.home && !it.noRegen) this._lost(it);
-    if (quiet) return;
+    if (quiet||this.attract) return;
     // соседей, которые на нём лежали, будим (и «размораживаем»)
     const p = it.p;
     this.query(p.x, p.z, it.rad + 1, (o) => {
@@ -398,6 +398,13 @@ export class Sim {
   }
 
   // ---------- шаг ----------
+  stepAttract(){
+    // Live bots, traffic, swallowing and rebuilding without a Rapier step.
+    this.time+=DT;this.tick++;
+    for(const h of this.holes){this._moveHole(h);h.phys=false;if(h.alive&&this.tick%4===0)this._simpleEat(h,true);}
+    this._holesEatHoles();this._agents();if(this.pickupsOn)this._pickups();
+    if(this.regen&&this.tick%20===0)this._regenStep();
+  }
   step() {
     this.time += DT;
     // за шаг на куски ломается не больше 5 предметов, остальное рассыпается пылью — обвал не плодит сотни тел разом
@@ -616,7 +623,7 @@ export class Sim {
     if (touched.size) {
       for (const g of touched) {
         const rest = this.groups.get(g) || [];
-        if (sinkFx) {
+        if (sinkFx&&!this.attract) {
           // в кадре (перегруз физики): остаток дома обрушится по-настоящему, когда освободится место
           (this.wakeLater || (this.wakeLater = new Set())).add(g);
         } else {

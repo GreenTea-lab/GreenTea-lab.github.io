@@ -1,3 +1,4 @@
+import '../test/remote-browser.mjs';
 import {chromium} from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';

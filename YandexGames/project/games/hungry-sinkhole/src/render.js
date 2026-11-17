@@ -1,6 +1,7 @@
 // Отрисовка: город инстансами (один меш на вид фасада/модели), земля одной текстурой,
 // дыры через трафарет (земля не рисуется внутри круга), частицы обломков и пыли.
 import * as THREE from 'three';
+import {Pool} from './instance-pool.js';
 import {detailedGround} from './surfaces.js';
 import { makeLooks } from './textures.js';
 import { makeModels } from './models.js';
@@ -10,7 +11,6 @@ const _m = new THREE.Matrix4();
 const _q = new THREE.Quaternion();
 const _p = new THREE.Vector3();
 const _s = new THREE.Vector3();
-const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
 const easeOut = (k) => 1 - (1 - k) ** 3;
 const easeBack = (k) => 1 + 2.2 * (k - 1) ** 3 + 1.2 * (k - 1) ** 2;
 
@@ -199,51 +199,6 @@ diffuseColor.rgb = col;`,
   return m;
 }
 
-// пул экземпляров одного вида; растёт по мере надобности (обломки добавляются на ходу)
-class Pool {
-  constructor(view, geo, mat, cap, castShadow = true) {
-    this.view = view;
-    this.geo = geo;
-    this.mat = mat;
-    this.cap = Math.max(8, cap);
-    this.free = [];
-    this.n = 0;
-    this.castShadow = castShadow;
-    this.mesh = this._make(this.cap);
-  }
-  _make(cap) {
-    const m = new THREE.InstancedMesh(this.geo, this.mat, cap);
-    m.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-    m.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(cap * 3).fill(1), 3);
-    m.count = 0;
-    m.frustumCulled = false;
-    m.castShadow = this.castShadow;
-    m.receiveShadow = true;
-    this.view.world.add(m);
-    return m;
-  }
-  alloc() {
-    if (this.free.length) return this.free.pop();
-    if (this.n >= this.cap) {
-      const old = this.mesh;
-      this.cap *= 2;
-      this.mesh = this._make(this.cap);
-      this.mesh.instanceMatrix.array.set(old.instanceMatrix.array);
-      this.mesh.instanceColor.array.set(old.instanceColor.array);
-      this.mesh.count = this.n;
-      this.view.world.remove(old);
-      old.dispose();
-    }
-    this.mesh.count = ++this.n;
-    return this.n - 1;
-  }
-  release(i) {
-    this.mesh.setMatrixAt(i, ZERO);
-    this.mesh.instanceMatrix.needsUpdate = true;
-    this.free.push(i);
-  }
-}
-
 function roofGeo() {
   const pos = [];
   const uv = [];
@@ -317,8 +272,8 @@ export class View {
   setQuality(q) {
     this.quality = q;
     const r = this.renderer;
-    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, q === 'high' ? 2 : q === 'mid' ? 1.5 : 1));
-    const sh = q !== 'low';
+    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.attractView?1:q === 'high' ? 2 : q === 'mid' ? 1.5 : 1));
+    const sh = !this.attractView&&q !== 'low';
     if (r.shadowMap.enabled !== sh) {
       r.shadowMap.enabled = sh;
       this.sun.castShadow = sh;
@@ -329,6 +284,8 @@ export class View {
     this.resize();
   }
 
+  setAttract(on){this.attractView=on;this.attractVisible=new Set();this.attractCullT=0;this.setQuality(this.quality);}
+
   resize() {
     const w = window.innerWidth, h = window.innerHeight;
     this.renderer.setSize(w, h, false);
@@ -337,6 +294,8 @@ export class View {
     this.portrait = h > w;
     this.camera.fov = this.portrait ? 50 : 36;
     this.camera.updateProjectionMatrix();
+    // setSize clears the canvas even while gameplay is paused or on results.
+    if(this.map){this._camera();this.render();}
   }
 
   // ---------- карта ----------
@@ -373,6 +332,7 @@ export class View {
     if (this.wx) {
       this.scene.remove(this.wx.pts);
       this.wx.pts.geometry.dispose();
+      this.wx.pts.material.map?.dispose();
       this.wx.pts.material.dispose();
       this.wx = null;
     }
@@ -392,7 +352,7 @@ export class View {
     this.hemi.intensity = dusk ? 1.25 : 1.5;
     this.hemi.groundColor.setHex(dusk ? 0x62658e : 0x8aa070);
     this._ground(map);
-    this._weather(map);
+    if(!this.attractView)this._weather(map);
     // считаем, сколько экземпляров каждого вида нужно
     const need = new Map();
     for (const it of sim.items) {
@@ -432,12 +392,13 @@ export class View {
   }
 
   _add(it) {
+    if(this.attractView&&!this.attractVisible.has(it.id))return;
     const p = this._pool(this._key(it));
-    const i = p.alloc();
+    const slot = { p, i: -1, it };
+    const i = p.alloc(slot);
     const c = new THREE.Color(it.tint);
     p.mesh.setColorAt(i, c);
     p.mesh.instanceColor.needsUpdate = true;
-    const slot = { p, i, it };
     this.slots.set(it.id, slot);
     this._set(slot);
     return slot;
@@ -831,6 +792,7 @@ export class View {
         if (s) {
           this.slots.delete(e.it.id);
           this.rising.delete(s);
+          s.it = e.it;
           this.ghosts.push({ s, t: 0, it: e.it });
         }
       } else if (e.t === 'eat' || e.t === 'break') {
@@ -883,6 +845,7 @@ export class View {
       g.it.p.y -= dt * (2 + g.t * 14);
       this._set(g.s);
       if (g.t > 0.7) {
+        this.rising.delete(g.s);
         g.s.p.release(g.s.i);
         this.ghosts.splice(i, 1);
       }
@@ -913,6 +876,16 @@ export class View {
       this.cam.dist += (want - this.cam.dist) * Math.min(1, dt * 2);
     }
     this._camera();
+    if(this.attractView){this.attractCullT-=dt;if(this.attractCullT<=0){this.attractCullT=.15;this._cullAttract(sim);}}
+  }
+
+  _cullAttract(sim){
+    this.camera.updateMatrixWorld();this.attractFrustum ||= new THREE.Frustum();this.attractMatrix ||= new THREE.Matrix4();this.attractSphere ||= new THREE.Sphere();
+    this.attractMatrix.multiplyMatrices(this.camera.projectionMatrix,this.camera.matrixWorldInverse);this.attractFrustum.setFromProjectionMatrix(this.attractMatrix);
+    const wanted=this.attractVisible;wanted.clear();let budget=100;
+    for(const it of sim.items){if(it.st===2)continue;const sphere=this.attractSphere;sphere.center.set(it.p.x,it.p.y,it.p.z);sphere.radius=it.rad+5;if(this.attractFrustum.intersectsSphere(sphere))wanted.add(it.id);}
+    for(const [id]of this.slots)if(!wanted.has(id))this._release(id);
+    for(const it of sim.items)if(wanted.has(it.id)&&!this.slots.has(it.id)&&budget-->0)this._add(it);
   }
 
   // золотая цель: звезда над ней и золотые искры
@@ -1022,7 +995,19 @@ export class View {
       this._warm = false;
       this.renderer.compile(this.scene, this.camera);
     }
-    this.renderer.render(this.scene, this.camera);
+    if(this.splitPlayers){
+      const r=this.renderer,W=window.innerWidth,H=window.innerHeight,vertical=H>W;
+      this.splitCameras ||= [this.camera.clone(),this.camera.clone()];
+      r.setScissorTest(true);
+      for(let i=0;i<2;i++){
+        const h=this.splitPlayers[i],c=this.splitCameras[i],w=vertical?W:W/2,height=vertical?H/2:H,x=vertical?0:i*w,y=vertical?(1-i)*height:0;
+        const distance=26+Math.min(h.r,8)*6.2+Math.max(0,h.r-8)*3.4;
+        c.aspect=w/height;c.fov=50;c.updateProjectionMatrix();
+        c.position.set(h.x,Math.sin(.98)*distance,h.z+Math.cos(.98)*distance);c.lookAt(h.x,0,h.z-distance*.04);
+        r.setViewport(x,y,w,height);r.setScissor(x,y,w,height);r.render(this.scene,c);
+      }
+      r.setScissorTest(false);r.setViewport(0,0,W,H);
+    }else this.renderer.render(this.scene, this.camera);
   }
 
   toScreen(x, y, z, out) {

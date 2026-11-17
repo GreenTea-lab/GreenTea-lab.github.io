@@ -25,10 +25,22 @@ function yesterday() {
   return today(d);
 }
 
+export function normalizeDaily(value){
+  if(!value||!/^\d{4}-\d{2}-\d{2}$/.test(value.day)||!Array.isArray(value.q)||value.q.length!==3)return null;
+  const ids=new Set(),q=[];
+  for(const entry of value.q){
+    const spec=QUESTS.find(s=>s.id===entry?.id),tier=spec?.need.indexOf(entry?.need);
+    if(!spec||tier<0||ids.has(spec.id))return null;
+    ids.add(spec.id);
+    q.push({id:spec.id,n:Number.isFinite(entry.n)?Math.max(0,Math.min(entry.need,Math.floor(entry.n))):0,need:entry.need,reward:spec.reward[tier],max:!!spec.max,got:entry.got===true});
+  }
+  return {day:value.day,q};
+}
+
 // три задания на день: одинаковые весь день, новые завтра
 export function ensureDaily(d) {
   const day = today();
-  if (d.daily && d.daily.day === day && Array.isArray(d.daily.q)) return false;
+  if (d.daily && d.daily.day === day && Array.isArray(d.daily.q) && d.daily.q.length===3 && d.daily.q.every(q=>q&&typeof q.id==='string'&&Number.isFinite(q.n)&&Number.isFinite(q.need)&&Number.isFinite(q.reward))) return false;
   let h = 0;
   for (const c of day) h = (h * 31 + c.charCodeAt(0)) >>> 0;
   const tier = d.level < 5 ? 0 : d.level < 12 ? 1 : 2;

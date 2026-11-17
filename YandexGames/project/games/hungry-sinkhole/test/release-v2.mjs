@@ -1,3 +1,4 @@
+import './remote-browser.mjs';
 import {chromium} from 'playwright';
 import http from 'node:http';
 import fs from 'node:fs';
@@ -28,6 +29,7 @@ try{
   const btn=f.locator('#play'),bounds=await btn.boundingBox();assert.ok(bounds.y>=0&&bounds.y+bounds.height<=cfg.h,'Play button fits '+cfg.name);
   if(cfg.h>cfg.w){const title=await f.locator('.logo').boundingBox(),modes=await f.locator('.modes').boundingBox();assert.ok(title.y+title.height<=modes.y,'Title does not overlap modes '+cfg.name);}
   await btn.click();await f.waitForFunction(()=>__game.state==='play'&&__game.sim.time>.1);await p.screenshot({path:out+'/'+cfg.name+'-play.png'});
+  if(cfg.mobile){await f.waitForFunction(()=>document.querySelectorAll('#board .lb-row').length===5);await f.locator('#board-toggle').click();}
   await f.waitForFunction(()=>document.querySelectorAll('#board .lb-row').length>=10);
   assert.ok(await f.locator('#board .lb-row').count()>=10,'Whole top 10 is visible');
   await f.locator('#pause').click();const time=await f.evaluate(()=>__game.time);
@@ -42,7 +44,7 @@ try{
    await p.evaluate(()=>storyMode='cancel');await f.locator('.story').click();await f.waitForFunction(()=>!__sdk.storyBusy);
    await p.evaluate(()=>storyMode='error');await f.locator('.story').click();await f.waitForFunction(()=>!__sdk.storyBusy);
   }
-  await f.locator('#menu').click();await f.locator('#expeditions').click();await p.screenshot({path:out+'/'+cfg.name+'-expeditions.png'});await f.locator('[data-exp="1"]').click();
+  await f.locator('#menu').click();await p.waitForTimeout(700);if(await f.locator('#gtake').isVisible())await f.locator('#gtake').click();await f.locator('#expeditions').click();await p.screenshot({path:out+'/'+cfg.name+'-expeditions.png'});await f.locator('[data-exp="1"]').click();
   assert.equal(await f.evaluate(()=>__game.mode),'expedition');assert.equal(await f.evaluate(()=>__game.sim.regen),false);
   await f.evaluate(()=>{__game.stats.eaten=70;__game.me.pts=700;__game.end();});assert.equal(await f.evaluate(()=>__save.data.expeditions[1]),3);
   await f.locator('#freewalk').click();assert.equal(await f.evaluate(()=>__game.mode),'zen');assert.equal(await f.evaluate(()=>__game.sim.regen),true);

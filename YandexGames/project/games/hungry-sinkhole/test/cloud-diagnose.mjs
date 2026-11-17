@@ -1,0 +1,5 @@
+import './remote-browser.mjs';
+if(process.platform!=='linux')throw new Error('Cloud checks require Linux');
+import {chromium} from 'playwright';import path from 'node:path';import {pathToFileURL} from 'node:url';
+const b=await chromium.launch({});const p=await b.newPage();p.on('console',m=>console.log(m.type(),m.text().slice(0,400)));p.on('pageerror',e=>console.log('ERROR',e));await p.goto(pathToFileURL(path.resolve('dist-vk/index.html')).href);await p.waitForFunction(()=>window.__game?.sim&&!document.querySelector('#loader'),null,{timeout:90000});
+console.log('DIRECT',await p.evaluate(()=>{const g=__game,a=g.sim.time;g.update(.05);return {before:a,after:g.sim.time,ad:__sdk.adActive};}));for(let i=0;i<3;i++){await p.waitForTimeout(1000);console.log(await p.evaluate(()=>{const g=__game;return {state:g.state,time:g.sim.time,hidden:document.hidden,focus:document.hasFocus(),holds:[...g.backgroundHolds],paused:g.paused,modal:g.ui.modalOpen,quality:g.quality,ad:__sdk.adActive,manual:g.manual,acc:g.acc,menuFrame:g.menuFrameTime,tick:g.sim.tick,frames:g._perfFrames,last:g.last,now:performance.now()};}));}await b.close();

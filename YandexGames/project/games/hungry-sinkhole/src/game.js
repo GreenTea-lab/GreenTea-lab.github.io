@@ -1,4 +1,6 @@
 import {sourceLook} from './theme-catalog.js';
+import {challengeFor,ensureOffline,ingredientFor,awardOfflineRun} from './offline.js';
+import {RainDirector} from './rain.js';
 // Игра: раунды, управление, события мира → звук и интерфейс
 import { EXPEDITIONS, expeditionOpen, expeditionStars } from './expeditions.js';
 import { roundCoins } from './economy.js';
@@ -21,7 +23,8 @@ const DBG = window.__HS_DEBUG || {};
 
 // режимы: битва (2 мин, возрождение), выживание (без возрождения, до последней дыры),
 // разрушение (одна дыра, % города), спокойный (без соперников и таймера)
-export const MODES = ['battle', 'royale', 'solo', 'zen'];
+export const MODES = ['battle', 'royale', 'solo', 'zen','rain','duel'];
+export const endlessMode=mode=>mode==='zen'||mode==='rain';
 const ROYALE_TIME = 180;
 
 export const COIN_PACKS = { coins_1000: 1000, coins_3500: 3500, coins_10000: 10000 };
@@ -35,6 +38,7 @@ export class Game {
     this.mouse = null;
     this.stick = null;
     this.backgroundHolds = new Set();
+    this.localSticks=[null,null];
   }
 
   async start(canvas, uiRoot, onProgress = async () => {}) {
@@ -102,23 +106,31 @@ export class Game {
 
   // ---------- мир ----------
   _newWorld(mapId, mode, attract) {
+    this.acc=0;this._perfT=0;this._perfFrames=0;
+    this._worldStartedAt=this._perfAt=performance.now();
     if (this.sim) this.sim.free();
-    const seed = this.expedition?.seed || DBG.seed || Math.floor(Math.random() * 1e6);
+    const seed = this.challenge?.seed || this.expedition?.seed || DBG.seed || Math.floor(Math.random() * 1e6);
     const map = genMap(mapId, seed);
+    this.view.setAttract?.(!!attract);
     const q = this.quality;
     // город восстанавливается везде, кроме «Разрушения»: там считается доля разрушенного
-    const sim = new Sim(map, { maxBodies: q === 'high' ? 320 : q === 'mid' ? 150 : 110, physR: q === 'low' ? 34 : 42, iters: q === 'high' ? 0 : 2, seed, regen: attract || (mode !== 'solo' && mode !== 'expedition'), pickups: attract ? 4 : mode === 'battle' || mode === 'royale' ? 6 : 4 });
+    const sim = new Sim(map, { maxBodies: q === 'high' ? 320 : q === 'mid' ? 150 : 110, physR: q === 'low' ? 34 : 42, iters: q === 'high' ? 0 : 2, seed, regen: attract || (mode !== 'solo' && mode !== 'expedition' && mode !== 'daily'), pickups: attract ? 4 : mode === 'battle' || mode === 'royale' ? 6 : 4 });
     this.sim = sim;
+    sim.attract=!!attract;
     this.map = map;
     this.mode = mode;
     const d = save.data;
     const up = (id) => UPGRADES.find((u) => u.id === id).val(d.up[id] || 0);
     const rivals = mode === 'battle' || mode === 'royale';
-    const spawns = this._spawns(map, attract ? BOTS : rivals ? BOTS + 1 : 1);
+    const duel=mode==='duel';
+    const spawns = this.challenge?[[map.lines[2],0]]:this._spawns(map, attract ? BOTS : rivals ? BOTS + 1 : duel?2:1);
     this.me = null;
+    this.second=null;
     if (!attract) {
       const [x, z] = spawns.shift();
-      this.me = sim.addHole({ name: t('you'), me: true, x, z, skin: d.skin, sizeBonus: up('size'), speedBonus: up('speed'), suck: up('suck'), grow: mode === 'solo' || mode === 'expedition' ? 2 : 1, noRespawn: mode === 'royale' });
+      const fair=duel||!!this.challenge;
+      this.me = sim.addHole({ name: duel?t('player1'):t('you'), me: true, x, z, skin: d.skin, sizeBonus: fair?0:up('size'), speedBonus: fair?0:up('speed'), suck: fair?0:up('suck'), grow: mode === 'solo' || mode === 'expedition'||mode==='daily' ? 2 : 1, noRespawn: mode === 'royale' });
+      if(duel){const [x,z]=spawns.shift();this.second=sim.addHole({name:t('player2'),x,z,skin:d.skin==='ocean'?'candy':'ocean',grow:1});}
     }
     if (rivals || attract) {
       const used = new Set();
@@ -136,6 +148,8 @@ export class Game {
       });
     }
     sim.focus = this.me || sim.holes[0];
+    this.rain=mode==='rain'?new RainDirector(sim):null;
+    this.view.splitPlayers=duel?[this.me,this.second]:null;
     this.view.setMap(map, sim);
     this.view.cam.x = sim.focus.x;
     this.view.cam.z = sim.focus.z;
@@ -161,6 +175,7 @@ export class Game {
     this.state = 'menu';
     this.paused = false;
     this.expedition = null;
+    this.challenge=null;this.runLoot={};this.localSticks=[null,null];
     this.attractFocus = null;
     this.acc = 0;
     this.menuFrameTime = 0;
@@ -174,8 +189,10 @@ export class Game {
     audio.setMood('menu');
   }
 
-  play(expeditionId = null) {
+  play(expeditionId = null, options={}) {
     const d = save.data;
+    this.challenge=options.daily?challengeFor():null;
+    this.runLoot={};this.localSticks=[null,null];this.keys.clear();this.mouse=null;this.stick=null;
     this.expedition = expeditionId ? EXPEDITIONS.find(l=>l.id===expeditionId && expeditionOpen(l.id,d)) : null;
     if(expeditionId && !this.expedition)return;
     document.body.classList.remove('in-menu');
@@ -185,30 +202,33 @@ export class Game {
     this.paused = false;
     ensureDaily(d);
     // обучение — в первом раунде, пока не пройдено или не пропущено
-    this.tut = d.tutDone ? null : { step: 0, t: 0, x: 0, z: 0 };
-    this._newWorld(this.expedition?.map || d.map, this.expedition ? 'expedition' : d.mode, false);
+    this.tut = d.tutDone||this.challenge||d.mode==='duel' ? null : { step: 0, t: 0, x: 0, z: 0 };
+    this._newWorld(this.challenge?.map || this.expedition?.map || d.map, this.challenge?'daily':this.expedition ? 'expedition' : d.mode, false);
     if (this.tut) {
       this.tut.x = this.me.x;
       this.tut.z = this.me.z;
     }
     const tb = UPGRADES.find((u) => u.id === 'time').val(d.up.time || 0);
-    this.time = this.totalTime = this.expedition ? this.expedition.time : d.mode === 'zen' ? 0 : d.mode === 'royale' ? ROYALE_TIME : ROUND_TIME + (d.mode === 'solo' ? tb : 0);
+    this.time = this.totalTime = this.challenge?this.challenge.time:this.expedition ? this.expedition.time : endlessMode(d.mode) ? 0 : d.mode === 'royale' ? ROYALE_TIME : ROUND_TIME + (d.mode === 'solo' ? tb : 0);
     this.stats = { cars: 0, trees: 0, crates: 0, eaten: 0, kills: 0, maxR: R0, combo: 0, comboT: 0, popPts: 0, popT: 0, keepUsed: false, last30: false, lastTick: 99, nextGrow: Math.floor(this.me.r) + 1, rumbleT: 0, picks: 0, out: 0, gold: 0 };
     this.killer = null;
     this.feed = [];
     this.ui.showHud();
     if (this.tut) this.ui.showTut(this.tut.step);
     else this.ui.toast(t('go'));
-    sdk.gameplay(true);
+    if(this.backgroundHolds.size||document.hidden||sdk.adActive)this.pause(true);
+    else sdk.gameplay(true);
     audio.play('go');
     audio.setMood(this.map.id);
     audio.setIntensity(1);
   }
 
   pause(on) {
-    if (this.state !== 'play' || (!on && (sdk.adActive || document.hidden || this.ui.modalOpen))) return;
+    if (this.state !== 'play' || (!on && (sdk.adActive || document.hidden || this.ui.modalOpen || this.backgroundHolds.size))) return;
     this.keys.clear(); this.mouse=null; this.stick=null;
+    this.localSticks=[null,null];this.ui.clearLocalSticks?.();
     this.paused = on;
+    if(!on){this._perfAt=performance.now();this._perfFrames=0;}
     sdk.gameplay(!on);
     if (on) this.ui.showPause();
   }
@@ -216,17 +236,18 @@ export class Game {
   // ---------- кадр ----------
   update(dt) {
     const sim = this.sim;
-    if (!sim || document.hidden || this.paused || sdk.adActive || this.state === 'result') return;
+    if (!sim || document.hidden || this.paused || sdk.adActive || this.backgroundHolds.size || this.state === 'result') return;
     if(this.state === 'menu'){
       if(this.ui.modalOpen || this.backgroundHolds.size)return;
       this.menuFrameTime = (this.menuFrameTime || 0) + dt;
-      if(this.menuFrameTime < 1 / 30)return;
+      if(this.menuFrameTime < 1 / 60)return;
       dt = Math.min(.1, this.menuFrameTime);
       this.menuFrameTime = 0;
     }
     this._adapt(dt);
     // радиус видимой земли вокруг дыры игрока: за ним физики нет
     sim.viewR = this.view.cam.dist * (this.view.portrait ? 0.62 : 0.78) + 6;
+    if(this.second){const a=this.me,b=this.second;sim.focus={x:(a.x+b.x)/2,z:(a.z+b.z)/2,r:Math.max(a.r,b.r)};sim.viewR=Math.hypot(a.x-b.x,a.z-b.z)/2+45;}
     const live = this.state === 'menu' || (this.state === 'play' && !this.paused) || this.state === 'result';
     if (live) {
       const speed = DBG.sub || 1;
@@ -272,7 +293,7 @@ export class Game {
 
   _step() {
     const sim = this.sim;
-    for (const h of sim.holes) if (h.bot) botThink(sim, h, DT);
+    for (const h of sim.holes) if (h.bot&&(!sim.attract||sim.tick%2===0)) botThink(sim, h, DT);
     if (this.me && this.state === 'play') {
       if (DBG.auto) {
         this.me.skill = 0.9;
@@ -280,13 +301,15 @@ export class Game {
         botThink(sim, this.me, DT);
       } else this._steer(this.me);
     }
-    sim.step();
+    if(this.second&&this.state==='play')this._steer(this.second,1);
+    this.rain?.step();
+    sim.attract?sim.stepAttract():sim.step();
     if (this.state === 'play' && !this.paused) this._tick();
   }
 
   _tick() {
     const st = this.stats;
-    const zen = this.mode === 'zen';
+    const zen = endlessMode(this.mode);
     this.time += zen ? DT : -DT;
     const me = this.me;
     st.maxR = Math.max(st.maxR, me.r);
@@ -361,23 +384,25 @@ export class Game {
     }
   }
 
-  _steer(h) {
+  _steer(h,player=0) {
     if (!h.alive) {
       h.throttle = 0;
       return;
     }
     let dx = 0, dz = 0, thr = 0;
     const k = this.keys;
-    if (k.has('KeyW') || k.has('ArrowUp')) dz -= 1;
-    if (k.has('KeyS') || k.has('ArrowDown')) dz += 1;
-    if (k.has('KeyA') || k.has('ArrowLeft')) dx -= 1;
-    if (k.has('KeyD') || k.has('ArrowRight')) dx += 1;
+    const duel=this.mode==='duel',arrows=player===1;
+    if (k.has(arrows?'ArrowUp':'KeyW') || !duel&&k.has('ArrowUp')) dz -= 1;
+    if (k.has(arrows?'ArrowDown':'KeyS') || !duel&&k.has('ArrowDown')) dz += 1;
+    if (k.has(arrows?'ArrowLeft':'KeyA') || !duel&&k.has('ArrowLeft')) dx -= 1;
+    if (k.has(arrows?'ArrowRight':'KeyD') || !duel&&k.has('ArrowRight')) dx += 1;
+    const stick=duel?this.localSticks[player]:this.stick;
     if (dx || dz) thr = 1;
-    else if (this.stick && this.stick.on) {
-      dx = this.stick.dx;
-      dz = this.stick.dy;
+    else if (stick && stick.on) {
+      dx = stick.dx;
+      dz = stick.dy;
       thr = Math.min(1, Math.hypot(dx, dz) / 50);
-    } else if (this.mouse && this.mouse.inside) {
+    } else if (!duel && this.mouse && this.mouse.inside) {
       const p = this.view.toScreen(h.x, 0, h.z, {});
       dx = this.mouse.x - p.x;
       dz = this.mouse.y - p.y;
@@ -403,6 +428,7 @@ export class Game {
       if (e.t === 'eat') {
         if (play && e.h === me) {
           const st = this.stats;
+          const material=ingredientFor(e.it);if(material)this.runLoot[material]=Math.min(30,(this.runLoot[material]||0)+1);
           st.eaten++;
           st.combo++;
           st.comboT = 0.7;
@@ -445,7 +471,7 @@ export class Game {
             // выбыл: место — сколько дыр ещё осталось, плюс один
             this.stats.out = this.sim.holes.filter((h) => h.alive).length + 1;
             this.ui.showOut(e.a.name, this.stats.out, !this.stats.keepUsed);
-          } else this.ui.showDeath(e.a.name, !this.stats.keepUsed);
+          } else if(this.mode!=='duel')this.ui.showDeath(e.a.name, !this.stats.keepUsed);
         } else {
           this.ui.feedMsg(t('ate', { a: e.a.name, b: e.b.name }));
           if (this.mode === 'royale') this.ui.feedMsg(t('left', { n: this.sim.holes.filter((h) => h.alive).length }));
@@ -474,7 +500,7 @@ export class Game {
     }
     if (breaks > 3 && play) audio.play('rumble');
     // всплывающие очки собираются пачкой
-    if (play && this.stats) {
+    if (play && this.stats && this.mode!=='duel') {
       const st = this.stats;
       st.popT -= 1 / 60;
       if (st.popPts > 0 && st.popT <= 0 && me.alive) {
@@ -495,9 +521,11 @@ export class Game {
     const me = this.me;
     if (!me || me.alive || this.stats.keepUsed) return;
     if(!sdk.canReward() || sdk.adActive)return;
+    const sim=this.sim,stats=this.stats,mass=this.massBefore;
     sdk.showRewarded(() => {
+      if(this.sim!==sim||this.stats!==stats||this.state!=='play'||me.alive)return;
       this.stats.keepUsed = true;
-      me.mass = this.massBefore;
+      me.mass = mass;
       me.pts = scoreForMass(me.mass);
       me.respawnT = 0;
       if (this.mode === 'royale' && this.state === 'play') {
@@ -505,7 +533,7 @@ export class Game {
         this.stats.out = 0;
         this.sim.respawn(me);
       }
-    },()=>{const button=this.ui.scr.querySelector('#keep');if(button)button.disabled=!!this.stats.keepUsed;});
+    },()=>{if(this.sim!==sim||this.stats!==stats)return;const button=this.ui.scr.querySelector('#keep');if(button)button.disabled=!!this.stats.keepUsed;});
   }
 
   // «Выживание»: выбывший игрок сам решает, когда смотреть итоги
@@ -537,6 +565,8 @@ export class Game {
     const recordKey=this.mode+':'+this.map.id;
     if(pts>(d.records[recordKey]?.pts||0))d.records[recordKey]={pts,map:this.map.id,mode:this.mode};
     const res = { mode: this.mode, map: this.map.id, pts, place, eaten: this.stats.eaten, kills: this.stats.kills, maxR: this.stats.maxR, time: this.time };
+    if(this.second)res.duel={winner:this.me.pts===this.second.pts?null:this.me.pts>this.second.pts?1:2,scores:[this.me.pts,this.second.pts]};
+    if(this.challenge)res.challenge={...this.challenge,won:this.stats.eaten>=this.challenge.target};
     // «Спокойный» без таймера — в таблицу рекордов не идёт, у него свой рекорд
     res.newBest = this.mode === 'zen' ? pts > (d.zenBest || 0) : pts > d.best;
     if (res.newBest) {
@@ -566,18 +596,20 @@ export class Game {
         this._quest('win', 1);
       }
     }
-    this._quest('rounds', 1);
+    if(!this.stats.continuation)this._quest('rounds', 1);
     this._quest('size', this.stats.maxR);
     if (this.mode === 'solo') this._quest('solo', res.pct);
-    res.elapsed=this.mode==='zen'?this.time:Math.max(0,this.totalTime-this.time);
-    res.coins = roundCoins({mode:this.mode,pts,place,stars:res.stars||0,newStars:res.newStars||0,elapsed:res.elapsed,gold:this.stats.gold});
+    res.elapsed=endlessMode(this.mode)?this.time:Math.max(0,this.totalTime-this.time);
+    const rewardPts=Math.max(0,pts-(this.stats.startPts||0)),played=Math.max(0,Math.min(1,res.elapsed/60));
+    res.coins = this.mode==='duel'||this.mode==='daily'?0:roundCoins({mode:endlessMode(this.mode)?'zen':this.mode,pts:rewardPts,place,stars:res.stars||0,newStars:res.newStars||0,elapsed:res.elapsed,gold:this.stats.gold});
     d.coins += res.coins;
-    d.rounds++;
+    if(!this.stats.continuation)d.rounds++;
     const oldLevel = d.level;
-    res.xp = Math.round(Math.sqrt(pts) * (this.mode === 'zen' ? 1.8 : 2.5)) + (this.mode === 'battle' || this.mode === 'royale' ? Math.max(0, 11 - place) * 8 : this.mode === 'solo' ? res.stars * 25 : 0);
+    res.xp = this.mode==='duel'?0:Math.round((Math.sqrt(rewardPts) * (endlessMode(this.mode) ? 1.8 : 2.5) + (this.mode === 'battle' || this.mode === 'royale' ? Math.max(0, 11 - place) * 8 : this.mode === 'solo' ? res.stars * 25 : 0))*played);
     res.levels = save.addXp(res.xp);
     res.maps = MAPS.filter((m) => m.need > oldLevel && m.need <= d.level).map((m) => m.id);
-    save.write();
+    res.offline=awardOfflineRun(d,{mode:this.mode,elapsed:res.elapsed,stats:this.stats,loot:this.runLoot,challenge:this.challenge,pts});
+    ensureOffline(d);save.write();
     // Personal records are kept per mode and location.
     if (this.tut) this.skipTut();
     this.ui.hideTut();
@@ -590,8 +622,9 @@ export class Game {
 
   doubleReward() {
     const res = this.lastRes;
-    if (!res || res.doubled || sdk.adActive || !sdk.canReward()) return;
+    if (!res || res.coins<=0 || res.doubled || sdk.adActive || !sdk.canReward()) return;
     sdk.showRewarded(() => {
+      if(this.state!=='result'||this.lastRes!==res||res.doubled)return;
       res.doubled = true;
       save.data.coins += res.coins;
       save.write();
@@ -601,28 +634,37 @@ export class Game {
 
   // после раунда — полноэкранная реклама в логической паузе
   afterRound(next) {
-    sdk.showInterstitial(() => (next === 'again' ? this.play(this.lastRes?.expedition || null) : this.menu()));
+    if(this.state!=='result'||this._transitioning)return;
+    this._transitioning=true;const sim=this.sim,missionId=this.expedition?.id||null,daily=!!this.challenge;
+    const done=()=>{this._transitioning=false;if(this.state!=='result'||this.sim!==sim)return;next==='again'?this.play(missionId,{daily}):this.menu();};
+    if(save.data.rounds<2){done();return;}
+    sdk.showInterstitial(done);
   }
 
 
   continueCity(){
     if(this.state!=='result')return;
     this.expedition=null;this.mode='zen';this.state='play';this.paused=false;this.time=0;
+    this.challenge=null;this.rain=null;this.runLoot={};this.second=null;this.view.splitPlayers=null;
     this.sim.enableRegen();this.me.pts=scoreForMass(this.me.mass);
     this.stats={cars:0,trees:0,crates:0,eaten:0,kills:0,maxR:this.me.r,combo:0,comboT:0,popPts:0,popT:0,keepUsed:false,nextGrow:Math.floor(this.me.r)+1,picks:0,out:0,gold:0};
-    this.ui.showHud();sdk.gameplay(true);audio.setMood(this.map.id);audio.setIntensity(1);
+    this.stats.startPts=this.me.pts;this.stats.continuation=true;
+    this.ui.showHud();if(this.backgroundHolds.size||document.hidden||sdk.adActive)this.pause(true);else sdk.gameplay(true);audio.setMood(this.map.id);audio.setIntensity(1);
   }
   _adapt(dt){
-    if(save.data.settings.quality!=='auto' || this.state!=='play' || this.sim.time<6)return;
-    this._perfT=(this._perfT||0)+dt;this._perfFrames=(this._perfFrames||0)+1;
-    if(this._perfT<5)return;
-    const fps=this._perfFrames/this._perfT;
+    if(save.data.settings.quality!=='auto' || this.state!=='play')return;
+    const now=performance.now();
+    if(now-this._worldStartedAt<6000){this._perfAt=now;this._perfFrames=0;return;}
+    this._perfFrames++;
+    const elapsed=(now-this._perfAt)/1000;
+    if(elapsed<5)return;
+    const fps=this._perfFrames/elapsed;
     if(fps<36 && this.quality!=='low'){
       this.quality=this.quality==='high'?'mid':'low';this.view.setQuality(this.quality);
       this.sim.maxBodies=this.quality==='mid'?150:110;
       this.sim.world.numSolverIterations=2;
     }
-    this._perfT=0;this._perfFrames=0;
+    this._perfT=0;this._perfFrames=0;this._perfAt=now;
   }
 
   // ---------- ввод ----------
@@ -643,11 +685,20 @@ export class Game {
     // плавающий джойстик: появляется под пальцем
     canvas.addEventListener('pointerdown', (e) => {
       if (e.pointerType === 'mouse') return;
+      if(this.mode==='duel'&&this.state==='play'&&!this.paused){
+        const player=window.innerHeight>window.innerWidth?Number(e.clientY>=window.innerHeight/2):Number(e.clientX>=window.innerWidth/2);
+        if(this.localSticks[player]?.on)return;
+        const s=this.localSticks[player]={on:true,id:e.pointerId,x0:e.clientX,y0:e.clientY,dx:0,dy:0};try{canvas.setPointerCapture?.(e.pointerId);}catch{}this.ui.localStick(player,s);return;
+      }
       if (this.stick && this.stick.on) return;
       this.stick = { on: true, id: e.pointerId, x0: e.clientX, y0: e.clientY, dx: 0, dy: 0 };
       this.ui.stick(this.stick);
     });
     window.addEventListener('pointermove', (e) => {
+      if(this.mode==='duel'){
+        const player=this.localSticks.findIndex(s=>s?.on&&s.id===e.pointerId);if(player<0)return;
+        const s=this.localSticks[player],dx=e.clientX-s.x0,dy=e.clientY-s.y0,L=Math.hypot(dx,dy),k=Math.min(1,60/(L||1));s.dx=dx*k;s.dy=dy*k;this.ui.localStick(player,s);return;
+      }
       const s = this.stick;
       if (!s || !s.on || e.pointerId !== s.id) return;
       let dx = e.clientX - s.x0, dy = e.clientY - s.y0;
@@ -665,6 +716,7 @@ export class Game {
       this.ui.stick(s);
     });
     const up = (e) => {
+      const player=this.localSticks.findIndex(s=>s?.id===e.pointerId);if(player>=0){this.localSticks[player].on=false;this.ui.localStick(player,this.localSticks[player]);}
       const s = this.stick;
       if (!s || e.pointerId !== s.id) return;
       s.on = false;
