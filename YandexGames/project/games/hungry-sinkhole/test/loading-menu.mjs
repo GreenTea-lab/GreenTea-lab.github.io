@@ -22,7 +22,7 @@ try{
   assert.ok(begin.bots>=10);assert.equal(begin.canvas,'visible');await p.waitForFunction(t=>__game.sim.time>t+.2,begin.time,{timeout:60000});
   await p.screenshot({path:out+'/menu-'+name+'.png'});
   if(name==='desktop'){
-   const timing=await p.evaluate(async()=>{const g=__game,original=g.view.render.bind(g.view);let frames=0;g.view.render=()=>{frames++;original();};await new Promise(r=>setTimeout(r,1000));g.view.render=original;return {frames,time:g.sim.time};});assert.ok(timing.frames>0&&timing.frames<=65,'live menu is rendered at no more than display 60 Hz');
+   const timing=await p.evaluate(async()=>{const g=__game,original=g.view.render.bind(g.view);let frames=0;const start=performance.now();g.view.render=()=>{frames++;original();};await new Promise(r=>setTimeout(r,1000));g.view.render=original;return {frames,elapsedMs:performance.now()-start,time:g.sim.time};});assert.ok(timing.frames>0&&timing.frames/(timing.elapsedMs/1000)<=65,'live menu is rendered at no more than display 60 Hz');
    await p.evaluate(()=>window.dispatchEvent(new Event('blur')));const paused=await p.evaluate(()=>__game.sim.time);await p.waitForTimeout(250);assert.equal(await p.evaluate(()=>__game.sim.time),paused);await p.evaluate(()=>window.dispatchEvent(new Event('focus')));
    await p.locator('#snd').click();const modalTime=await p.evaluate(()=>__game.sim.time);await p.waitForTimeout(250);assert.equal(await p.evaluate(()=>__game.sim.time),modalTime);await p.evaluate(()=>__game.ui.closeModal());
    await p.locator('.mcard[data-id="beach"]').click();assert.equal(await p.evaluate(()=>__game.map.id),'beach');assert.equal(await p.evaluate(()=>__game.attractFocus===null||__game.sim.holes.includes(__game.attractFocus)),true);
@@ -32,6 +32,6 @@ try{
   report.screens.push({name,width:w,height:h,stages:6,liveMenu:true});await p.close();console.log('LOADING / LIVE MENU',name,'PASS');
  }
  const error=await browser.newPage({viewport:{width:390,height:844},locale:'ru-RU'});await error.route('**/game.js',route=>route.abort('failed'));await error.goto(url);await error.locator('#load-retry:visible').waitFor();assert.ok((await error.locator('#lt').textContent()).includes('Не удалось')); await error.screenshot({path:out+'/loading-error.png'});report.retryOnBundleFailure=true;await error.close();
- const single=await browser.newPage();await single.goto(pathToFileURL(path.resolve('dist-vk-single/index.html')).href);await single.waitForFunction(()=>__game?.sim&&!document.querySelector('#loader'));report.singleFileStarts=true;await single.close();
+ const single=await browser.newPage();await single.goto(pathToFileURL(path.resolve('dist-vk-single/index.html')).href);await single.waitForFunction(()=>window.__game?.sim&&!document.querySelector('#loader'));report.singleFileStarts=true;await single.close();
  assert.deepEqual(report.errors,[]);fs.writeFileSync(out+'/report.json',JSON.stringify(report,null,2)+'\n');console.log('LOADING / MENU PASS');
-}finally{await browser.close();}
+}catch(e){report.failure=e.stack;throw e;}finally{fs.writeFileSync(out+'/report.json',JSON.stringify(report,null,2)+'\n');await browser.close();}

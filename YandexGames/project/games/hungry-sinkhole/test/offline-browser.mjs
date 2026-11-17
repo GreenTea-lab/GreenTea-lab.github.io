@@ -10,7 +10,7 @@ const check=(name,v)=>{assert.ok(v,name);report.checks.push(name);console.log('P
 try{
  for(const [width,height]of [[390,844],[844,390],[320,568]]){
   const p=await b.newPage({viewport:{width,height},hasTouch:true,isMobile:true,locale:'ru-RU'});p.setDefaultTimeout(90000);p.on('pageerror',e=>report.errors.push(e.stack));
-  await p.addInitScript(()=>{window.__HS_DEBUG={seed:4100,quality:'low'};localStorage.setItem('hungry_sinkhole_save_v1',JSON.stringify({level:30,tutDone:true,rounds:0,coins:1000}));});
+  await p.addInitScript(()=>{window.__HS_DEBUG={seed:4100,quality:'low'};if(!localStorage.getItem('hungry_sinkhole_save_v1'))localStorage.setItem('hungry_sinkhole_save_v1',JSON.stringify({level:30,tutDone:true,rounds:0,coins:1000}));});
   await p.goto(pathToFileURL(path.resolve('dist-vk/index.html')).href);await p.waitForFunction(()=>window.__game?.ui&&!document.querySelector('#loader'),null,{timeout:90000});
   const menu=await p.evaluate(async()=>{const g=__game;await new Promise(r=>setTimeout(r,1800));const a=g.view.slots.size,total=g.sim.items.filter(i=>i.st!==2).length,r=g.view.renderer;const start=performance.now();let frames=0;const original=g.view.render.bind(g.view);g.view.render=()=>{frames++;original();};await new Promise(r=>setTimeout(r,3000));g.view.render=original;return {visible:a,total,active:g.sim.active.size,shadow:r.shadowMap.enabled,dpr:r.getPixelRatio(),frames,ms:performance.now()-start,triangles:r.info.render.triangles,calls:r.info.render.calls};});
   report.menu.push({width,height,...menu});check('menu culls models and avoids physics/shadows '+width,menu.visible>0&&menu.visible<menu.total*.8&&menu.active===0&&!menu.shadow&&menu.dpr<=1);
