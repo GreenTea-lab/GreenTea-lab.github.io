@@ -35,4 +35,7 @@ jobs:
             YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/*.json
             YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/*.mp4
             YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/*.jpg
+            YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/frames/
+            YandexGames/project/games/hungry-sinkhole/test-results/vk-media-2.3.1/${{ matrix.direction }}/sound.webm
+          compression-level: 0
           retention-days: 14

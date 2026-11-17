@@ -3,7 +3,6 @@ import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
 const orientation = process.argv[2];
@@ -87,11 +86,6 @@ async function advance(p,dt) {
   },dt);
 }
 
-function ffmpeg(args) {
-  const r=spawnSync('ffmpeg',['-hide_banner','-loglevel','error','-y',...args],{stdio:'inherit'});
-  if(r.status!==0)throw Error('FFmpeg failed');
-}
-
 try {
   const width=portrait?600:1200,height=portrait?1200:600;
   const still=await page(width,height);
@@ -152,14 +146,11 @@ try {
   });
   fs.writeFileSync(root+'/sound.webm',Buffer.from(sound,'base64'));
   await p.close();
-  const w=portrait?1080:1920,h=portrait?1920:1080;
-  ffmpeg(['-framerate',String(fps),'-i',frameDir+'/%04d.jpg','-i',root+'/sound.webm',
-    '-map','0:v','-map','1:a','-t','18','-vf','scale='+w+':'+h+':flags=lanczos,fps=30',
-    '-af','volume=1.4,alimiter=limit=.85,afade=t=in:d=.15,afade=t=out:st=17.45:d=.55',
-    '-pix_fmt','yuv420p','-c:v','libx264','-crf','21','-preset','fast','-c:a','aac','-b:a','128k',
-    '-movflags','+faststart',root+'/gameplay.mp4']);
-  ffmpeg(['-ss','13.6','-i',root+'/gameplay.mp4','-frames:v','1','-q:v','2',root+'/poster.jpg']);
-  report.video={width:w,height:h,duration:18,fps:30,source:'2.3.1 gameplay at simulation speed, recorded in remote Chromium with a staged save and starting positions',audio:'Original game music'};
+  report.capture={
+    width:portrait?540:960,height:portrait?960:540,duration:18,fps,frames:3*perScene,
+    source:'2.3.1 gameplay at simulation speed, recorded in remote Chromium with a staged save and starting positions',
+    audio:'Original game music'
+  };
   assert.deepEqual(report.errors,[]);
 } finally {
   fs.writeFileSync(root+'/manifest.json',JSON.stringify(report,null,2)+'\n');
