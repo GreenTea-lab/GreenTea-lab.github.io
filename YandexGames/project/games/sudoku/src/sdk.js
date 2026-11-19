@@ -14,6 +14,7 @@ class SDK {
     this.payments = null;
     this.catalog = [];
     this.noAds = false; // куплено «Без рекламы» — полноэкранная реклама не показывается
+    this.platformPaused = false;
   }
 
   async init() {
@@ -32,8 +33,8 @@ class SDK {
       try {
         this.lang = this.ysdk.environment.i18n.lang || this.lang;
       } catch (e) {}
-      this.ysdk.on && this.ysdk.on('game_api_pause', () => this._emit('pause'));
-      this.ysdk.on && this.ysdk.on('game_api_resume', () => this._emit('resume'));
+      this.ysdk.on && this.ysdk.on('game_api_pause', () => { this.platformPaused = true; this.gameplay(false); this._emit('pause'); });
+      this.ysdk.on && this.ysdk.on('game_api_resume', () => { this.platformPaused = false; this._emit('resume'); });
       try {
         this.player = await this.ysdk.getPlayer({ scopes: false });
       } catch (e) {
@@ -60,6 +61,7 @@ class SDK {
   }
 
   gameplay(active) {
+    if (active && (this.platformPaused || this.adActive || document.hidden)) active = false;
     if (this.adActive) this._gpTouched = true;
     if (active === this.gameplayOn) return;
     this.gameplayOn = active;
@@ -118,13 +120,16 @@ class SDK {
   }
 
   showInterstitial(onDone) {
+    if (this.adActive) { onDone && onDone(); return; }
     if (!this.ysdk || this.noAds) {
       // локально или после покупки «Без рекламы» полноэкранной рекламы нет
       onDone && onDone();
       return;
     }
     const resume = this._adPause();
+    let finished = false;
     const finish = () => {
+      if (finished) return; finished = true;
       this.adActive = false;
       resume();
       onDone && onDone();
@@ -145,9 +150,12 @@ class SDK {
 
   // onReward вызывается, если игрок досмотрел; onDone — всегда в конце
   showRewarded(onReward, onDone) {
+    if (this.adActive) { onDone && onDone(false); return; }
     let rewarded = false;
     const resume = this._adPause();
+    let finished = false;
     const finish = () => {
+      if (finished) return; finished = true;
       this.adActive = false;
       resume();
       if (rewarded) onReward && onReward();

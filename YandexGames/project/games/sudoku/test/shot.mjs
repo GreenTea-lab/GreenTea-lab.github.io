@@ -1,11 +1,12 @@
 // Тестовый запуск в Chromium: run({ w, h, mobile, steps, locale, pre })
-import { chromium } from 'playwright';
+if (process.env.GAME_TESTS_REMOTE !== '1') throw new Error('Browser checks are remote-only. Set GAME_TESTS_REMOTE=1 in the connected cloud environment.');
+const { chromium } = await import('playwright');
 import http from 'http';
 import fs from 'fs';
 import path from 'path';
 
 const root = path.resolve('dist');
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.woff2': 'font/woff2' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8', '.woff2': 'font/woff2', '.webp': 'image/webp' };
 const server = http
   .createServer((req, res) => {
     let p = path.join(root, decodeURIComponent(req.url.split('?')[0]));
@@ -33,7 +34,7 @@ const port = server.address().port;
 
 export async function run({ w = 1280, h = 720, mobile = false, dpr = 1, steps, locale = 'ru-RU', pre }) {
   const browser = await chromium.launch({
-    executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome',
+    ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : {}),
     args: ['--autoplay-policy=no-user-gesture-required'],
   });
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: dpr, isMobile: mobile, hasTouch: mobile, locale });
@@ -59,4 +60,5 @@ export function done(errors) {
   server.close();
   const filtered = errors.filter((e) => !e.includes('sdk.js') && !e.includes('404') && !e.includes('Яндекс SDK') && !e.includes('GPU stall'));
   console.log(filtered.length ? filtered.join('\n') : 'NO ERRORS');
+  if (filtered.length) process.exitCode = 1;
 }

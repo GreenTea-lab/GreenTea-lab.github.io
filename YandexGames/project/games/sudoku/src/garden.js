@@ -151,9 +151,9 @@ export const earnedCount = (solved) => ITEMS.filter((_, k) => solved >= need(k))
 export const iconSVG = (id) => `<svg viewBox="0 0 100 100" aria-hidden="true">${L[id]}</svg>`;
 
 // сцена сезона si; count — сколько предметов открыто всего, fresh — номер нового (анимация)
-export function sceneSVG(si, count, fresh = -1) {
+export function sceneSVG(si, count, fresh = -1, { artwork = false, hidden = [] } = {}) {
   const S = SEASONS[si];
-  const shown = S.items.map((it, k) => ({ ...it, n: si * 12 + k })).filter((it) => it.n < count);
+  const shown = S.items.map((it, k) => ({ ...it, n: si * 12 + k })).filter((it) => it.n < count && !hidden.includes(it.n));
   shown.sort((a, b) => a.y - b.y);
   let sand = '';
   for (let k = 0; k < 9; k++) {
@@ -168,11 +168,11 @@ export function sceneSVG(si, count, fresh = -1) {
   const items = shown.map((it) => `<g transform="translate(${it.x - 50 * it.s} ${it.y - 100 * it.s}) scale(${it.s})"><g class="it${it.n === fresh ? ' fresh' : ''}">${L[it.id]}</g></g>`).join('');
   return `<svg viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img">
     <defs><linearGradient id="gs${si}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${S.sky[0]}"/><stop offset=".6" stop-color="${S.sky[1]}"/><stop offset="1" stop-color="${S.sky[2]}"/></linearGradient></defs>
-    <rect width="1000" height="560" fill="url(#gs${si})"/>${deco}
+    ${artwork ? '' : `<rect width="1000" height="560" fill="url(#gs${si})"/>${deco}
     <path d="M0 300C120 250 260 270 380 240S640 230 760 260 920 250 1000 270V560H0z" fill="${S.hill}"/>
     <path d="M0 330C200 300 400 320 600 305S900 300 1000 315V560H0z" fill="${S.ground[0]}"/>
     ${sand}
-    <path d="M430 560C470 500 520 470 600 440" stroke="${S.ground[1]}" stroke-width="22" fill="none" stroke-dasharray="26 18" stroke-linecap="round" opacity=".9"/>
+    <path d="M430 560C470 500 520 470 600 440" stroke="${S.ground[1]}" stroke-width="22" fill="none" stroke-dasharray="26 18" stroke-linecap="round" opacity=".9"/>`}
     ${items}${snow}
   </svg>`;
 }

@@ -17,6 +17,7 @@ import { Tutorial } from './tutorial.js';
 import { SKINS, owns, skinPreview } from './skins.js';
 import { RANKS, rankOf, MEDALS, monthCount, medalsEarned, need as medalNeed } from './ranks.js';
 import P from './data/puzzles.json';
+import { ART, Backdrop } from './art.js';
 
 export const HINT_COST = 50;
 const AD_COINS = 50;
@@ -58,7 +59,8 @@ export const IAP_DEFS = {
 const IAP_ART = { coins_1000: coinsArt(2), coins_3500: coinsArt(4), coins_10000: coinsArt(6), coins_300: coinsArt(2), coins_3000: coinsArt(6), disable_ads: NOADS_ART, premium_pass: `<span class="premart">${IC.crown}</span>` };
 
 const S = { view: 'menu', modal: null, cur: null, lastAd: Date.now(), saveTimer: null, garden: 0, quickKind: 'classic', season: 0 };
-let board, scene, tut;
+let board, scene, tut, backdrop;
+const externalPauses = new Set();
 
 // ---------- монеты и уведомления ----------
 function addCoins(n) {
@@ -84,18 +86,22 @@ export function toast(msg, kind = '') {
 }
 
 function setGameplay() {
-  sdk.gameplay(S.view === 'game' && !S.modal && !document.hidden && !sdk.adActive && !!board && !board.done && !board.paused);
+  sdk.gameplay(S.view === 'game' && !S.modal && !document.hidden && !externalPauses.size && !sdk.platformPaused && !sdk.adActive && !!board && !board.done && !board.paused);
 }
 
 function applySettings() {
   const st = save.data.settings;
   document.documentElement.dataset.gtheme = st.theme;
   document.documentElement.dataset.text = String(st.text);
+  const reduced = st.reducedMotion || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.documentElement.dataset.motion = reduced ? 'reduced' : 'full';
+  if (backdrop) backdrop.configure(st);
   const bd = document.querySelector('#game .board');
   if (bd) bd.dataset.skin = st.theme !== 'contrast' && owns(save.data, st.skin) ? st.skin : 'paper';
   if (scene) {
+    scene.reducedMotion = reduced;
     scene.setTheme(st.theme);
-    scene.setPetals(st.petals);
+    scene.setPetals(st.petals && !reduced);
   }
   if (board && board.visible) requestAnimationFrame(() => (board.layout(), board.render()));
 }
@@ -132,8 +138,15 @@ function closeModal(silent) {
 const head = (title) => `<div class="sh-h"><b>${esc(title)}</b><button class="xbtn" data-close aria-label="close">${IC.close}</button></div>`;
 
 function show(view) {
+  const previous = S.view;
   S.view = view;
+  document.documentElement.dataset.view = view;
+  document.body.classList.remove('garden-walk');
   document.querySelectorAll('#app>.view').forEach((v) => v.classList.toggle('hidden', v.id !== view));
+  if (previous !== view && document.documentElement.dataset.motion !== 'reduced') {
+    const el = document.getElementById(view);
+    el?.animate([{ opacity: 0, transform: `translateY(${view === 'menu' ? -12 : 18}px)` }, { opacity: 1, transform: 'translateY(0)' }], { duration: 360, easing: 'cubic-bezier(.2,.75,.2,1)' });
+  }
   if (view === 'game') board.show(true);
   else if (tut) tut.stop();
   audio.setMood(view === 'game' ? (S.cur && S.cur.kind === 'classic' && S.cur.tier >= 4 ? 'night' : 'game') : 'menu');
@@ -207,6 +220,7 @@ function persist() {
   const keys = Object.keys(save.data.ip);
   if (keys.length > 8) for (const k of keys.slice(0, keys.length - 8)) if (k !== S.cur.key) delete save.data.ip[k];
   clearTimeout(S.saveTimer);
+  save.write(false); // Every move survives refresh, including an immediate tab close.
   S.saveTimer = setTimeout(() => save.write(), 700);
 }
 
@@ -542,14 +556,21 @@ function openDaily() {
 
 // ---------- мой сад ----------
 function renderGarden(fresh = -1) {
+  const previousSeason = $('#garden .gscene')?.dataset.season;
   const D = save.data;
   const n = gardenCount();
   D.gardenCount = n;
   if (fresh < 0 && D.garden.seen < n) fresh = n - 1;
-  if (fresh >= 0) S.season = ITEMS[fresh].season;
+  if (fresh >= 0) { S.season = ITEMS[fresh].season; S.gardenPreview = false; }
   D.garden.seen = n;
   const si = S.season;
-  const left = n < ITEMS.length ? need(n) - D.solved : 0;
+  const left = n < ITEMS.length ? Math.max(0, need(Math.max(0, n - D.garden.extra)) - D.solved) : 0;
+  const localCount = Math.max(0, Math.min(12, n - si * 12));
+  const progress = Math.round(localCount / 12 * 100);
+  const preview = !!S.gardenPreview;
+  const next = ITEMS[n];
+  const stage = localCount < 4 ? 'seed' : localCount < 8 ? 'growing' : localCount < 12 ? 'bloom' : 'complete';
+  const hidden = D.garden.hidden || [];
   const tabs = SEASONS.map((s, k) => {
     const open = n > k * 12;
     return `<button data-s="${k}" class="${k === si ? 'on' : ''}${open ? '' : ' lock'}">${open ? '' : IC.lock}<span>${esc(t('s_' + s.id))}</span></button>`;
@@ -557,21 +578,58 @@ function renderGarden(fresh = -1) {
   const items = SEASONS[si].items
     .map((it, k) => {
       const idx = si * 12 + k;
-      return `<div class="gi${idx < n ? '' : ' lock'}">${iconSVG(it.id)}<span>${esc(idx < n ? t('it_' + it.id) : '?')}</span></div>`;
+      return `<button class="gi${idx < n ? '' : ' lock'}${idx === n ? ' next' : ''}${hidden.includes(idx) ? ' stored' : ''}" data-item="${idx}">${iconSVG(it.id)}<span>${esc(t('it_' + it.id))}<small>${esc(idx < n ? t(hidden.includes(idx) ? 'gardenStored' : 'gardenPlaced') : idx === n ? t('gardenDecorationNext') : t('gardenSoon'))}</small></span>${idx < n ? IC.checkc : IC.lock}</button>`;
     })
     .join('');
   const buy = n < ITEMS.length ? `<button class="btn b-gold g-buy">${IC.gift}<span>${esc(t('buyItem'))}<small>${IC.coin}${price(n)}</small></span></button>` : '';
   $('#garden .inner').innerHTML = `<div class="gwrap">
     <div class="stabs">${tabs}</div>
-    <div class="gscene">${sceneSVG(si, n, fresh)}${n <= si * 12 ? `<div class="glock">${IC.lock}<b>${esc(t('seasonLocked'))}</b></div>` : ''}</div>
-    <div class="gnext">${esc(n < ITEMS.length ? (left > 0 ? t('nextItem', { n: left }) : t('nextItemSoon')) : t('allItems', { n: ITEMS.length }))}${buy}</div>
+    <div class="garden-heading"><div><small>${esc(t('gardenStage_' + stage))}</small><h2>${esc(t('s_' + SEASONS[si].id))}</h2></div><span>${localCount}<small> / 12</small></span></div>
+    <div class="gscene garden-art" data-season="${si}" data-light="${esc(D.garden.light)}" data-stage="${stage}" data-preview="${preview}" style="--garden-art:url('${ART[SEASONS[si].id]}')">
+      <div class="garden-landscape"></div><div class="garden-mist"></div>
+      ${sceneSVG(si, preview ? ITEMS.length : n, fresh, { artwork: true, hidden: preview ? [] : hidden })}
+      <div class="garden-caption">${esc(preview ? t('gardenPreviewBadge') : t('gardenStage_' + stage))}</div>
+      <button class="garden-walk-exit btn b-glass">${IC.back}<span>${esc(t('gardenExitWalk'))}</span></button>
+      <div class="garden-sparkles" aria-hidden="true">${Array.from({ length: 9 }, (_, i) => `<i style="--i:${i}"></i>`).join('')}</div>
+    </div>
+    <div class="garden-toolbar"><button class="btn b-glass g-preview" aria-pressed="${preview}">${IC.tree}<span>${esc(t(preview ? 'gardenReturn' : 'gardenPreview'))}</span></button><button class="btn b-glass g-walk">${IC.play}<span>${esc(t('gardenWalk'))}</span></button></div>
+    <div class="garden-light"><span>${esc(t('gardenLight'))}</span><div class="seg">${['natural','warm','moon'].map(l => `<button data-light="${l}" class="${D.garden.light === l ? 'on' : ''}" aria-pressed="${D.garden.light === l}">${esc(t('gardenLight_' + l))}</button>`).join('')}</div></div>
+    <div class="garden-meter"><div><span>${esc(t('gardenSeasonProgress'))}</span><b>${progress}%</b></div><div class="garden-track" role="progressbar" aria-label="${esc(t('gardenSeasonProgress'))}" aria-valuenow="${localCount}" aria-valuemin="0" aria-valuemax="12"><i style="width:${progress}%"></i></div></div>
+    <div class="gnext">${next ? `<div class="garden-next-icon">${iconSVG(next.id)}</div><div class="garden-next-text"><small>${esc(t('gardenDecorationNext'))} · ${esc(t('s_' + SEASONS[next.season].id))}</small><b>${esc(t('it_' + next.id))}</b><span>${esc(left > 0 ? t('nextItem', { n: left }) : t('nextItemSoon'))}</span></div>${buy}` : esc(t('allItems', { n: ITEMS.length }))}</div>
+    <div class="garden-collection-head"><b>${esc(t('gardenCollection'))}</b><span>${n} / ${ITEMS.length}</span></div>
     <div class="glist">${items}</div></div>`;
+  if (previousSeason !== undefined && +previousSeason !== si && document.documentElement.dataset.motion !== 'reduced') {
+    const outgoing = document.createElement('div');
+    outgoing.className = 'garden-outgoing';
+    outgoing.style.backgroundImage = `url("${ART[SEASONS[+previousSeason].id]}")`;
+    $('#garden .gscene').append(outgoing);
+    outgoing.animate([{opacity:1},{opacity:0}], {duration:700,easing:'ease-in-out',fill:'forwards'}).finished.finally(()=>outgoing.remove());
+  }
   $('#garden .stabs').onclick = (e) => {
     const b = e.target.closest('[data-s]');
     if (!b) return;
     audio.play('click');
     S.season = +b.dataset.s;
+    S.gardenPreview = false;
     renderGarden();
+  };
+  $('#garden .g-preview').onclick = () => { audio.play('click'); S.gardenPreview = !preview; renderGarden(); };
+  $('#garden .g-walk').onclick = () => { audio.play('click'); document.body.classList.add('garden-walk'); };
+  $('#garden .garden-walk-exit').onclick = () => document.body.classList.remove('garden-walk');
+  $('#garden .garden-light .seg').onclick = e => {
+    const b = e.target.closest('[data-light]'); if (!b) return;
+    D.garden.light = b.dataset.light; save.write(); audio.play('click'); renderGarden();
+  };
+  $('#garden .glist').onclick = e => {
+    const b = e.target.closest('[data-item]'); if (!b) return;
+    const idx = +b.dataset.item, item = ITEMS[idx], have = idx < n;
+    audio.play('click');
+    const root = openModal(`${head(t('it_' + item.id))}<div class="sh-b garden-item-detail">${iconSVG(item.id)}<p>${esc(t(have ? 'gardenItemOwned' : 'gardenItemLocked', { n: need(Math.max(0, idx - D.garden.extra)) }))}</p>${have ? `<button class="btn b-gold g-place">${esc(t(hidden.includes(idx) ? 'gardenPlace' : 'gardenStore'))}</button>` : ''}<button class="btn b-glass" data-close>${esc(t('back'))}</button></div>`);
+    const place = $('.g-place', root);
+    if (place) place.onclick = () => {
+      D.garden.hidden = hidden.includes(idx) ? hidden.filter(x => x !== idx) : [...hidden, idx];
+      save.write(); closeModal(); renderGarden();
+    };
   };
   const bb = $('#garden .g-buy');
   if (bb)
@@ -828,7 +886,10 @@ function openSettings() {
       ${tog('hlSame', 'hlSame', 'hlSameDesc')}
       ${tog('timer', 'showTimer', 'showTimerDesc')}
       ${tog('petals', 'petals', 'petalsDesc')}
+      ${tog('autoNotes', 'autoNotes', 'autoNotesDesc')}
+      ${tog('reducedMotion', 'reducedMotion', 'reducedMotionDesc')}
       </div>
+      <div class="sect"><div class="lb">${esc(t('background'))}</div><div class="background-options">${seg('background', [['living', t('backgroundLiving')], ['classic', t('backgroundClassic')], ...SEASONS.map(s => [s.id, t('s_' + s.id)])])}</div><small class="muted">${esc(t('backgroundDesc'))}</small></div>
       <div class="sect"><div class="lb">${esc(t('volume'))}</div>${slidersHTML(st, { music: t('music'), sound: t('sound') }, { music: IC.music, sfx: IC.sound })}</div>
       <div class="sect"><div class="lb">${esc(t('howTo'))}</div><p class="howto">${esc(t('howToText'))}</p><button class="btn b-glass s-tut">${IC.play}<span>${esc(t('tutAgain'))}</span></button></div>
     </div>`,
@@ -836,7 +897,7 @@ function openSettings() {
       onClose: () => {
         save.write();
         if (board.visible) board.render();
-        if (S.view === 'menu') renderMenu();
+    if (S.view === 'menu') renderMenu();
       },
     },
   );
@@ -1147,6 +1208,7 @@ function openAchievements() {
 // ---------- запуск ----------
 export function initApp() {
   scene = new Scene();
+  backdrop = new Backdrop();
   applySettings();
   initVolume(save.data.settings);
   sdk.noAds = !!save.data.noAds;
@@ -1161,7 +1223,7 @@ export function initApp() {
     opt: (k) => save.data.settings[k],
     hintCost,
     payHint,
-    blocked: () => !!S.modal || sdk.adActive,
+    blocked: () => !!S.modal || sdk.adActive || sdk.platformPaused || externalPauses.size > 0 || document.hidden,
     burst: (x, y, n, sp) => scene.burst(x, y, n, sp),
     onEvent: (name, data) => {
       if (name === 'pause') setGameplay();
@@ -1202,15 +1264,23 @@ export function initApp() {
     } else audio.resume('hidden');
     setGameplay();
   });
-  window.addEventListener('blur', () => audio.suspend('blur'));
-  window.addEventListener('focus', () => audio.resume('blur'));
+  window.addEventListener('blur', () => { externalPauses.add('blur'); audio.suspend('blur'); persist(); setGameplay(); });
+  window.addEventListener('focus', () => { externalPauses.delete('blur'); audio.resume('blur'); setGameplay(); });
   sdk.on('pause', () => {
+    externalPauses.add('sdk');
     audio.suspend('sdk');
+    persist();
     sdk.gameplay(false);
   });
   sdk.on('resume', () => {
+    externalPauses.delete('sdk');
     audio.resume('sdk');
     setGameplay();
+  });
+  if (sdk.platformPaused) { externalPauses.add('sdk'); audio.suspend('sdk'); }
+  window.addEventListener('pagehide', () => { persist(); save.write(); });
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.body.classList.remove('garden-walk');
   });
   document.addEventListener('contextmenu', (e) => e.preventDefault());
   document.addEventListener('selectstart', (e) => e.preventDefault());

@@ -5,6 +5,14 @@ export const SKINS = [
   { id: 'stone', price: 900 },
   { id: 'sakura', price: 1200 },
   { id: 'ink', price: 1800 },
+  { id: 'jade', price: 750 },
+  { id: 'lotus', price: 1000 },
+  { id: 'porcelain', price: 1100 },
+  { id: 'maple', price: 1300 },
+  { id: 'lavender', price: 1400 },
+  { id: 'midnight', price: 1600 },
+  { id: 'snow', price: 850 },
+  { id: 'matcha', price: 950 },
   { id: 'gold', price: 0, premium: true },
 ];
 
