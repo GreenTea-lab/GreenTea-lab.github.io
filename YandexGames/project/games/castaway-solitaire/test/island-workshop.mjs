@@ -42,6 +42,12 @@ try {
   assert.equal(await page.locator('[data-guide-notice]').getAttribute('data-kind'),'decor');
   await page.locator('.guide-dismiss').tap();
   await page.locator('.guide-dismiss').tap();
+  // Manual mode freezes the opening camera move until it is advanced here.
+  await page.evaluate(()=>{
+    const island=__game.island;
+    for(let i=0;island.camT&&i<40;i++)island.update(.05);
+    island.render();
+  });
   const targetActor=id=>page.evaluate(id=>{
     const I=__game.island;
     I.update(.05);
