@@ -128,13 +128,18 @@ try{
  // Resident simulation after every building is complete: no water/building penetration or jumps.
  const movement=await f2.evaluate(()=>{
   const I=__game.island;I.setStages(Object.fromEntries(Object.keys(I.spots).map(k=>[k,3])));
-  const stats=I.walkers.map(w=>({id:w.id,distance:0,invalid:0,maxStep:0}));
+  const stats=I.walkers.map(w=>({id:w.id,distance:0,invalid:0,maxStep:0,unexpectedSteps:0}));
   for(let k=0;k<4800;k++){
    const old=I.walkers.map(w=>({x:w.x,z:w.z}));I.update(.05);
-   I.walkers.forEach((w,i)=>{const d=Math.hypot(w.x-old[i].x,w.z-old[i].z);stats[i].distance+=d;stats[i].maxStep=Math.max(stats[i].maxStep,d);if(!I.walkable(w.x,w.z)||!Number.isFinite(w.m.position.y))stats[i].invalid++;});
+   I.walkers.forEach((w,i)=>{
+    const d=Math.hypot(w.x-old[i].x,w.z-old[i].z),stat=stats[i];
+    stat.distance+=d;stat.maxStep=Math.max(stat.maxStep,d);
+    if(d>w.speed*.05+.003)stat.unexpectedSteps++;
+    if(!I.walkable(w.x,w.z)||!Number.isFinite(w.m.position.y))stat.invalid++;
+   });
   }return stats;
  });
- assert.ok(movement.every(x=>x.distance>5&&x.invalid===0&&x.maxStep<.06),JSON.stringify(movement));
+ assert.ok(movement.every(x=>x.distance>5&&x.invalid===0&&x.unexpectedSteps===0),JSON.stringify(movement));
  fs.writeFileSync(`${out}/residents.json`,JSON.stringify(movement,null,2));await ctx.close();
  report.push({name:'first-win-build-ads-cosmetics-cloud-stories-residents',passed:true});
  for(const ads of ['false','error','timeout']){

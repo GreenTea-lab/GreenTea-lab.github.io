@@ -49,18 +49,27 @@ try {
     for(let i=0;island.camT&&i<40;i++)island.update(.05);
     island.render();
   });
-  const targetActor=id=>page.evaluate(id=>{
+  const targetActor=(id,pan=false)=>page.evaluate(({id,pan})=>{
     const I=__game.island;
     I.update(.05);
-    I.render();
     const actor=I.allActors().find(w=>w.id===id);
     const {x,y,z}=actor.m.position;
-    const p=I.project(x,y+(actor.species?.length ? .32 : .66),z);
-    for(const dy of [0,-4,4,-8,8])for(const dx of [0,-4,4,-8,8]){
-      const x=p.x+dx,y=p.y+dy;
-      if(document.elementFromPoint(x,y)?.id==='c'&&I.pickIsland(x,y)?.actor===actor)return {x,y};
+    const height=actor.species ? .32 : .66;
+    const angles=pan?[I.cam.yaw,I.cam.yaw+Math.PI]:[I.cam.yaw];
+    for(const yaw of angles){
+      if(pan){
+        I.camT=null;
+        Object.assign(I.cam,{yaw,tx:x,ty:y+height,tz:z});
+        I.applyCam();
+      }
+      I.render();
+      const p=I.project(x,y+height,z);
+      for(const dy of [0,-4,4,-8,8,-12,12])for(const dx of [0,-4,4,-8,8]){
+        const sx=p.x+dx,sy=p.y+dy;
+        if(document.elementFromPoint(sx,sy)?.id==='c'&&I.pickIsland(sx,sy)?.actor===actor)return {x:sx,y:sy};
+      }
     }
-  },id);
+  },{id,pan});
   const resident=await targetActor('robin');
   assert.ok(resident,'A visible point hits Robinson');
   await page.touchscreen.tap(resident.x,resident.y);
@@ -167,7 +176,8 @@ try {
   });
   assert.deepEqual(celebration, {celebrating:true, valid:true});
   assert.ok(await page.evaluate(()=>__game.island.lastArrivals.some(actor=>actor.ru==='Попугай')));
-  const parrot=await targetActor('parrot-0');
+  // The parrot may leave the narrow portrait construction view as it explores.
+  const parrot=await targetActor('parrot-0',true);
   assert.ok(parrot,'A visible point hits the parrot after building the hut');
   await page.touchscreen.tap(parrot.x,parrot.y);
   assert.match(await page.locator('.actor-speech').textContent(),/Кар-р/);

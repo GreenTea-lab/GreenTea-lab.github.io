@@ -2,7 +2,11 @@ import {Box3,Vector3} from 'three';
 import {IC} from '../src/icons.js';
 window.__icons=IC;
 window.auditIsland=I=>{
- const solids=Object.entries(I.projObjs).map(([id,o])=>{o.grp.updateMatrixWorld(true);return {id,box:new Box3().setFromObject(o.grp.children[0])};});
+ const solids=Object.entries(I.projObjs).map(([id,o])=>{
+  o.grp.updateMatrixWorld(true);
+  // Rotating blades form a cross, so measure their vertices rather than rotating their square bounds.
+  return {id,box:new Box3().setFromObject(o.model,id==='windmill')};
+ });
  const overlaps=[],buried=[],decor=[];
  const entries=I.staticEntries.map((e,i)=>({id:'decor-'+i,box:new Box3(new Vector3(e.minX,e.minY,e.minZ),new Vector3(e.maxX,e.maxY,e.maxZ))}));
  const penetrates=(a,b)=>a.min.x<b.max.x-.005&&a.max.x>b.min.x+.005&&a.min.z<b.max.z-.005&&a.max.z>b.min.z+.005&&a.min.y<b.max.y-.005&&a.max.y>b.min.y+.005;
