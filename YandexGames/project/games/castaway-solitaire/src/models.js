@@ -752,7 +752,13 @@ export function parrot() {
   v.set(0, 3, 3, C.dark);
   v.box(-1, 1, 0, -1, 2, 1, C.blue);
   v.box(2, 1, 0, 2, 2, 1, C.blue);
-  v.box(0, -2, -1, 1, -1, -1, C.teal);
+  v.box(0, -1, -2, 1, 0, -1, C.teal);
+  for (const [shin, foot, side] of [[0, -1, -1], [1, 2, 1]]) {
+    v.box(shin, -1, 0, foot, -1, 0, C.orange);
+    v.box(foot, -2, -1, foot, -2, 2, C.orange);
+    v.set(foot + side, -2, 1, 0xffb969);
+    v.set(foot, -2, 2, 0xffb969);
+  }
   v.set(0, 4, 2, C.white);
   v.set(1, 4, 2, C.white);
   return v;

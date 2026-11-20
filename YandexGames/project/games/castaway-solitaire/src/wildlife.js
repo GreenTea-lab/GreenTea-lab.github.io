@@ -1,5 +1,5 @@
 export const WILDLIFE = [
- {id:'parrot',ru:'Попугай',en:'Parrot',requires:['hut',0],count:1,speed:1.2,scale:1.35},
+ {id:'parrot',ru:'Попугай',en:'Parrot',requires:['hut',0],count:1,speed:.68,scale:1.35},
  {id:'hedgehog',ru:'Ёжик',en:'Hedgehog',requires:['garden',0],count:1,speed:.6,scale:1.5},
  {id:'monkey',ru:'Обезьянки',en:'Monkeys',requires:['garden',1],count:2,speed:1.25,scale:1.22},
  {id:'dog',ru:'Пёс Боцман',en:'Bosun the dog',requires:['hut',2],count:1,speed:1.05,scale:1.25},

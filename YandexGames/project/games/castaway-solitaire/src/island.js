@@ -1237,9 +1237,11 @@ export class Island {
       return false;
     }
     if(social)this.lookAtActor(w,social.partner.x,social.partner.z,dt);
-    const bounce=Math.abs(Math.sin(phase*9))*(w.species ? .19 : .08);
+    const parrot=w.species==='parrot';
+    const sway=Math.sin(phase*(parrot ? 4.5 : 9));
+    const bounce=Math.abs(sway)*(parrot ? .055 : w.species ? .19 : .08);
     w.m.rotation.x=social&&!w.species?Math.sin(phase*5)*.23:0;
-    w.m.rotation.z=Math.sin(phase*9)*.14;
+    w.m.rotation.z=sway*(parrot ? .07 : .14);
     w.m.position.set(w.x,this.ground(w.x,w.z)+bounce,w.z);
     return true;
   }
@@ -1478,11 +1480,16 @@ export class Island {
           }
         }
       }
-      const hopper=w.species==='parrot'||w.species==='monkey'||w.species==='rabbit';
-      w.ph+=dt*(moving?(hopper?10.5:9):1.5);
+      const parrot=w.species==='parrot';
+      const hopper=w.species==='monkey'||w.species==='rabbit';
+      const pace=parrot ? 5.6 : hopper ? 10.5 : 9;
+      w.ph+=dt*(moving ? pace : 1.5);
       const ground=this.ground(w.x,w.z);w.y=Math.max(ground,(w.y??ground)+(ground-(w.y??ground))*Math.min(1,dt*12));
-      w.m.rotation.z=moving?Math.sin(w.ph)*.035:0;
-      const hop=moving?Math.abs(Math.sin(w.ph))*(hopper ? .32 : w.child ? .1 : .045):0;
+      const stride=Math.sin(w.ph);
+      w.m.rotation.z=moving?stride*.035:0;
+      const height=parrot ? .15 : hopper ? .32 : w.child ? .1 : .045;
+      const lift=parrot ? stride**2 : Math.abs(stride);
+      const hop=moving ? lift*height : 0;
       w.m.position.set(w.x,w.y+hop,w.z);
     }
     // огни, маяк, звери
