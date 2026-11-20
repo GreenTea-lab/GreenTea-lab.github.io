@@ -533,7 +533,7 @@ export class Island {
     const spots = [];
     for (let i=-NX+1; i<NX; i++) for (let j=-NZ+1; j<NZ; j++) {
       const x=(i+.5)*TS,z=(j+.5)*TS;
-      if (hash(i,j,553) > .16 + .15*vnoise(x,z,2) || this.ground(x,z) < .9 ||
+      if (hash(i,j,553) > .20 + .18*vnoise(x,z,2) || this.ground(x,z) < .9 ||
           !this.isLand(x,z,.11) || this.onPath(x,z) || this.nearSpot(x,z,.25) ||
           this.staticEntries.some(entry => !entry.player && !entry.water && contains(entry,x,z,.12))) continue;
       spots.push({x,z});
