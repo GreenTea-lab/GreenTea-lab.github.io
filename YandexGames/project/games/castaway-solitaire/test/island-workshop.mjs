@@ -37,7 +37,7 @@ try {
       adults:walkers.length,land:landAnimals.map(w=>w.species),turtles:turtles.length,gulls:gulls.length};
   });
   assert.ok(nature.naturalPlants >= 24 && nature.hillPlants >= 7 && nature.grass >= 100, JSON.stringify(nature));
-  assert.deepEqual([nature.rocky,nature.adults,nature.land,nature.turtles,nature.gulls],[0,2,['crab'],0,2]);
+  assert.deepEqual([nature.rocky,nature.adults,nature.land,nature.turtles,nature.gulls],[0,2,['crab'],0,1]);
   await page.waitForSelector('.logo-hidden',{state:'attached'});
   assert.equal(await page.locator('[data-guide-notice]').getAttribute('data-kind'),'decor');
   await page.locator('.guide-dismiss').tap();

@@ -68,6 +68,7 @@ export class UI {
     return `<button class="chip hit" data-a="build">${IC.star}<b id="starsN">${fmt(save.stars())}</b></button>`;
   }
   refreshTop() {
+    this.buildMarkers=null;
     const c = this.root.querySelector('#coinsN');
     if (c) c.textContent = fmt(save.data.coins);
     const s = this.root.querySelector('#starsN');
@@ -201,7 +202,7 @@ export class UI {
     });
     this.refreshTop();
     this.bub.innerHTML = '';
-    this._bubKey = '';
+    this.buildMarkers=null;
   }
   acknowledgeGuide(kind) {
     const key=kind+'Guide';
@@ -271,35 +272,39 @@ export class UI {
   updateBubble() {
     this.updateActorSpeech();
     if (this.screen !== 'home' || this.modalOpen || this.g.decorSelection) {
-      if (this.bub.innerHTML) this.bub.innerHTML = '';
-      this._bubKey = '';
+      if(this.bub.firstChild)this.bub.replaceChildren();
+      this.buildMarkers=null;
       return;
     }
-    const list = this.bubbleList();
-    const key = list.map((n) => n.p.id + n.cost + n.ok).join();
-    if (key !== this._bubKey) {
-      this._bubKey = key;
+    const island=this.g.island, {yaw,pitch,dist,tx,ty,tz}=island.cam;
+    const view=[island,island.w,island.h,yaw,pitch,dist,tx,ty,tz];
+    if(!this.buildMarkers){
+      const list=this.bubbleList();
       this.bub.innerHTML = list
         .map((n) => `<button class="bubble hit ${n.ok ? 'ok' : ''}" data-id="${n.p.id}">${n.ok ? IC.hammer : ''}<span>${esc(t('p_' + n.p.id))}</span><span class="cost">${IC.star}${n.cost}</span></button>`)
         .join('');
-      this.bub.querySelectorAll('.bubble').forEach((b) => (b.onclick = () => this.project(b.dataset.id)));
+      const entries=Array.from(this.bub.children,(button,i)=>{
+        const id=list[i].p.id,stage=save.data.stages[id];
+        button.onclick=()=>this.project(id);
+        const lift=id==='lookout'||id==='beacon' ? stage?4.6:1.4 : stage?1.8:1.3;
+        return {button,spot:island.spots[id],lift};
+      });
+      this.buildMarkers={entries,view:[]};
     }
-    const bs = this.bub.children;
-    list.forEach((n, i) => {
-      const b = bs[i];
-      if (!b) return;
-      const sp = this.g.island.spots[n.p.id];
-      const stg = save.data.stages[n.p.id];
-      const h = n.p.id === 'lookout' || n.p.id === 'beacon' ? (stg ? 4.6 : 1.4) : stg ? 1.8 : 1.3;
-      const pt = this.g.island.project(sp.x, sp.y + h, sp.z);
-      // не даём метке уйти за край экрана, а стрелка всё равно смотрит на площадку
-      const hw = b.offsetWidth / 2 + 8;
-      const x = Math.max(hw, Math.min(window.innerWidth - hw, pt.x));
-      b.style.left = x + 'px';
-      b.style.top = pt.y + 'px';
-      b.style.setProperty('--ax', Math.max(-hw + 22, Math.min(hw - 22, pt.x - x)) + 'px');
-      b.style.display = pt.vis ? '' : 'none';
-    });
+    const markers=this.buildMarkers;
+    if(view.every((value,i)=>value===markers.view[i]))return;
+    if(island.w!==markers.view[1]||island.h!==markers.view[2]){
+      for(const entry of markers.entries)entry.halfWidth=entry.button.offsetWidth/2+8;
+    }
+    markers.view=view;
+    for(const {button,spot,lift,halfWidth} of markers.entries){
+      const pt=island.project(spot.x,spot.y+lift,spot.z);
+      const x=Math.max(halfWidth,Math.min(island.w-halfWidth,pt.x));
+      button.style.left=x+'px';
+      button.style.top=pt.y+'px';
+      button.style.setProperty('--ax',Math.max(-halfWidth+22,Math.min(halfWidth-22,pt.x-x))+'px');
+      button.style.visibility=pt.vis ? '' : 'hidden';
+    }
   }
 
   actorSpeech(mesh,text) {

@@ -681,48 +681,60 @@ for(const p of WORLD_PROJECTS)B[p.id]=s=>worldBuilding(p.kind,s,C);
 export const BUILD = B;
 
 // ---------- жители и звери ----------
+function form(v,cx,cy,cz,rx,ry,rz,paint) {
+  const color=typeof paint==='function' ? paint : ()=>paint;
+  for(let x=Math.ceil(cx-rx);x<=cx+rx;x++){
+    for(let y=Math.ceil(cy-ry);y<=cy+ry;y++){
+      for(let z=Math.ceil(cz-rz);z<=cz+rz;z++){
+        if(((x-cx)/rx)**2+((y-cy)/ry)**2+((z-cz)/rz)**2<=1)v.set(x,y,z,color(x,y,z));
+      }
+    }
+  }
+}
+
 export function person(look) {
   const v = new Vox();
   const { shirt, hair, skin = 0xf3c9a1, pants = 0x5a6e9a, hat = null, beard = false } = look;
-  const shoe = 0x6b4a32;
-  v.box(1, 0, 2, 1, 0, 3, shoe);
-  v.box(3, 0, 2, 3, 0, 3, shoe);
-  v.box(1, 1, 2, 1, 2, 2, pants);
-  v.box(3, 1, 2, 3, 2, 2, pants);
-  v.box(1, 3, 1, 3, 5, 3, shirt);
-  v.set(2, 3, 3, pants);
-  v.box(0, 4, 2, 0, 5, 2, shirt);
-  v.box(4, 4, 2, 4, 5, 2, shirt);
-  v.set(0, 3, 2, skin);
-  v.set(4, 3, 2, skin);
-  v.box(0, 6, 0, 4, 10, 4, skin);
-  v.box(0, 11, 0, 4, 11, 4, hair);
-  v.box(0, 7, 0, 4, 10, 0, hair);
-  v.box(0, 9, 1, 0, 10, 4, hair);
-  v.box(4, 9, 1, 4, 10, 4, hair);
-  v.box(1, 10, 4, 3, 10, 4, hair);
-  v.set(1, 7, 4, 0x2a2430);
-  v.set(1, 8, 4, 0x2a2430);
-  v.set(3, 7, 4, 0x2a2430);
-  v.set(3, 8, 4, 0x2a2430);
-  v.set(0, 7, 4, 0xf6b8b0);
-  v.set(4, 7, 4, 0xf6b8b0);
+  const shoe=0x654736;
+  for(const side of [-1,1]){
+    v.box(side,0,-1,side*2,1,2,(x,y)=>y===0?0x493833:shoe);
+    v.box(side,2,-1,side*2,5,1,pants);
+    v.box(side*3,6,-1,side*4,8,1,shirt);
+    v.box(side*4,4,0,side*4,6,1,skin);
+    v.set(side*3,4,1,skin);
+  }
+  form(v,0,7,0,3.6,3.2,2.45,(x,y,z)=>y<=5 ? pants : jitter(shirt,x,y,z,.045));
+  v.box(-2,5,2,2,5,2,shoe);
+  v.set(0,5,2,0xd6ab55);
+  v.box(-1,9,-1,1,11,1,skin);
+  v.set(0,9,2,skin);
+  form(v,0,13,0,3.6,3.55,3.15,(x,y,z)=>y>=15||(z<0&&y>=12)||(Math.abs(x)>=3&&y>=13) ? hair : skin);
+  for(const side of [-1,1]){
+    v.set(side*4,12,0,skin);
+    v.set(side*3,12,0,skin);
+    v.set(side,13,3,0x322630);
+    v.set(side*2,12,3,0xdba182);
+  }
+  v.set(0,12,3,skin);
+  v.set(0,11,3,beard?hair:0xb76961);
   if (beard) {
-    v.box(1, 6, 4, 3, 6, 4, hair);
-    v.box(0, 6, 3, 0, 7, 3, hair);
-    v.box(4, 6, 3, 4, 7, 3, hair);
+    v.box(-2,11,2,2,11,2,hair);
+    v.box(-1,10,2,1,10,2,hair);
   }
   if (hat === 'straw') {
-    v.box(-1, 12, -1, 5, 12, 5, C.thatch);
-    v.box(0, 13, 0, 4, 13, 4, C.thatchD);
-    v.box(1, 14, 1, 3, 14, 3, C.thatch);
+    form(v,0,16,0,5.2,.6,4.7,(x,y,z)=>jitter(C.thatch,x,y,z,.07));
+    v.box(-2,17,-2,2,17,2,0x9c6540);
+    form(v,0,18,0,2.9,1.6,2.7,0xe9bd6b);
   } else if (hat === 'captain') {
-    v.box(0, 12, 0, 4, 13, 4, 0x2f3e66);
-    v.box(0, 12, 4, 4, 12, 5, 0x222a44);
-    v.set(2, 13, 4, C.yellow);
+    form(v,0,16,0,4.1,2,3.35,(x,y,z)=>y===16?0x394365:0x546a90);
+    v.box(-2,16,2,2,16,4,0x292c46);
+    v.set(0,17,3,C.yellow);
   } else if (hat === 'flower') {
-    v.set(4, 11, 3, C.pink);
-    v.set(4, 11, 4, C.yellow);
+    v.set(3,15,1,C.pink);
+    v.set(3,14,2,C.pink);
+    v.set(3,15,2,C.yellow);
+    v.set(3,15,3,C.pink);
+    v.set(3,16,2,C.pink);
   }
   return v;
 }
@@ -748,12 +760,6 @@ export function parrot() {
   const scarlet=0xd83f37, crimson=0xb6283c, crown=0xf65b3b;
   const gold=0xf0ad39, blue=0x2a71b2, deepBlue=0x264987;
   const ivory=0xffdfac, skin=0xffe8cd, charcoal=0x312c38;
-  function plumage(cx, cy, cz, rx, ry, rz, color) {
-    for(let x=Math.ceil(cx-rx);x<=cx+rx;x++)
-      for(let y=Math.ceil(cy-ry);y<=cy+ry;y++)
-        for(let z=Math.ceil(cz-rz);z<=cz+rz;z++)
-          if(((x-cx)/rx)**2+((y-cy)/ry)**2+((z-cz)/rz)**2<=1)v.set(x,y,z,color(x,y,z));
-  }
   // Leaning body, rounded head and tapered tail, with +Z at the beak.
   for(let z=-13;z<=-4;z++){
     const half=z>=-7?2:z>=-10?1:0, y=Math.floor(4+(z+13)*.31);
@@ -761,12 +767,12 @@ export function parrot() {
     if(y>Math.floor(4+(z+12)*.31))v.set(0,y-1,z,deepBlue);
     if(z>=-8)v.set(0,y+1,z,scarlet);
   }
-  plumage(0,7,-1,3.25,4.6,4.6,(x,y,z)=>z>=0 ? scarlet : crimson);
-  plumage(0,10,1,2.65,3.55,3.05,(x,y,z)=>z>=1 ? crown : scarlet);
-  plumage(0,13,2.6,3.2,3.3,3.25,(x,y,z)=>y>=14 ? crown : scarlet);
+  form(v,0,7,-1,3.25,4.6,4.6,(x,y,z)=>z>=0 ? scarlet : crimson);
+  form(v,0,10,1,2.65,3.55,3.05,(x,y,z)=>z>=1 ? crown : scarlet);
+  form(v,0,13,2.6,3.2,3.3,3.25,(x,y,z)=>y>=14 ? crown : scarlet);
   for(const side of [-1,1]){
     // Scapulars, gold coverts and navy-edged flight feathers.
-    plumage(side*2.6,7,-2.25,1.55,3,4.55,(x,y,z)=>{
+    form(v,side*2.6,7,-2.25,1.55,3,4.55,(x,y,z)=>{
       const feather=z+(y-7)*.65;
       if(feather>-.7)return y>8?scarlet:crimson;
       if(feather>-2.95)return gold;
@@ -796,94 +802,133 @@ export function parrot() {
 }
 
 export function wingBird() {
-  // чайка: тело + крылья (крылья машут через масштаб по Y)
   const v = new Vox();
-  v.box(-1, 0, -2, 1, 1, 2, C.white);
-  v.set(0, 1, 3, C.white);
-  v.set(0, 1, 4, C.orange);
-  v.box(-1, 0, -3, 1, 0, -3, 0xb0b8c4);
+  form(v,0,0,0,2.3,1.55,4.6,(x,y)=>y>0 ? 0xb9c5d1 : 0xf9f5ea);
+  form(v,0,1,3.2,1.5,1.6,2.1,0xfff9ea);
+  v.box(-1,0,-5,1,0,-3,0xc8d0d9);
+  v.box(0,1,4,0,1,6,0xf2b34f);
+  v.set(0,0,5,0xd08a47);
+  for(const x of [-1,1])v.set(x,1,4,0x343946);
   return v;
 }
 export function wing(side) {
   const v = new Vox();
-  for (let i = 1; i <= 5; i++) v.box(side * i, 0, -1, side * i, 0, i < 4 ? 1 : 0, i === 5 ? 0x8f99a8 : C.white);
+  for(let i=0;i<=8;i++){
+    const front=1-Math.floor(i/3), back=front-3+Math.floor(i/4);
+    v.box(side*i,0,back,side*i,0,front,(x,y,z)=>i>=6 ? (i===7&&z===front?0xe9e8e1:0x505b6b) : z===back?0x8898aa:0xb8c6d2);
+    if(i===1||i===2)v.set(side*i,1,front,0xc8d1d9);
+  }
   return v;
 }
 
 export function crab() {
   const v = new Vox();
-  v.box(-2, 0, -1, 2, 1, 1, C.red);
-  v.set(-1, 2, 1, C.dark), v.set(1, 2, 1, C.dark);
-  v.set(-3, 1, 2, C.redD), v.set(3, 1, 2, C.redD);
-  v.set(-3, 0, 0, C.redD), v.set(3, 0, 0, C.redD), v.set(-3, 0, -1, C.redD), v.set(3, 0, -1, C.redD);
+  form(v,0,2,0,4,2,3.2,(x,y,z)=>y>=3?0xf2764b:jitter(0xd94e39,x,y,z,.075));
+  for(const side of [-1,1]){
+    for(const z of [-2,-1,1]){
+      v.box(side*2,1,z,side*4,1,z,0xcf543d);
+      v.box(side*4,0,z,side*5,0,z,0xb74337);
+      v.set(side*4,0,z+1,0xe47250);
+    }
+    v.box(side*2,2,2,side*4,2,2,0xe45c40);
+    v.box(side*4,2,3,side*4,3,5,0xed7049);
+    v.box(side*3,2,3,side*3,3,4,0xe65d3e);
+    v.set(side*3,2,5,0xe09669);
+    v.box(side*2,3,1,side*2,4,1,0xe88750);
+    v.set(side*2,5,1,0xffe1a7);
+    v.set(side*2,5,2,0x3a2827);
+  }
   return v;
 }
 
 export function goat() {
   const v = new Vox();
-  v.box(-1, 2, -3, 1, 4, 2, C.white);
-  for (const [x, z] of [[-1, -3], [1, -3], [-1, 2], [1, 2]]) v.box(x, 0, z, x, 1, z, 0xd9d2c4);
-  v.box(-1, 4, 3, 1, 6, 5, C.white);
-  v.set(-1, 7, 3, 0x9a8a78), v.set(1, 7, 3, 0x9a8a78);
-  v.set(-1, 5, 6, C.dark), v.set(1, 5, 6, C.dark);
-  v.set(0, 3, 5, 0xd9d2c4);
-  v.set(0, 3, -4, 0xd9d2c4);
+  const fleece=0xefe5cf, shadow=0xcab896;
+  form(v,0,5,-1,2.6,2.75,4.5,(x,y,z)=>jitter(y>4?fleece:shadow,x,y,z,.07));
+  form(v,0,7,3,1.7,3.2,2.4,fleece);
+  form(v,0,8,5,1.85,2.1,2.5,(x,y,z)=>z>6?0xbba898:fleece);
+  for(const side of [-1,1]){
+    for(const z of [-3,2])v.box(side,0,z,side,4,z,(x,y)=>y===0?0x54433a:shadow);
+    v.box(side,10,4,side,12,4,0xae9678);
+    v.set(side,12,3,0x79675b);
+    v.box(side*2,8,4,side*3,8,4,0xab907b);
+    v.set(side*2,8,5,C.dark);
+  }
+  v.box(0,5,6,0,7,6,shadow);
+  v.box(0,6,-6,0,6,-4,fleece);
+  v.set(0,7,-6,fleece);
   return v;
 }
 
 export function chicken() {
   const v = new Vox();
-  v.box(-1, 1, -1, 1, 3, 1, C.white);
-  v.box(0, 3, 1, 0, 4, 2, C.white);
-  v.set(0, 5, 2, C.red);
-  v.set(0, 4, 3, C.orange);
-  v.set(0, 0, 0, C.orange);
+  form(v,0,4,-1,2.8,2.9,3.5,(x,y,z)=>y>3?0xfaf2dd:0xceba9b);
+  form(v,0,6,2,1.5,2.2,2,0xffeed2);
+  form(v,0,7,3,1.65,1.75,1.75,0xfff3dc);
+  v.box(0,8,2,0,9,4,0xd6493d);
+  v.set(0,10,3,0xf15c43);
+  v.box(0,7,4,0,7,5,0xe8a647);
+  v.set(0,6,4,0xc74038);
+  v.box(0,5,-5,0,7,-3,0xad9475);
+  for(const side of [-1,1]){
+    v.set(side,7,4,0x362629);
+    v.box(side,0,0,side,2,0,0xc7884d);
+    v.set(side,0,1,0xe3a35e);
+    v.box(side*2,4,-3,side*2,4,0,0xebd7b6);
+  }
   return v;
 }
 
 export function turtle() {
   const v = new Vox();
-  v.box(-3, 0, -3, 3, 1, 3, 0x749754);
-  v.box(-3, 2, -2, 3, 2, 2, 0x588647);
-  v.box(-2, 3, -2, 2, 3, 2, (x,y,z)=>(x+z)%2===0?0x88b85a:0x709e51);
-  v.box(-1, 4, -1, 1, 4, 1, 0x7ea747);
-  v.set(0,0,-4,0xa5c77a);
+  form(v,0,1,0,4.8,1.55,5.5,(x,y,z)=>y===0?0xa4b981:0x637b51);
+  form(v,0,2.4,0,4.65,2.35,5.1,(x,y,z)=>{
+    const rim=(x/4.6)**2+(z/5.1)**2;
+    if(rim>.73)return 0xc49d60;
+    const seam=x===0||z===0||Math.abs(x)+Math.abs(z)===4;
+    return seam?0x556e49:jitter(0x8f9c55,x,y,z,.09);
+  });
+  v.set(0,1,-6,0x819d65);
   return v;
 }
 export function turtleHead() {
   const v=new Vox();
-  v.box(-1,0,0,1,1,2,0xa5c77a);
-  v.set(-1,1,2,C.dark);
-  v.set(1,1,2,C.dark);
-  v.set(0,0,3,0x88ac63);
+  form(v,0,0,1.5,1.8,1.5,2.15,(x,y,z)=>jitter(y<0?0xb3bf8d:0x809f67,x,y,z,.09));
+  for(const x of [-1,1]){
+    v.set(x,1,2,0xb9c58c);
+    v.set(x,1,3,0x28362d);
+  }
+  v.set(0,0,3,0x5e7455);
   return v;
 }
 export function turtleFlipper(side, rear) {
   const v=new Vox();
-  const span=rear?2:3;
+  const span=rear?3:5;
   for(let x=0;x<=span;x++){
-    v.set(x*side,0,-Math.floor(x/2),x===span?0x7da85e:0xa5c77a);
-    if(x<span)v.set(x*side,0,1-Math.floor(x/2),0x8eb870);
+    const sweep=-Math.floor(x/2);
+    v.box(x*side,0,sweep-1,x*side,0,sweep+(x<span?1:0),(xx,y,z)=>jitter(z===sweep?0x82a475:0x587d56,xx,y,z,.09));
   }
   return v;
 }
 export function monkey() {
-  const v=new Vox(),brown=0x895738,skin=0xdcb287;
-  v.box(-2,2,-1,2,5,1,brown);
-  v.box(-1,3,2,1,5,2,skin);
-  v.box(-2,6,-1,2,9,2,0x996744);
-  v.box(-1,6,3,1,8,3,skin);
+  const v=new Vox(),brown=0x835742,skin=0xdfb289;
+  form(v,0,4,0,2.8,3.3,2.3,(x,y,z)=>z>1&&Math.abs(x)<2?0xb37f59:brown);
+  form(v,0,8.5,1,3,2.6,2.7,(x,y,z)=>z>2&&y<10?skin:0xa16d4e);
   for(const side of [-1,1]){
-    v.box(side*3,7,0,side*3,8,1,skin);
-    v.box(side*3,2,0,side*3,5,1,brown);
-    v.set(side*3,2,1,skin);
-    v.box(side,0,0,side,1,1,brown);
-    v.set(side,8,3,C.dark);
+    v.box(side*3,8,0,side*4,9,1,brown);
+    v.set(side*4,8,2,skin);
+    v.box(side*2,3,0,side*3,6,1,brown);
+    v.box(side*3,2,1,side*3,3,2,skin);
+    v.box(side,0,-1,side*2,2,1,brown);
+    v.box(side,0,2,side*2,0,2,skin);
+    v.set(side,9,3,C.dark);
   }
-  v.set(0,6,3,0x673e2a);
-  v.box(0,2,-4,0,2,-2,brown);
-  v.box(0,3,-5,0,5,-5,brown);
-  v.set(0,5,-4,brown);
+  v.box(-1,7,3,1,8,4,skin);
+  v.set(0,7,4,0x935645);
+  v.box(0,3,-6,0,3,-2,brown);
+  v.box(0,4,-6,0,7,-6,brown);
+  v.box(0,7,-6,0,7,-4,brown);
+  v.set(0,6,-4,0xbb8661);
   return v;
 }
 
@@ -911,30 +956,126 @@ export function cloud(seed) {
   return v;
 }
 
-// New island companions, in the same voxel scale as the original animals.
-export function hedgehog(){
- const v=new Vox();v.box(-2,1,-3,2,3,1,0x795a43);v.box(-1,4,-2,1,4,0,0x92735a);
- // Alternating light-tipped spines, pale face and small dark paws.
- for(let z=-3;z<=1;z++)for(let x=-2;x<=2;x++)if((x+z)%2===0)v.set(x,Math.abs(x)<2?4:3,z,0xc5ad86);
- v.box(-1,1,2,1,2,3,0xe3c79f);v.set(0,1,4,C.dark);v.set(-1,2,3,C.dark);v.set(1,2,3,C.dark);
- for(const x of[-1,1])for(const z of[-2,1])v.set(x,0,z,0x594232);return v;
+export function hedgehog() {
+  const v=new Vox();
+  form(v,0,3,-1,3.65,2.95,4.65,(x,y,z)=>{
+    if(y<=2||z>=2)return 0xac8768;
+    return (x+z)%3===0?0xc4ac86:0x725441;
+  });
+  for(let z=-4;z<=1;z++){
+    for(let x=-2;x<=2;x++){
+      if((x+z)%2!==0)continue;
+      let y=6;
+      while(y>3&&!v.has(x,y,z))y--;
+      if(v.has(x,y,z))v.set(x,y+1,z,0xc5ac86);
+    }
+  }
+  form(v,0,2,3.2,2.3,1.8,2.6,0xd3b598);
+  v.set(0,2,6,0x3c2c28);
+  for(const side of [-1,1]){
+    v.set(side,3,5,0x342720);
+    v.box(side,0,-2,side,1,-2,0x6d5348);
+    v.box(side,0,2,side,1,2,0x6d5348);
+  }
+  return v;
 }
-export function squirrel(){
- const v=new Vox();v.box(-1,1,-1,1,4,1,0xb96932);v.box(0,2,2,0,4,2,0xf0cf99);v.box(-1,4,1,1,6,3,0xd7843e);
- for(const x of[-1,1]){v.set(x,7,1,0xb96932);v.set(x,5,3,C.dark);v.box(x,0,0,x,0,2,0x8f4c2c);}v.set(0,4,4,0x51392c);
- v.box(-1,2,-3,1,5,-2,0xa9592d);v.box(-2,5,-4,1,8,-3,0xd7843e);v.box(-1,8,-3,1,9,-2,0xe5a15d);return v;
+
+export function squirrel() {
+  const v=new Vox(), rust=0xb86d3d;
+  form(v,0,3,0,2.2,2.9,2.45,(x,y,z)=>z>1?0xe7be88:rust);
+  form(v,0,6,1.35,2,2.1,2.2,(x,y,z)=>z>=2&&y<6?0xecc89b:0xd1834e);
+  form(v,0,5,-4.3,2.15,4,2.2,(x,y,z)=>y>=6?0xd99556:0x9d5b3c);
+  v.box(0,1,-5,0,2,-1,0xa6623d);
+  v.box(0,7,-4,0,8,-2,0xd69255);
+  for(const x of [-1,1]){
+    v.box(x,7,0,x,9,1,rust);
+    v.set(x,8,1,0xd69e77);
+    v.set(x,6,3,0x3a2825);
+    v.box(x,0,0,x,1,2,0x9d5938);
+    v.box(x,2,2,x,3,3,0xb97249);
+  }
+  v.set(0,5,4,0x75413a);
+  return v;
 }
-export function dog(){
- const v=new Vox();v.box(-2,3,-3,2,5,3,0xbc8b51);for(const x of [-2,2])for(const z of [-2,2])v.box(x,0,z,x,2,z,0x8c623b);
- v.box(-2,5,3,2,7,5,0xc99d66);v.box(-1,5,6,1,6,7,0xe6c899);v.set(0,6,8,C.dark);for(const x of [-2,2]){v.set(x,7,6,C.dark);v.box(x,5,3,x,7,4,0x795137);}v.box(0,5,-5,0,7,-4,0xbc8b51);return v;
+
+export function dog() {
+  const v=new Vox(), tawny=0xb9834f, chest=0xe6c59b;
+  form(v,0,5,-1.5,2.8,2.7,5.3,(x,y,z)=>y>=5&&z<1?0x8c573e:tawny);
+  form(v,0,6.5,3,2.2,2.65,2.5,(x,y,z)=>y===7?0x398995:chest);
+  form(v,0,8,4.5,2.5,2.35,2.5,0xc38956);
+  form(v,0,7,7,1.9,1.5,2.1,chest);
+  v.box(-1,7,8,1,7,9,0x372b30);
+  for(const side of [-1,1]){
+    for(const z of [-4,2]){
+      v.box(side*2,1,z,side*2,5,z,tawny);
+      v.box(side*2,0,z,side*2,0,z+1,0x805839);
+    }
+    v.box(side*2,8,3,side*3,9,4,0x875537);
+    v.box(side*3,6,4,side*3,8,5,0x8f5938);
+    v.set(side*2,8,6,0x3d2826);
+  }
+  v.box(0,5,-8,0,6,-6,tawny);
+  v.box(0,7,-8,0,7,-7,0xdaa471);
+  return v;
 }
-export function rabbit(){
- const v=new Vox();v.box(-2,1,-2,2,3,2,0xd6bba4);v.box(-1,3,2,1,5,4,0xe3cdb9);
- for(const x of [-1,1]){v.box(x,6,2,x,9,3,0xe3cdb9);v.set(x,7,3,0xd99f9f);v.set(x,4,5,C.dark);v.box(x,0,1,x,0,3,0xe3cdb9);}v.set(0,3,5,0xd99999);v.set(0,2,-3,C.white);return v;
+
+export function rabbit() {
+  const v=new Vox(), gray=0xb4a398;
+  form(v,0,3.5,-1,3.15,3.05,3.5,(x,y,z)=>y>3?gray:0xd2c2af);
+  form(v,0,6,2.4,2.45,2.4,2.55,(x,y,z)=>y<5?0xe5d4c3:0xc3b1a5);
+  form(v,0,3,-4.3,1.55,1.5,1.6,0xeee4d5);
+  for(const side of [-1,1]){
+    v.box(side,7,1,side*2,11,2,gray);
+    v.box(side*2,9,2,side*2,11,2,0xc88f91);
+    v.set(side*2,12,1,gray);
+    v.set(side*2,6,4,0x3d2f2d);
+    v.box(side*2,0,-1,side*2,1,1,0xcbb9a8);
+    v.box(side,0,2,side,1,3,0xdfcabb);
+    v.set(side,2,2,0xcbb9a8);
+  }
+  v.set(0,5,5,0xb98083);
+  return v;
 }
-export function deer(){
- const v=new Vox();v.box(-2,4,-3,2,6,3,0xc69766);for(const x of[-2,2])for(const z of[-2,2])v.box(x,0,z,x,3,z,0x8d633d);
- v.box(-1,6,3,1,10,4,0xc69766);v.box(-1,9,4,1,11,6,0xd5aa7c);v.set(0,9,7,C.dark);v.set(-1,10,7,C.dark);v.set(1,10,7,C.dark);
- for(const x of[-2,2]){v.set(x,11,4,0xb88652);v.box(x,12,3,x,15,3,0x936a40);v.set(x*2,14,3,0x936a40);}v.set(0,5,-4,0xe9d5b6);return v;
+
+export function deer() {
+  const v=new Vox(), tan=0xc29060, dark=0x77604a;
+  form(v,0,6,-2,2.7,2.5,4.8,(x,y,z)=>y<=5?0xd0ac83:tan);
+  form(v,0,8.5,2.15,1.75,3.4,2.25,(x,y,z)=>z>3?0xe1bd91:tan);
+  form(v,0,11.2,4,2,2.1,2.45,0xc99867);
+  form(v,0,10,5.5,1.5,1.4,2,0xd9b286);
+  v.set(0,10,7,0x3e302b);
+  v.box(0,6,-7,0,7,-6,0xe6c8a0);
+  for(const side of [-1,1]){
+    for(const z of [-4,1]){
+      v.box(side,3,z,side*2,5,z,tan);
+      v.box(side*2,0,z,side*2,3,z,(x,y)=>y===0?0x433b39:dark);
+    }
+    v.box(side*2,12,3,side*3,12,3,tan);
+    v.set(side*3,12,4,0xd6b18a);
+    v.set(side*2,11,5,0x3f302c);
+    v.box(side,11,2,side,16,2,dark);
+    v.box(side,14,1,side*2,14,2,dark);
+    v.set(side*2,15,1,dark);
+    v.set(side,17,2,dark);
+  }
+  return v;
 }
-export function duck(){const v=new Vox();v.box(-2,1,-2,2,3,2,0xe4d0a1);v.box(-1,3,2,1,5,3,0x4e8f64);v.box(-1,3,4,1,3,5,0xeeb15b);v.set(-1,4,4,C.dark);v.set(1,4,4,C.dark);v.box(-1,0,1,1,0,2,0xeeb15b);v.set(0,3,-3,0xb6a17d);return v;}
+
+export function duck() {
+  const v=new Vox();
+  form(v,0,3.5,-1.7,3.25,2.6,4.7,(x,y,z)=>y>4?0x938679:0xd0bc9e);
+  form(v,0,6,2.3,1.8,2.8,2,0x846052);
+  v.box(-1,6,2,1,6,4,0xf2e1c5);
+  form(v,0,7.5,3,1.85,1.85,2.15,(x,y,z)=>y>7?0x408474:0x356f68);
+  v.box(-1,7,4,1,7,6,0xe3bb65);
+  v.box(0,6,5,0,6,6,0xb58249);
+  v.box(0,4,-7,0,5,-5,0x817067);
+  for(const side of [-1,1]){
+    v.set(side,8,4,0x232d2a);
+    v.box(side*2,4,-4,side*3,4,-1,0x7e6f68);
+    v.box(side*3,4,-3,side*3,4,-2,0x5e79ac);
+    v.box(side,0,-1,side,2,-1,0xd39358);
+    v.box(side,0,0,side*2,0,1,0xdfa963);
+  }
+  return v;
+}

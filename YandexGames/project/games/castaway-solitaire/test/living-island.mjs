@@ -11,7 +11,11 @@ try{
  await p.goto(R.base+'/dist-vk-single/index.html');await p.waitForFunction(()=>window.__game?.ui&&!document.querySelector('#loader'));await p.addScriptTag({url:R.base+'/'+out+'/audit.js'});
  assert.equal(await p.evaluate(()=>document.documentElement.dataset.theme),'island');
  const starting=await p.evaluate(()=>{const I=__game.island;I.update(.05);I.render();__game.ui.home();document.documentElement.dataset.motion='off';return {people:I.walkers.length,crabs:I.crabs.length,gulls:I.gulls.length,turtles:I.turtles.length,land:I.landAnimals.map(w=>w.species),total:I.population.animals+I.gulls.length};});
- assert.deepEqual(starting,{people:2,crabs:1,gulls:2,turtles:0,land:['crab'],total:3});
+ assert.deepEqual(starting,{people:2,crabs:1,gulls:1,turtles:0,land:['crab'],total:2});
+ assert.ok(await p.evaluate(()=>{
+   const [a,b]=__game.island.walkers;
+   return Math.hypot(a.x-b.x,a.z-b.z)>6;
+ }));
  await p.screenshot({path:out+'/starting-island.png'});report.push({starting});
  let previousAnimals=0,previousPeople=0;
  for(let tier=0;tier<=5;tier++){
@@ -20,16 +24,30 @@ try{
    const audit=await p.evaluate(stage=>{const I=__game.island,stages=Object.fromEntries(Object.keys(I.spots).map(id=>[id,stage]));__save.data.stages=stages;I.setStages(stages);I.update(.05);return auditIsland(I);},stage);
    report.push({tier,stage,audit});assert.ok(audit.trees>=10,`Trees restored on coast ${tier}: ${audit.trees}`);assert.deepEqual(audit.overlaps,[],`Models ${tier}/${stage}`);assert.deepEqual(audit.buried,[],`Terrain ${tier}/${stage}`);assert.deepEqual(audit.decor,[],`Decoration ${tier}/${stage}`);
   }
-  const inhabitants=await p.evaluate(()=>({people:__game.island.walkers.length,animals:__game.island.population.animals,types:[...new Set(__game.island.landAnimals.map(w=>w.species))]}));
+  const inhabitants=await p.evaluate(()=>{
+    const I=__game.island, xs=I.walkers.map(w=>w.x),zs=I.walkers.map(w=>w.z);
+    const types=[...I.landAnimals.map(w=>w.species),...I.gulls.map(w=>w.userData.species),...I.turtles.map(w=>w.userData.species)];
+    return {people:I.walkers.length,animals:types.length,types,
+      spreadX:Math.max(...xs)-Math.min(...xs),spreadZ:Math.max(...zs)-Math.min(...zs),grids:I.navCache.size};
+  });
+  assert.equal(inhabitants.types.length,new Set(inhabitants.types).size);
   assert.ok(inhabitants.people>=previousPeople&&inhabitants.animals>=previousAnimals);previousPeople=inhabitants.people;previousAnimals=inhabitants.animals;
+  assert.ok(inhabitants.grids<=4,JSON.stringify(inhabitants));
+  if(tier===5)assert.ok(inhabitants.spreadX>=17&&inhabitants.spreadZ>=9,JSON.stringify(inhabitants));
   const motion=await p.evaluate(seconds=>{
    const I=__game.island,stats=I.allActors().map(w=>({id:w.id,species:w.species||'person',distance:0,minX:w.x,maxX:w.x,minZ:w.z,maxZ:w.z,invalid:0,buried:0,jumps:0}));let minTurtleDot=1,turtleCollisions=0;
+   const times=[];
    I.update(.05);
    for(let k=0;k<seconds*20;k++){
-    const old=I.allActors().map(w=>({x:w.x,z:w.z})),turtles=I.turtles.map(m=>m.position.clone());I.update(.05);
+    const old=I.allActors().map(w=>({x:w.x,z:w.z})),turtles=I.turtles.map(m=>m.position.clone());
+    const start=performance.now();
+    I.update(.05);
+    times.push(performance.now()-start);
     I.allActors().forEach((w,i)=>{const s=stats[i],d=Math.hypot(w.x-old[i].x,w.z-old[i].z);s.distance+=d;s.minX=Math.min(s.minX,w.x);s.maxX=Math.max(s.maxX,w.x);s.minZ=Math.min(s.minZ,w.z);s.maxZ=Math.max(s.maxZ,w.z);if(!(w.species?I.faunaWalkable(w.x,w.z,w.radius+.06):I.walkable(w.x,w.z)))s.invalid++;if(w.m.position.y<I.ground(w.x,w.z)-.001)s.buried++;if(d>(w.speed||.9)*.05+.003)s.jumps++;});
     I.turtles.forEach((m,i)=>{const dx=m.position.x-turtles[i].x,dz=m.position.z-turtles[i].z,len=Math.hypot(dx,dz);minTurtleDot=Math.min(minTurtleDot,(dx*Math.sin(m.rotation.y)+dz*Math.cos(m.rotation.y))/len);if(I.ground(m.position.x,m.position.z)>.2||I.staticEntries.some(b=>m.position.x>b.minX-.6&&m.position.x<b.maxX+.6&&m.position.z>b.minZ-.6&&m.position.z<b.maxZ+.6))turtleCollisions++;});
-   }return {stats,minTurtleDot,turtleCollisions};
+   }
+   times.sort((a,b)=>a-b);
+   return {stats,minTurtleDot,turtleCollisions,updateP95:times[Math.floor(times.length*.95)],updateP99:times[Math.floor(times.length*.99)]};
   },tier===0||tier===5?180:30);
   report.push({tier,inhabitants,motion});fs.writeFileSync(out+'/progress.json',JSON.stringify(report,null,2));
   assert.ok(motion.stats.every(s=>s.invalid===0&&s.buried===0&&s.jumps===0),JSON.stringify(motion));assert.ok(motion.stats.filter(s=>s.species==='crab').every(s=>s.distance>(tier===0||tier===5?8:1)),JSON.stringify(motion.stats));assert.ok(motion.minTurtleDot>.995);assert.equal(motion.turtleCollisions,0);

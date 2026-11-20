@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { hash, Vox } from './vox.js';
 import * as M from './models.js';
-import { findRoute } from './navigation.js';
+import { NavigationGrid } from './navigation.js';
 import { DECOR_BY_ID, meadowFlower } from './decor.js';
 import { PROJECTS } from './data.js';
 
@@ -16,6 +16,10 @@ const RZ = 11;
 export const WL = 0.3; // уровень воды
 const NX = 46; // колонки от -NX до NX
 const NZ = 36;
+const NAV_SAMPLES_X = NX * 4 + 1;
+const OBSTACLE_BUCKET = 3;
+const OBSTACLE_PAD = 1.4;
+const distance2 = (a,b) => (a.x-b.x)**2 + (a.z-b.z)**2;
 
 function vnoise(x, z, s) {
   const xi = Math.floor(x / s);
@@ -84,6 +88,8 @@ export class Island {
     this.stages = {};
     this.projObjs = {};
     this.builtAreas = [];
+    this.navCache = new Map();
+    this.navTerrain = new Uint8Array(NAV_SAMPLES_X * (NZ * 4 + 1));
     this.projectAreas = new Map();
     this.trimmedGrass = new Set(trimmedGrass);
     this.walkers = [];
@@ -105,6 +111,7 @@ export class Island {
     this.makeClouds();
     this.makeBirds();
     this.makeCritters();
+    this.makeActorShadows();
     // камера: сферические координаты вокруг центра
     this.cam = { yaw: 0.25, pitch: 0.82, dist: 36*worldScale(this.expansion), tx: 0, ty: 0.6, tz: 0.5 };
     this.camT = null; // цель плавного перелёта
@@ -139,6 +146,8 @@ export class Island {
     const s = (this.sun = new THREE.DirectionalLight(0xfff0d8, 2.4));
     s.position.set(14, 26, 10);
     s.castShadow = this.quality !== 'low';
+    s.shadow.autoUpdate = false;
+    s.shadow.needsUpdate = true;
     const ms = this.quality === 'high' ? 2048 : 1024;
     s.shadow.mapSize.set(ms, ms);
     const sc = s.shadow.camera;
@@ -498,13 +507,14 @@ export class Island {
       entry.nav = movedBox(shape.nav,x,z);
       entry.groundCover=!!def.groundCover;
       this.staticEntries.push(entry);
-      const group = this.meshOf(shape.model);
+      const group = this.meshOf(shape.model,!entry.groundCover);
       group.position.set(x+shape.ox,entry.base,z+shape.oz);
       group.rotation.y=shape.rot;
       this.scene.add(group);
       this.playerDecor.set(item.id, {group, entry, item});
       Object.assign(item, {x, z});
-      this.refreshPaths();
+      if(entry.blocks)this.refreshPaths();
+      if(!entry.groundCover)this.sun.shadow.needsUpdate=true;
       this.maskGrass();
       return true;
     };
@@ -527,7 +537,12 @@ export class Island {
     placed.group.traverse(object => object.geometry?.dispose());
     this.staticEntries.splice(this.staticEntries.indexOf(placed.entry), 1);
     this.playerDecor.delete(id);
-    if(refresh){this.refreshPaths();this.maskGrass();}
+    if(placed.entry.blocks)this.invalidateNavigation();
+    if(!placed.entry.groundCover)this.sun.shadow.needsUpdate=true;
+    if(refresh){
+      if(placed.entry.blocks)this.refreshPaths();
+      this.maskGrass();
+    }
     return true;
   }
   storeDecorForProject(id, stage) {
@@ -544,11 +559,17 @@ export class Island {
     return stored;
   }
   refreshPaths() {
-    this.navCache?.clear();
+    this.invalidateNavigation();
     for (const actor of this.landAnimals ? this.allActors() : []) {
       actor.route = [];
       this.relocateWalker(actor);
+      actor.wait = .2 + Math.random() * .85;
     }
+  }
+
+  invalidateNavigation() {
+    this.navCache.clear();
+    this.obstacleBuckets = null;
   }
   makeGrass() {
     const vertices = [], colors = [];
@@ -851,45 +872,65 @@ export class Island {
   }
 
   makeBirds() {
-    this.gulls = [];
     const body = this.geomOf(M.wingBird());
     const wl = this.geomOf(M.wing(-1));
     const wr = this.geomOf(M.wing(1));
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-    for (let i = 0; i < 2; i++) {
-      const g = new THREE.Group();
-      g.add(new THREE.Mesh(body.geo, mat));
-      const l = new THREE.Mesh(wl.geo, mat);
-      const r = new THREE.Mesh(wr.geo, mat);
-      l.position.x = -0.1;
-      r.position.x = 0.1;
-      g.add(l, r);
-      g.userData = {
-        m:g,species:'gull',l,r,a:.55+i*2.6,rad:(10+i*3)*worldScale(this.expansion),
-        y:7.6+i*1.8,sp:.18+i*.05,cx:i*3-1.5,cz:1,
-      };
-      g.scale.setScalar(1.6);
-      this.scene.add(g);
-      this.gulls.push(g);
-    }
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(body.geo,mat));
+    const l=new THREE.Mesh(wl.geo,mat),r=new THREE.Mesh(wr.geo,mat);
+    l.position.x=-.15;
+    r.position.x=.15;
+    g.add(l,r);
+    g.userData={
+      m:g,species:'gull',l,r,a:.55,rad:10*worldScale(this.expansion),
+      y:7.6,sp:.18,cx:-1.5,cz:1,
+    };
+    g.scale.setScalar(1.22);
+    this.scene.add(g);
+    this.gulls=[g];
   }
 
-  actorMesh(v,scale=1,shadow=true){
-    const m=this.meshOf(v,shadow),box=new THREE.Box3().setFromObject(m),center=box.getCenter(new THREE.Vector3());
+  actorMesh(v,scale=1){
+    const m=this.meshOf(v,false),box=new THREE.Box3().setFromObject(m),center=box.getCenter(new THREE.Vector3());
     for(const child of m.children){child.position.x-=center.x;child.position.z-=center.z;child.position.y-=box.min.y;}
     m.scale.setScalar(scale);const size=box.getSize(new THREE.Vector3());m.userData.bodyRadius=Math.hypot(size.x,size.z)*scale/2;return m;
   }
   makeCritters(){this.crabs=[];this.landAnimals=[];this.turtles=[];this.updateWildlife({});}
   allActors(){return [...this.walkers,...this.landAnimals];}
+  makeActorShadows() {
+    const g=new THREE.PlaneGeometry(1,1);
+    g.rotateX(-Math.PI/2);
+    const m=new THREE.MeshBasicMaterial({color:0x29352e,map:this.puffTex,transparent:true,opacity:.23,depthWrite:false});
+    const mesh = new THREE.InstancedMesh(g,m,M.PEOPLE.length+WILDLIFE.length+1);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    mesh.frustumCulled=false;
+    mesh.count=0;
+    this.actorShadows={mesh,transform:new THREE.Object3D()};
+    this.scene.add(mesh);
+  }
+
+  updateActorShadows(actors) {
+    const {mesh,transform}=this.actorShadows;
+    mesh.count=actors.length;
+    for(let i=0;i<actors.length;i++){
+      const actor=actors[i], width=Math.max(.5,actor.radius*1.7);
+      transform.position.set(actor.x,this.ground(actor.x,actor.z)+.016,actor.z);
+      transform.scale.set(width,1,width*.82);
+      transform.updateMatrix();
+      mesh.setMatrixAt(i,transform.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate=true;
+  }
   makeTurtle(lane) {
-    const m=this.actorMesh(M.turtle(),1.1,false);
+    const m=this.actorMesh(M.turtle(),.92);
     const head=this.meshOf(M.turtleHead(),false);
-    head.position.set(-.05,.10,.31);
+    head.position.set(-.05,.12,.39);
     m.add(head);
     const flippers=[];
     for (const side of [-1,1])for(const rear of [false,true]){
       const part=this.meshOf(M.turtleFlipper(side,rear),false);
-      part.position.set(side*.28-.05,-.025,rear?-.26:.14);
+      part.position.set(side*.36-.05,.005,rear?-.31:.23);
       flippers.push({part,side,rear});
       m.add(part);
     }
@@ -897,22 +938,22 @@ export class Island {
     return m;
   }
   updateWildlife(stages){
-    // Keep the beach varied rather than filling it with identical crabs.
-    const crabCount=1+Math.floor(this.expansion/2);
-    for(let i=this.crabs.length;i<crabCount;i++){
-      const m=this.actorMesh(M.crab(),1.2,false),w={id:'crab-'+i,species:'crab',m,x:0,z:3+i*.7,route:[],wait:i*.3,ph:i,speed:1.35,radius:.44};
+    if(!this.crabs.length){
+      const m=this.actorMesh(M.crab(),.74),w={id:'crab-0',species:'crab',m,x:0,z:3,route:[],wait:.3,ph:0,speed:1.35,radius:.44};
       w.radius=m.userData.bodyRadius;m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);this.crabs.push(m);
     }
-    for(const def of WILDLIFE)if(def!==TURTLE&&wildlifeUnlocked(def,stages))for(let i=0;i<def.count;i++){
-      const id=def.id+'-'+i;if(this.landAnimals.some(w=>w.id===id))continue;
+    for(const def of WILDLIFE){
+      if(def===TURTLE||!wildlifeUnlocked(def,stages)||this.landAnimals.some(w=>w.species===def.id))continue;
+      const id=def.id+'-0';
       const near=this.spots[def.requires[0]],m=this.actorMesh(M[def.id](),def.scale);
       const radius=def.id==='parrot' ? m.userData.bodyRadius : def.id==='deer' ? .6 : .46;
-      const w={id,species:def.id,m,x:near.x+2+i*.8,z:near.z+2,route:[],wait:i*.4,ph:i,speed:def.speed,radius};
+      const w={id,species:def.id,m,x:near.x+2,z:near.z+2,route:[],wait:Math.random(),ph:Math.random()*6,speed:def.speed,radius};
       m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);
       if(def.id==='parrot')this.parrot=m;
     }
-    const turtleCount=wildlifeUnlocked(TURTLE,stages)?1+(this.expansion>=2?1:0)+(this.expansion>=5?1:0):0;
-    while(this.turtles.length<turtleCount){const m=this.makeTurtle(this.turtles.length);this.scene.add(m);this.turtles.push(m);}
+    if(!this.turtles.length&&wildlifeUnlocked(TURTLE,stages)){
+      const m=this.makeTurtle(0);this.scene.add(m);this.turtles.push(m);
+    }
     this.turtle=this.turtles[0];
     this.population={people:this.walkers.length,animals:this.landAnimals.length+this.turtles.length};
   }
@@ -952,14 +993,18 @@ export class Island {
       this.placeProject(p, s, p.id === animateId);
     }
     this.builtAreas=Object.values(this.projObjs).map(p=>p.area).filter(Boolean);
-    this.navCache?.clear();
+    this.invalidateNavigation();
     this.maskGrass();
     this.updatePeople(stages);
     this.updateWildlife(stages);
     const animalsAfter=new Set(this.landAnimals.map(w=>w.species));
     if(this.turtles.length)animalsAfter.add(TURTLE.id);
     this.lastArrivals=[...M.PEOPLE.filter(p=>this.walkers.some(w=>w.id===p.id)&&!peopleBefore.has(p.id)).map(p=>({ru:p.nameRU||'Новый житель',en:p.nameEN||'New neighbour'})),...WILDLIFE.filter(d=>animalsAfter.has(d.id)&&!animalsBefore.has(d.id)).map(d=>({ru:d.ru,en:d.en}))];
-    for(const w of this.allActors()){w.route=[];w.celebration=null;w.social=null;this.relocateWalker(w);w.wait=.3;}
+    for(const w of this.allActors()){
+      w.route=[];w.celebration=null;w.social=null;
+      this.relocateWalker(w);
+      w.wait=.2+Math.random()*.85;
+    }
     if (animateId && this.spots[animateId]) this.gatherForBuild(animateId);
     return stored;
   }
@@ -967,15 +1012,16 @@ export class Island {
     const site = this.spots[id];
     const distance = actor => Math.hypot(actor.x - site.x, actor.z - site.z);
     const residents = [...this.walkers].sort((a, b) => distance(a) - distance(b)).slice(0, 4);
+    if(!residents.length)return;
     const actors = this.allActors();
     const claimed = [];
+    const grid=this.navigation(residents[0]);
     for (const resident of residents) {
       const options = [];
       for (let z = -8; z <= 8; z += .5) {
         for (let x = -8; x <= 8; x += .5) {
           const point = {x: site.x + x, z: site.z + z};
-          if (Math.hypot(x, z) > 8 || !this.walkable(point.x, point.z) ||
-              !this.actorRegionHas(resident, point.x, point.z) ||
+          if (Math.hypot(x, z) > 8 || !grid.has(point.x,point.z) ||
               claimed.some(p => Math.hypot(p.x - point.x, p.z - point.z) < 1.1) ||
               actors.some(a => a !== resident && Math.hypot(a.x - point.x, a.z - point.z) < .85)) continue;
           // Prefer the near edge of the lot, with a short approach for the resident.
@@ -984,7 +1030,7 @@ export class Island {
       }
       options.sort((a, b) => a.score - b.score);
       for (const {point} of options.slice(0, 8)) {
-        const route = findRoute(resident, point, (x, z) => this.walkable(x, z));
+        const route = grid.route(resident,point);
         if (!route.length || route.length > 43) continue;
         resident.celebration = {site, point: route.at(-1), deadline: this.time + 9, started: null};
         resident.route = route;
@@ -1001,7 +1047,7 @@ export class Island {
     const arrived = Math.hypot(w.x - point.x, w.z - point.z) < .15;
     if (started === null && this.time < event.deadline && !arrived) {
       if (!w.route.length && w.wait <= 0) {
-        w.route = findRoute(w, point, (x, z) => this.walkable(x, z));
+        w.route = this.navigation(w).route(w,point);
         if (!w.route.length) w.celebration = null;
       }
       return false;
@@ -1069,11 +1115,15 @@ export class Island {
     }
     if (anim) {
       grp.scale.setScalar(0.01);
-      this.anims.push({ t: 0, d: 0.9, fn: (k) => grp.scale.setScalar(Math.max(0.01, easeOutBack(k))) });
+      this.anims.push({ t: 0, d: 0.9, fn: (k) => {
+        grp.scale.setScalar(Math.max(0.01,easeOutBack(k)));
+        if(k>=1)this.sun.shadow.needsUpdate=true;
+      } });
       this.puff(sp.x, sp.y + 0.3, sp.z, p.r);
     }
     this.scene.add(grp);
     this.projObjs[p.id] = o;
+    this.sun.shadow.needsUpdate=true;
   }
   markerVox(p) {
     const v = new Vox();
@@ -1113,14 +1163,25 @@ export class Island {
     const built = Object.values(stages).reduce((a, b) => a + b, 0);
     for (const def of M.PEOPLE) {
       if ((def.requires && (stages[def.requires[0]]||0)<def.requires[1]) || built < def.from || this.walkers.some((w) => w.id === def.id)) continue;
-      const scale=def.child ? .51 : .78;
+      const scale=def.child ? .44 : .64;
       const m = this.actorMesh(M.person(def.look),scale);
-      const sp = this.spots.hut;
-      const w = {id:def.id,m,child:!!def.child,lines:def.lines,radius:m.userData.bodyRadius,speed:def.child?1.14:.9,
-        x:sp.x+1.5+this.walkers.length,z:sp.z+2.2,tx:0,tz:0,wait:1+this.walkers.length,ph:Math.random()*6};
-      w.tx = w.x;
-      w.tz = w.z;
-      w.route=[];this.relocateWalker(w);w.y=this.ground(w.x,w.z);
+      const index=this.walkers.length;
+      const w = {id:def.id,m,child:!!def.child,lines:def.lines,radius:m.userData.bodyRadius,
+        speed:def.child?1.14:.9,wait:1+index*.35,ph:Math.random()*6,route:[]};
+      const sp=this.spots[def.requires?.[0]];
+      const angle = index===0 ? 2.15 : index===1 ? .78 : index*2.39996;
+      const home=sp ? {x:sp.x,z:sp.z} :
+        {x:Math.cos(angle)*this.rx*.67,z:Math.sin(angle)*this.rz*.67};
+      const points=this.navigation(w).points;
+      let best=Infinity, spawn=home;
+      for(const p of points){
+        if(this.walkers.some(other=>distance2(p,other)<6.25))continue;
+        const score=distance2(p,home);
+        if(score<best){spawn=p;best=score;}
+      }
+      Object.assign(w,spawn);
+      this.relocateWalker(w);
+      w.y=this.ground(w.x,w.z);
       m.position.set(w.x,w.y,w.z);
       this.scene.add(m);
       this.walkers.push(w);
@@ -1129,59 +1190,85 @@ export class Island {
   walkable(x,z) {
     return this.isLand(x,z,.07) && !this.blocked(x,z,.42) && Math.hypot(x-HILL.x,z-HILL.z)>HILL.r+.1 && !this.palmPos?.some(p=>Math.hypot(x-p[0],z-p[1])<.5);
   }
-  actorRegion(w){
-    this.navCache ||= new Map();const fauna=!!w.species,pad=fauna?w.radius+.06:.42,key=(fauna?'animal':'person')+pad.toFixed(3);
-    if(this.navCache.has(key))return this.navCache.get(key);
-    const valid=(x,z)=>fauna?this.faunaWalkable(x,z,pad):this.walkable(x,z),all=new Set();
-    const code=(x,z)=>x+','+z;
-    for(let x=-45;x<=45;x++)for(let z=-35;z<=35;z++)if(valid(x*.5,z*.5))all.add(code(x,z));
-    const seen=new Set();let largest=new Set();
-    for(const start of all){if(seen.has(start))continue;const group=new Set([start]),q=[start.split(',').map(Number)];seen.add(start);
-      for(let i=0;i<q.length;i++){const [x,z]=q[i];for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const next=code(x+dx,z+dz);if(seen.has(next)||!all.has(next)||!valid((x+dx*.5)*.5,(z+dz*.5)*.5))continue;seen.add(next);group.add(next);q.push([x+dx,z+dz]);}}
-      if(group.size>largest.size)largest=group;
+  navigationTerrain(x,z) {
+    const index=(z*4+NZ*2)*NAV_SAMPLES_X+x*4+NX*2;
+    let mask=this.navTerrain[index];
+    if(mask)return mask;
+    mask=1;
+    if(this.ground(x,z)>.4){
+      const land=this.shapeF(x,z), hill=Math.hypot(x-HILL.x,z-HILL.z);
+      if(land>.025&&hill>HILL.r+.15)mask|=4;
+      if(land>.07&&hill>HILL.r+.1&&!this.palmPos.some(p=>(p[0]-x)**2+(p[1]-z)**2<.25))mask|=2;
     }
-    this.navCache.set(key,largest);return largest;
+    this.navTerrain[index]=mask;
+    return mask;
   }
-  actorRegionHas(w,x,z){return this.actorRegion(w).has(Math.round(x*2)+','+Math.round(z*2));}
+
+  navigation(w) {
+    const fauna=!!w.species, clearance=fauna ? Math.ceil((w.radius+.06)*5)/5 : .42;
+    let grid=this.navCache.get(clearance);
+    if(!grid){
+      const terrain=fauna ? 4 : 2;
+      grid=new NavigationGrid((x,z)=>!!(this.navigationTerrain(x,z)&terrain)&&!this.blocked(x,z,clearance));
+      this.navCache.set(clearance,grid);
+    }
+    return grid;
+  }
+
   relocateWalker(w) {
-    const free=(x,z)=>(w.species?this.faunaWalkable(x,z,w.radius+.06):this.walkable(x,z))&&this.actorRegionHas(w,x,z);
-    if(free(w.x,w.z) && free(Math.round(w.x*2)/2,Math.round(w.z*2)/2))return;
-    for(let r=.5;r<25;r+=.5) for(let a=0;a<Math.PI*2;a+=.24){
-      const x=Math.round((w.x+Math.cos(a)*r)*2)/2,z=Math.round((w.z+Math.sin(a)*r)*2)/2;
-      if(free(x,z)){w.x=x;w.z=z;w.tx=x;w.tz=z;w.route=[];return;}
+    const grid=this.navigation(w);
+    const valid=w.species ? this.faunaWalkable(w.x,w.z,w.radius+.06) : this.walkable(w.x,w.z);
+    if(valid&&grid.has(w.x,w.z))return;
+    let best=Infinity, nearest;
+    for(const point of grid.points){
+      const score=distance2(w,point);
+      if(score<best){best=score;nearest=point;}
     }
+    if(!nearest)return;
+    Object.assign(w,nearest);
+    w.route=[];
+    w.y=this.ground(w.x,w.z);
+    w.m.position.set(w.x,w.y,w.z);
   }
-  pickTarget(w) {
-    // интересные места: перед постройками, пляж, у костра
-    const keys = Object.keys(this.spots).filter((k) => k !== 'ship' && k !== 'beacon');
+
+  pickTarget(w,actors) {
+    const grid=this.navigation(w), points=grid.points;
+    if(!points.length)return;
+    const radius=w.species==='crab' ? 18 : w.species ? 8 : 10;
     for (let i = 0; i < 30; i++) {
-      let x;
-      let z;
-      if (!w.species && Math.random() < 0.55) {
-        const s = this.spots[keys[Math.floor(Math.random() * keys.length)]];
-        const a = Math.random() * Math.PI * 2;
-        x = s.x + Math.cos(a) * (s.r + 0.9);
-        z = s.z + Math.sin(a) * (s.r + 0.9);
-      } else {
-        const a = Math.random() * Math.PI * 2;
-        const rr = (w.species?.length ? .2 : .3) + Math.random() * (w.species?.length ? .76 : .55);
-        x = Math.cos(a) * this.rx * rr;
-        z = Math.sin(a) * this.rz * rr;
-      }
-      if (!this.isLand(x, z, 0.05)) continue;
-      if (this.blocked(x, z)) continue;
-      if (Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - 0.5) continue;
-      const valid=(x,z)=>w.species?this.faunaWalkable(x,z,w.radius+.06):this.walkable(x,z);
-      if(!valid(x,z)||!this.actorRegionHas(w,x,z)||this.allActors().some(v=>v!==w&&Math.hypot((v.route.at(-1)?.x??v.x)-x,(v.route.at(-1)?.z??v.z)-z)<.9))continue;
-      const route=findRoute(w,{x,z},valid);
-      if(route.length<3)continue;
-      w.route=route;w.tx=route.at(-1).x;w.tz=route.at(-1).z;
+      const point=points[Math.floor(Math.random()*points.length)], length=distance2(w,point);
+      if(length<2.25||length>radius**2||actors.some(v=>v!==w&&distance2(v.route.at(-1)??v,point)<.81))continue;
+      const route=grid.route(w,point);
+      if(route.length<3){this.relocateWalker(w);return;}
+      w.route=route;
       return;
     }
   }
+
+  indexObstacles() {
+    const buckets=new Map();
+    const record=(area,building)=>{
+      const xMin=Math.floor((area.minX-OBSTACLE_PAD)/OBSTACLE_BUCKET),xMax=Math.floor((area.maxX+OBSTACLE_PAD)/OBSTACLE_BUCKET);
+      const zMin=Math.floor((area.minZ-OBSTACLE_PAD)/OBSTACLE_BUCKET),zMax=Math.floor((area.maxZ+OBSTACLE_PAD)/OBSTACLE_BUCKET);
+      for(let i=xMin;i<=xMax;i++)for(let j=zMin;j<=zMax;j++){
+        const key=i*128+j;
+        let bucket=buckets.get(key);
+        if(!bucket){bucket=[];buckets.set(key,bucket);}
+        bucket.push({area,building});
+      }
+    };
+    for(const area of this.builtAreas)record(area,true);
+    for(const item of this.staticEntries)if(!item.water&&item.blocks!==false)record(item.nav,false);
+    this.obstacleBuckets=buckets;
+  }
+
   blocked(x,z,pad=.22) {
-    if(this.builtAreas.some(area=>contains(area,x,z,pad)&&area.minY<this.ground(x,z)+1))return true;
-    return this.staticEntries.some(b=>!b.water&&b.blocks!==false&&contains(b.nav,x,z,pad));
+    if(pad>OBSTACLE_PAD)return this.builtAreas.some(a=>contains(a,x,z,pad)&&a.minY<this.ground(x,z)+1)||
+      this.staticEntries.some(b=>!b.water&&b.blocks!==false&&contains(b.nav,x,z,pad));
+    if(!this.obstacleBuckets)this.indexObstacles();
+    const key=Math.floor(x/OBSTACLE_BUCKET)*128+Math.floor(z/OBSTACLE_BUCKET);
+    const nearby=this.obstacleBuckets.get(key);
+    return !!nearby?.some(({area,building})=>contains(area,x,z,pad)&&(!building||area.minY<this.ground(x,z)+1));
   }
 
   lookAtActor(w,x,z,dt) {
@@ -1274,6 +1361,7 @@ export class Island {
     const shadows = this.quality !== 'low' && !background;
     if (this.renderer.shadowMap.enabled !== shadows) {
       this.renderer.shadowMap.enabled = shadows;
+      if(shadows)this.sun.shadow.needsUpdate=true;
       this.scene.traverse(object => {
         if (object.material) object.material.needsUpdate = true;
       });
@@ -1461,7 +1549,7 @@ export class Island {
       turtle.rotation.z=Math.sin(stroke)*.06;
       u.head.rotation.x=.14*Math.sin(stroke*.55)-(reacting ? .26 : 0);
       u.head.rotation.y=Math.sin(t*.85+u.phase)*.14;
-      u.head.position.z=.31+Math.sin(stroke)*.025;
+      u.head.position.z=.39+Math.sin(stroke)*.025;
       for(const {part,side,rear} of u.flippers){
         const phase=stroke+(rear?1.4:0);
         part.rotation.y=side*(.22+Math.sin(phase)*(rear ? .24 : .44));
@@ -1471,11 +1559,18 @@ export class Island {
     // Residents follow connected dry routes; movement never projects through buildings.
     const actors = this.allActors();
     this.startSocial();
+    let routePlanned=false;
     for (const w of actors) {
       if (this.updateCelebration(w,dt)||this.animateActorReaction(w,dt)) continue;
       let moving=false;
       if(w.wait>0) w.wait-=dt;
-      else if(!w.route?.length){this.pickTarget(w);if(!w.route?.length)w.wait=.6;}
+      else if(!w.route.length){
+        if(!routePlanned){
+          this.pickTarget(w,actors);
+          routePlanned=true;
+          if(!w.route.length)w.wait=.6;
+        }
+      }
       else {
         const target=w.route[0],dx=target.x-w.x,dz=target.z-w.z,d=Math.hypot(dx,dz);
         if(d<.045){w.route.shift();if(!w.route.length && !w.celebration)w.wait=w.species?.length ? .3+Math.random()*1.2 : 2+Math.random()*4;}
@@ -1500,6 +1595,7 @@ export class Island {
       const hop=moving ? lift*height : 0;
       w.m.position.set(w.x,w.y+hop,w.z);
     }
+    this.updateActorShadows(actors);
     // огни, маяк, звери
     for (const k in this.projObjs) {
       const o = this.projObjs[k];
