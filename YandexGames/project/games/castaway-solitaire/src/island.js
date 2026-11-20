@@ -1161,13 +1161,15 @@ export class Island {
   // ---------- жители ----------
   updatePeople(stages) {
     const built = Object.values(stages).reduce((a, b) => a + b, 0);
+    const previous=this.walkers.length;
     for (const def of M.PEOPLE) {
       if ((def.requires && (stages[def.requires[0]]||0)<def.requires[1]) || built < def.from || this.walkers.some((w) => w.id === def.id)) continue;
-      const scale=def.child ? .44 : .64;
+      const scale=(def.child ? .44 : .64)*(def.size??1);
       const m = this.actorMesh(M.person(def.look),scale);
       const index=this.walkers.length;
-      const w = {id:def.id,m,child:!!def.child,lines:def.lines,radius:m.userData.bodyRadius,
-        speed:def.child?1.14:.9,wait:1+index*.35,ph:Math.random()*6,route:[]};
+      const pace=def.pace??(def.child?1.14:.88+hash(index,16)*.17);
+      const w={id:def.id,m,child:!!def.child,lines:def.lines,radius:m.userData.bodyRadius,
+        pace,speed:pace,runner:def.runner??!!def.child,running:false,wait:.5+hash(index,24)*2,ph:Math.random()*6,route:[]};
       const sp=this.spots[def.requires?.[0]];
       const angle = index===0 ? 2.15 : index===1 ? .78 : index*2.39996;
       const home=sp ? {x:sp.x,z:sp.z} :
@@ -1175,9 +1177,9 @@ export class Island {
       const points=this.navigation(w).points;
       let best=Infinity, spawn=home;
       for(const p of points){
-        if(this.walkers.some(other=>distance2(p,other)<6.25))continue;
         const score=distance2(p,home);
-        if(score<best){spawn=p;best=score;}
+        if(score>=best||this.walkers.some(other=>distance2(p,other)<6.25))continue;
+        spawn=p;best=score;
       }
       Object.assign(w,spawn);
       this.relocateWalker(w);
@@ -1185,6 +1187,41 @@ export class Island {
       m.position.set(w.x,w.y,w.z);
       this.scene.add(m);
       this.walkers.push(w);
+    }
+    if(this.walkers.length>=16&&this.walkers.length!==previous)this.buildResidentBatch();
+  }
+
+  buildResidentBatch() {
+    const sources=this.walkers.map(({m})=>m.children[0]);
+    const vertices=sources.reduce((total,m)=>total+m.geometry.getAttribute('position').count,0);
+    const indices=sources.reduce((total,m)=>total+m.geometry.index.count,0);
+    const mesh=new THREE.BatchedMesh(sources.length,vertices,indices,this.mat);
+    mesh.frustumCulled=false;
+    mesh.sortObjects=false;
+    const entries=sources.map((source,i)=>{
+      source.updateMatrix();
+      const id=mesh.addInstance(mesh.addGeometry(source.geometry));
+      const actor=this.walkers[i].m;
+      actor.visible=false;
+      return {actor,local:source.matrix,id,pose:new Float64Array(6).fill(NaN)};
+    });
+    if(this.residentBatch){
+      this.scene.remove(this.residentBatch.mesh);
+      this.residentBatch.mesh.dispose();
+    }
+    this.residentBatch={mesh,entries,matrix:new THREE.Matrix4()};
+    this.scene.add(mesh);
+  }
+
+  updateResidentBatch() {
+    if(!this.residentBatch)return;
+    const {mesh,entries,matrix}=this.residentBatch;
+    for(const {actor,local,id,pose} of entries){
+      const p=actor.position,r=actor.rotation;
+      if(pose[0]===p.x&&pose[1]===p.y&&pose[2]===p.z&&pose[3]===r.x&&pose[4]===r.y&&pose[5]===r.z)continue;
+      pose[0]=p.x;pose[1]=p.y;pose[2]=p.z;pose[3]=r.x;pose[4]=r.y;pose[5]=r.z;
+      actor.updateMatrix();
+      mesh.setMatrixAt(id,matrix.multiplyMatrices(actor.matrix,local));
     }
   }
   walkable(x,z) {
@@ -1240,6 +1277,10 @@ export class Island {
       if(length<2.25||length>radius**2||actors.some(v=>v!==w&&distance2(v.route.at(-1)??v,point)<.81))continue;
       const route=grid.route(w,point);
       if(route.length<3){this.relocateWalker(w);return;}
+      if(!w.species){
+        w.running=w.runner&&Math.random()<.72;
+        w.speed=w.pace*(w.running?1.38:1);
+      }
       w.route=route;
       return;
     }
@@ -1559,6 +1600,7 @@ export class Island {
     // Residents follow connected dry routes; movement never projects through buildings.
     const actors = this.allActors();
     this.startSocial();
+    const townBusy=this.walkers.length>=16;
     let routePlanned=false;
     for (const w of actors) {
       if (this.updateCelebration(w,dt)||this.animateActorReaction(w,dt)) continue;
@@ -1573,7 +1615,14 @@ export class Island {
       }
       else {
         const target=w.route[0],dx=target.x-w.x,dz=target.z-w.z,d=Math.hypot(dx,dz);
-        if(d<.045){w.route.shift();if(!w.route.length && !w.celebration)w.wait=w.species?.length ? .3+Math.random()*1.2 : 2+Math.random()*4;}
+        if(d<.045){
+          w.route.shift();
+          if(!w.route.length&&!w.celebration){
+            const pause=w.species ? .3 : townBusy ? .55 : 1.6;
+            const variety=w.species ? 1.2 : townBusy ? 1.5 : 2.4;
+            w.wait=pause+Math.random()*variety;
+          }
+        }
         else {
           const step=Math.min((w.celebration ? 2.5 : w.speed || .9)*dt,d),nx=w.x+dx/d*step,nz=w.z+dz/d*step;
           if(!(w.species?this.faunaWalkable(nx,nz,w.radius+.06):this.walkable(nx,nz))){w.route=[];w.wait=.4;}
@@ -1585,12 +1634,14 @@ export class Island {
       }
       const parrot=w.species==='parrot';
       const hopper=w.species==='monkey'||w.species==='rabbit';
-      const pace=parrot ? 5.6 : hopper ? 10.5 : 9;
+      const running=moving&&!w.species&&w.running;
+      const pace=parrot ? 5.6 : hopper ? 10.5 : running ? 12 : 9;
       w.ph+=dt*(moving ? pace : 1.5);
       const ground=this.ground(w.x,w.z);w.y=Math.max(ground,(w.y??ground)+(ground-(w.y??ground))*Math.min(1,dt*12));
       const stride=Math.sin(w.ph);
       w.m.rotation.z=moving?stride*.035:0;
-      const height=parrot ? .15 : hopper ? .32 : w.child ? .1 : .045;
+      if(!w.species)w.m.rotation.x=running ? .11 : 0;
+      const height=parrot ? .15 : hopper ? .32 : running ? .1 : w.child ? .075 : .045;
       const lift=parrot ? stride**2 : Math.abs(stride);
       const hop=moving ? lift*height : 0;
       w.m.position.set(w.x,w.y+hop,w.z);
@@ -1605,11 +1656,16 @@ export class Island {
     }
   }
   dispose() {
+    if(this.residentBatch){
+      this.scene.remove(this.residentBatch.mesh);
+      this.residentBatch.mesh.dispose();
+    }
     const geometries=new Set(),materials=new Set(),textures=new Set([this.glowTex,this.puffTex,this.oceanU.distTex.value,this.heartTexture]);
     this.scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m){materials.add(m);if(m.map)textures.add(m.map);}});
     for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t?.dispose();this.renderer.dispose();
   }
   render() {
+    this.updateResidentBatch();
     this.renderer.render(this.scene, this.camera);
   }
 }

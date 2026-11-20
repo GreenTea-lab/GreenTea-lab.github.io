@@ -695,6 +695,7 @@ function form(v,cx,cy,cz,rx,ry,rz,paint) {
 export function person(look) {
   const v = new Vox();
   const { shirt, hair, skin = 0xf3c9a1, pants = 0x5a6e9a, hat = null, beard = false } = look;
+  const {hairStyle,clothes,gear,accent=0xd4a85b}=look;
   const shoe=0x654736;
   for(const side of [-1,1]){
     v.box(side,0,-1,side*2,1,2,(x,y)=>y===0?0x493833:shoe);
@@ -717,6 +718,19 @@ export function person(look) {
   }
   v.set(0,12,3,skin);
   v.set(0,11,3,beard?hair:0xb76961);
+  if(hairStyle==='braid'){
+    v.box(1,11,-3,2,14,-2,hair);
+    v.box(2,9,-2,2,11,-2,hair);
+    v.set(2,10,-2,accent);
+  }else if(hairStyle==='bun'){
+    form(v,0,16,-2.5,1.55,1.55,1.45,hair);
+    v.set(0,16,-1,accent);
+  }else if(hairStyle==='curls'){
+    for(const x of [-2,0,2])form(v,x,15,-1,1.45,1.6,1.8,hair);
+  }else if(hairStyle==='long'){
+    v.box(-2,9,-3,2,13,-2,hair);
+    v.box(-3,11,-2,3,13,-2,hair);
+  }
   if (beard) {
     v.box(-2,11,2,2,11,2,hair);
     v.box(-1,10,2,1,10,2,hair);
@@ -735,8 +749,51 @@ export function person(look) {
     v.set(3,15,2,C.yellow);
     v.set(3,15,3,C.pink);
     v.set(3,16,2,C.pink);
+  } else if (hat === 'kerchief') {
+    form(v,0,15,0,3.7,2.5,3.35,(x,y,z)=>(x+z+y)%4===0?shirt:accent);
+    v.box(0,10,-3,1,14,-3,accent);
+  } else if (hat === 'cap') {
+    form(v,0,16,0,3.65,1.8,3.1,accent);
+    v.box(-2,15,2,2,15,5,accent);
+  }
+  if(clothes==='apron'){
+    v.box(-2,6,2,2,7,2,accent);
+    v.box(-1,8,2,1,8,2,accent);
+    v.box(-2,3,3,2,6,3,accent);
+    v.set(1,5,3,0xf7dec0);
+  }else if(clothes==='vest'){
+    for(const side of [-1,1])v.box(side*2,6,2,side,8,2,accent);
+    v.set(0,7,2,0xe5c07e);
+  }else if(clothes==='overalls'){
+    for(const side of [-1,1])v.box(side,7,2,side,8,2,pants);
+    v.box(-1,5,2,1,7,2,pants);
+    v.set(1,7,2,accent);
+    v.set(-1,7,2,accent);
+  }else if(clothes==='tunic'){
+    form(v,0,4.5,0,3.2,2.9,2.55,(x,y,z)=>y===3?accent:shirt);
+  }
+  if(gear==='basket'){
+    v.box(4,2,1,6,4,3,(x,y,z)=>(x+z)%2===0?0xa56c40:0xc68f56);
+    v.box(4,4,1,6,4,3,0xd4a866);
+    v.box(5,3,1,5,5,1,0x99633d);
+  }else if(gear==='satchel'){
+    v.box(-3,5,2,-2,7,3,0x946039);
+    v.set(-2,7,3,0xe0b45f);
+    v.set(1,8,2,0xa9784d);
+    v.box(0,7,2,1,7,2,0xa9784d);
+    v.box(-2,6,2,0,6,2,0xa9784d);
+  }else if(gear==='book'){
+    v.box(4,3,1,5,5,2,accent);
+    v.box(5,4,2,5,5,2,0xe4cfab);
+  }else if(gear==='scarf'){
+    v.box(-1,10,2,1,10,2,accent);
+    v.box(-1,8,2,-1,9,2,accent);
   }
   return v;
+}
+
+function settler(id,nameRU,nameEN,requires,look,traits={}) {
+  return {id,nameRU,nameEN,requires,look,from:0,...traits};
 }
 
 export const PEOPLE = [
@@ -753,6 +810,37 @@ export const PEOPLE = [
   { id:'reader',nameRU:'Библиотекарь Нина',nameEN:'Librarian Nina',requires:['library',2],from:0,look:{shirt:0x9995d1,hair:0xd1c2a4,pants:0x456d71}},
   { id:'ranger',nameRU:'Следопыт Эрик',nameEN:'Ranger Eric',requires:['aviary',2],from:0,look:{shirt:0x7f9c56,hair:0x654730,pants:0xc59465,hat:'straw'}},
   { id: 'leo', look: { shirt: 0xe39775, hair: 0x66503b, pants: 0x536f62, hat:'captain',beard:true }, from: 72 },
+  // The first camp gains residents as it becomes a village.
+  settler('agnia','Агния','Agnia',['fire',2],{shirt:0xd3855e,pants:0x665767,hair:0x624033,hat:'kerchief',clothes:'apron',accent:0xe7bb77}),
+  settler('yanek','Янек','Janek',['workshop',1],{shirt:0x518678,pants:0x72664c,hair:0x49382e,skin:0xbb825f,hat:'cap',clothes:'overalls',accent:0x9e6444},{pace:1.05}),
+  settler('rita','Рита','Rita',['garden',2],{shirt:0xd8ae5c,pants:0x6b7652,hair:0x46312e,hairStyle:'braid',gear:'basket',accent:0xb54f43}),
+  settler('stefan','Стефан','Stefan',['pier',2],{shirt:0xe4ddca,pants:0x435c76,hair:0xa16d4a,hat:'cap',gear:'scarf',accent:0x974941},{pace:1.2}),
+  settler('sava','Савва','Savva',['farm',2],{shirt:0x9d9a65,pants:0x725039,hair:0xd3beb1,skin:0xb77851,hat:'straw',beard:true,clothes:'vest',accent:0x745441},{pace:.7,size:.95}),
+  // Fishing bay.
+  settler('ada','Ада','Ada',['fishmarket',1],{shirt:0xe99865,pants:0x606e8a,hair:0x623b36,hairStyle:'bun',clothes:'apron',accent:0xf2d389}),
+  settler('tariq','Тарик','Tariq',['boathouse',3],{shirt:0x88bfc0,pants:0x3c5668,hair:0x3b322f,skin:0xb57455,hat:'kerchief',gear:'satchel',accent:0x516494},{pace:1.14}),
+  settler('luk','Лука','Luka',['fishmarket',2],{shirt:0xb6a4da,pants:0x546c6b,hair:0x93694c,hairStyle:'curls',hat:'cap',accent:0xe7bb56},{child:true,pace:1.25,runner:true}),
+  settler('sima','Сима','Sima',['smokehouse',3],{shirt:0x9b6963,pants:0x5d475a,hair:0xb5a99e,hairStyle:'bun',gear:'basket',accent:0xe1ad72},{pace:.73}),
+  // Palm grove.
+  settler('nadir','Надир','Nadir',['hammock',1],{shirt:0xd0b77e,pants:0x687d76,hair:0x4e3d36,skin:0xb47455,hat:'straw',clothes:'vest',accent:0xa56860},{size:.92}),
+  settler('zoya','Зоя','Zoya',['teahouse',2],{shirt:0x8d9bc4,pants:0x6f5b78,hair:0x4b3534,hairStyle:'braid',clothes:'tunic',accent:0xe4ba7a}),
+  settler('faye','Фая','Faye',['orchard',2],{shirt:0xd2827b,pants:0x64815b,hair:0x464038,skin:0xc58765,hat:'kerchief',gear:'basket',accent:0xa6a362}),
+  settler('pavel','Павел','Pavel',['orchard',3],{shirt:0x68a2a9,pants:0x7f694f,hair:0x765140,clothes:'overalls',accent:0xd6b05f},{pace:1.2,runner:true}),
+  // Quiet harbour.
+  settler('irina','Ирина','Irina',['windmill',1],{shirt:0x77a18d,pants:0x665a62,hair:0xa46b45,hairStyle:'long',clothes:'vest',accent:0xeaa46e}),
+  settler('matvey','Матвей','Matvey',['guesthouse',1],{shirt:0x798bba,pants:0x745841,hair:0xd5cab4,beard:true,hat:'cap',gear:'scarf',accent:0x8e5964},{pace:.7,size:1.07}),
+  settler('sofia','София','Sofia',['guesthouse',2],{shirt:0xe39ea5,pants:0x8e6e89,hair:0x534035,hairStyle:'curls',clothes:'tunic',accent:0xebc676},{child:true,pace:1.26,runner:true}),
+  settler('kir','Кир','Kir',['fountain',2],{shirt:0xe9ba68,pants:0x638396,hair:0x634435,skin:0xd89e75,hat:'cap',gear:'satchel',accent:0x608379},{pace:1.22,runner:true}),
+  // Azure cape.
+  settler('mira','Мира','Mira',['observatory',1],{shirt:0x8375ae,pants:0x655a7e,hair:0x514057,hat:'kerchief',gear:'book',accent:0xe4b880}),
+  settler('boris','Борис','Boris',['library',1],{shirt:0xb98564,pants:0x535d6c,hair:0xd2c3ad,beard:true,clothes:'vest',gear:'book',accent:0x719b89},{pace:.76,size:.96}),
+  settler('polya','Поля','Polya',['aviary',1],{shirt:0x7caa77,pants:0xa87c5c,hair:0x4e3634,skin:0xd49f75,hairStyle:'braid',gear:'satchel',accent:0xca8275},{pace:1.1}),
+  settler('naomi','Наоми','Naomi',['observatory',3],{shirt:0x59838e,pants:0x5a5472,hair:0x2e292c,skin:0xa66748,hairStyle:'bun',clothes:'tunic',accent:0xcf9575},{pace:1.12}),
+  // Voyagers' garden.
+  settler('felix','Феликс','Felix',['pavilion',1],{shirt:0xe8ad62,pants:0x666886,hair:0x785849,hat:'cap',clothes:'vest',accent:0x915d74},{pace:1.15}),
+  settler('galina','Галина','Galina',['treasury',2],{shirt:0x90aaca,pants:0x6c5b78,hair:0xdbccb9,hairStyle:'bun',gear:'book',accent:0xc18762},{pace:.77}),
+  settler('aynur','Айнур','Aynur',['statue',2],{shirt:0xc17d69,pants:0x547c75,hair:0x423235,skin:0xbe7f5b,hairStyle:'long',hat:'kerchief',accent:0xd9ac67},{pace:1.04,size:1.06}),
+  settler('liza','Лиза','Liza',['pavilion',3],{shirt:0xd891b5,pants:0x8180aa,hair:0x825741,hairStyle:'braid',hat:'flower',clothes:'tunic',accent:0xeec571},{child:true,pace:1.26,runner:true}),
 ];
 
 export function parrot() {
