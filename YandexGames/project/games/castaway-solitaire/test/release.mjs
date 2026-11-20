@@ -75,7 +75,10 @@ try{
  assert.ok(await f.evaluate(()=>__game.ui.affordable()>0));
  assert.equal(await page.evaluate(()=>log.some(x=>x.handler==='VKWebAppShowNativeAds')),false);
  await page.screenshot({path:`${out}/first-win.png`});
- await f.locator('[data-a=island]').click();await f.evaluate(()=>{__game.build('hut');});await f.waitForTimeout(800);
+ await f.locator('[data-a=first-build]').click();
+ assert.equal(await f.evaluate(()=>__save.data.stages.hut),0);
+ assert.ok(await f.locator('#mod .panel h2').filter({hasText:'Хижина'}).isVisible());
+ await f.locator('[data-a=go]').click();await f.waitForTimeout(800);
  assert.equal(await f.evaluate(()=>__save.data.stages.hut),1);
  // Long ad: one request, mute, input blocked beyond the availability timeout.
  await f.evaluate(()=>{window.__CS_DEBUG.manual=false;__game.playLevel(2);});await f.waitForFunction(()=>__game.table.busy===0);

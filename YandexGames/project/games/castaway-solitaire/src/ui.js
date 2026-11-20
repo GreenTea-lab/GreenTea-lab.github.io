@@ -359,7 +359,7 @@ export class UI {
     if (!el) return;
     if (el.dataset.t === (text || '')) return;
     el.dataset.t = text || '';
-    el.innerHTML = text ? `<div class="tip">${esc(text)}</div>` : '';
+    el.innerHTML = text ? `<div class="tip">${esc(text)}${text === t('tut1') ? `<strong>${esc(t('tutExample'))}</strong>` : ''}</div>` : '';
   }
   tipBottom(texts) {
     let b = 0;
@@ -443,7 +443,8 @@ export class UI {
     });
   }
   win(r) {
-    const { n, stars, score, best, coins, canBuild } = r;
+    const { n, stars, score, best, coins, canBuild, firstProject } = r;
+    const projectName = firstProject && t('p_' + firstProject);
     const m = this.modal({
       ribbon: t('win'),
       ribbonCls: 'green',
@@ -451,11 +452,18 @@ export class UI {
         <p class="center" style="margin:0 0 6px">${esc(t('winSub', { n: r.left }))}</p>
         <div class="res"><div>${esc(t('score'))}: <b>${fmt(score)}</b>${best ? `<small>${esc(t('best'))} ${fmt(best)}</small>` : ''}</div><div>${IC.coin}<b id="wc">+${fmt(coins)}</b></div></div>
         <div class="col">${sdk.canReward()?`<button class="btn mid sea" data-a="x2">${IC.film}${esc(t('x2'))}</button>`:''}
-        <div class="row"><button class="btn big sand ${canBuild ? 'pulse' : ''}" data-a="island" style="position:relative">${IC.palm}${esc(t('toIsland'))}${canBuild ? '<span class="badge">!</span>' : ''}</button><button class="btn big green" data-a="next">${esc(t('next'))}</button></div></div>`,
+        ${firstProject ? `<p class="center first-build-note">${esc(t('firstBuildHint', {name: projectName}))}</p>
+          <button class="btn big green first-build-button" data-a="first-build">${IC.hammer}${esc(t('firstBuild', {name: projectName}))}</button>
+          <button class="btn mid sand" data-a="next">${esc(t('next'))}</button>`
+          : `<div class="row"><button class="btn big sand ${canBuild ? 'pulse' : ''}" data-a="island" style="position:relative">${IC.palm}${esc(t('toIsland'))}${canBuild ? '<span class="badge">!</span>' : ''}</button><button class="btn big green" data-a="next">${esc(t('next'))}</button></div>`}</div>`,
       close: false,
     });
     [0, 1, 2].forEach((i) => i < stars && setTimeout(() => audio.play('star', i), 250 + i * 300));
     this.bind(m, {
+      'first-build': () => {
+        m.close();
+        this.g.toIsland(false, firstProject);
+      },
       x2: (b) => {
         b.disabled = true;
         this.g.doubleReward(coins, () => {

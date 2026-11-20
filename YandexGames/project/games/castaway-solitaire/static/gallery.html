@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Остров и постройки · Пасьянс Робинзона</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#f9f2e5;color:#352d23;font:16px/1.45 system-ui,sans-serif}
+  main{max-width:1100px;margin:auto;padding:clamp(16px,4vw,38px)}
+  h1{font-size:clamp(26px,5vw,42px);margin:0 0 6px}
+  h2{font-size:23px;margin:28px 0 12px}
+  p{margin:0 0 14px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+  button{border:1px solid #bda987;background:#fffaf0;border-radius:9px;color:inherit;font:inherit;padding:8px 12px;cursor:pointer}
+  button[aria-pressed=true]{background:#186d79;border-color:#186d79;color:#fff}
+  button:focus-visible{outline:3px solid #287cba;outline-offset:2px}
+  .scene{width:100%;height:clamp(230px,55vw,490px);background:#82cfee;border-radius:18px;overflow:hidden}
+  canvas{display:block;width:100%;height:100%;touch-action:pan-y}
+  .details{color:#675841;margin-top:8px;min-height:1.5em}
+  #buildings{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,285px),1fr));gap:12px}
+  article{background:#fffaf0;border:1px solid #dfd0b6;border-radius:12px;padding:12px}
+  article h3{font-size:17px;margin:0 0 8px}
+  .models{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  figure{min-width:0;margin:0;color:#57452e;text-align:center;font-size:12px}
+  figure img{width:100%;aspect-ratio:1;display:block;background:radial-gradient(#e6f2d9,#cedfca);border-radius:8px;margin-bottom:5px}
+  #error{color:#9c3628}
+</style>
+<main>
+  <h1>Остров и постройки</h1>
+  <p>Шесть размеров острова и 75 стадий 25 построек.</p>
+  <h2>Размер острова</h2>
+  <div id="coasts" class="toolbar" aria-label="Выбор берега"></div>
+  <div class="toolbar" id="stages" aria-label="Стадия построек на острове"></div>
+  <div class="scene"><canvas id="island" aria-label="Трёхмерная модель острова"></canvas></div>
+  <p id="coast-details" class="details" aria-live="polite"></p>
+  <div class="toolbar"><button type="button" id="left" aria-label="Повернуть остров влево">↶</button><button type="button" id="right" aria-label="Повернуть остров вправо">↷</button></div>
+  <p id="error" role="status" hidden></p>
+  <h2>Все постройки</h2>
+  <div id="buildings"></div>
+</main>
+<!--GALLERY_SCRIPT-->
+</html>

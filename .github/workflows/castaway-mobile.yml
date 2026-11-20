@@ -1,0 +1,35 @@
+name: Castaway Solitaire mobile checks
+on:
+  push:
+    branches: [master, codex/castaway-first-voyage]
+    paths:
+      - 'YandexGames/project/games/castaway-solitaire/**'
+      - '.github/workflows/castaway-mobile.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    defaults:
+      run:
+        working-directory: YandexGames/project/games/castaway-solitaire
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npm run build
+      - run: |
+          if ! command -v google-chrome > /dev/null; then
+            npx playwright install --with-deps chrome
+          fi
+      - run: node test/first-voyage-mobile.mjs
+      - run: npm run test:release
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: castaway-mobile-qa
+          path: YandexGames/project/games/castaway-solitaire/test-results/

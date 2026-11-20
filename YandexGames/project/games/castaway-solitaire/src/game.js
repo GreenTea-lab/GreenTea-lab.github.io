@@ -372,7 +372,11 @@ export class Game {
     sdk.submitScore(save.total());
     this.ui.tip('');
     this.ui.refreshTop();
-    this.ui.win({ n, stars: r.stars, score: r.score, best: prev.best > r.score ? prev.best : 0, coins: reward, left: r.left, canBuild: this.ui.affordable() > 0 });
+    const available = this.ui.nextProject();
+    const firstProject = available?.ok && !Object.values(d.stages).some(stage => stage > 0)
+      ? available.p.id : null;
+    this.ui.win({ n, stars: r.stars, score: r.score, best: prev.best > r.score ? prev.best : 0,
+      coins: reward, left: r.left, canBuild: available?.ok, firstProject });
   }
   doubleReward(coins, done, finished) {
     sdk.showRewarded(() => {
@@ -406,17 +410,21 @@ export class Game {
     const go = () => this.playLevel(this.n);
     ad ? this.interstitial(go) : go();
   }
-  toIsland(ad) {
+  toIsland(ad, projectId = null) {
     const go = () => {
       this.table.stop();
       this.state = 'island';
       sdk.gameplay(false);
       this.shade.classList.remove('on');
       this.cT.classList.remove('on');
-      this.island.mode = 'island';
       this.island.setMode('island');
       audio.setIntensity(0);
       this.ui.home();
+      if (projectId) {
+        this.island.focus(projectId);
+        this.ui.project(projectId);
+        return;
+      }
       // подсказать, что можно строить
       if (this.ui.affordable() > 0) setTimeout(() => this.ui.toast(t('canBuild') + ': ' + this.ui.bubbleList().map((n) => t('p_' + n.p.id)).join(', '), 3600), 900);
     };
@@ -426,12 +434,16 @@ export class Game {
   // ---------- кадр ----------
   frame(dt) {
     const lvl = this.state === 'level';
-    // во время партии остров рендерится реже (экономия батареи)
-    this.skip = (this.skip || 0) + 1;
-    if ((!lvl || document.documentElement.dataset.theme==='island') && (!lvl || this.quality === 'high' || this.skip % 2 === 0)) {
-      this.island.update(lvl ? dt * (this.quality === 'high' ? 1 : 2) : dt);
-      this.island.render();
-    }
+    const visible = !lvl || document.documentElement.dataset.theme === 'island';
+    const limited = lvl && this.quality !== 'high';
+    if (visible) {
+      this.islandElapsed = (this.islandElapsed || 0) + dt;
+      if (!limited || this.islandElapsed >= 1 / 30 - 0.002) {
+        this.island.update(this.islandElapsed);
+        this.island.render();
+        this.islandElapsed = 0;
+      }
+    } else this.islandElapsed = 0;
     if (lvl && !this.paused && !this.ui.modalOpen && !sdk.adActive) this.table.update(dt);
     if (lvl) this.table.render();
     if (lvl && this.tutStep) this.updateTipThrottled(dt);

@@ -23,3 +23,8 @@ for(const vk of [false,true]){
   fs.writeFileSync(single+'/index.html',doc);
   console.log(out,Math.round(fs.statSync(out+'/game.js').size/1024)+' KiB JS;',single,(Buffer.byteLength(doc)/1024/1024).toFixed(2)+' MiB');
 }
+const gallery = await build({entryPoints:['src/gallery.js'],bundle:true,minify:true,format:'iife',
+  target:['es2019'],write:false,legalComments:'none'});
+const galleryCode = gallery.outputFiles[0].text.replace(/<\/script/gi,'<\\/script');
+fs.writeFileSync('dist-single/gallery.html', fs.readFileSync('static/gallery.html','utf8')
+  .replace('<!--GALLERY_SCRIPT-->', () => '<script>' + galleryCode + '</script>'));

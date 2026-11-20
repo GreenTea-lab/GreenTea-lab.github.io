@@ -844,17 +844,27 @@ export class Island {
     return (a < 1 ? 34 / Math.max(0.5, a) ** 0.85 : 34)*worldScale(this.expansion);
   }
   setMode(mode) {
+    if (mode === 'island' && this.mode === 'table') {
+      this.applyCam();
+      const {x, y, z} = this.camera.position;
+      const ty = this.camera.aspect < 1 ? 3.5 : 2.6;
+      this.cam = {tx: 0, ty, tz: 0, yaw: Math.atan2(x, z),
+        pitch: Math.atan2(y - ty, Math.hypot(x, z)), dist: Math.hypot(x, y - ty, z)};
+    }
     this.mode = mode;
     if (mode === 'island') this.flyTo({ yaw: 0.25, pitch: 0.82, dist: this.baseDist(), tx: 0, ty: 0.6, tz: 0.5 }, 1.2);
   }
   flyTo(c, dur = 1) {
     const from = { ...this.cam };
-    this.camT = { from, to: { ...from, ...c }, t: 0, d: dur };
+    const to = { ...from, ...c };
+    const delta = to.yaw - from.yaw;
+    to.yaw = from.yaw + Math.atan2(Math.sin(delta), Math.cos(delta));
+    this.camT = { from, to, t: 0, d: dur };
   }
   focus(id) {
     const s = this.spots[id];
     const big = id === 'lookout' || id === 'beacon' || id === 'ship';
-    this.flyTo({ tx: s.x, ty: s.y + (big ? 1.6 : 0.5), tz: s.z, dist: (big ? 20 : 15) * Math.max(1, this.baseDist() / 34) * 0.9, pitch: 0.62 }, 1.1);
+    this.flyTo({ yaw: 0.25, tx: s.x, ty: s.y + (big ? 1.6 : 0.5), tz: s.z, dist: (big ? 20 : 15) * Math.max(1, this.baseDist() / 34) * 0.9, pitch: 0.62 }, 1.1);
   }
   applyCam() {
     const c = this.cam;
