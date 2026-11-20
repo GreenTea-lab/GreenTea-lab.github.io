@@ -1425,7 +1425,10 @@ export class Island {
       const p=this.swimPoint(angle,lane),next=this.swimPoint(angle+.0001,lane);
       const stroke=t*4.2+u.phase,reacting=t-(u.tapped??-Infinity)<.75;
       turtle.position.set(p.x,WL-.045+Math.sin(t*1.25+u.phase)*.09+(reacting ? .12 : 0),p.z);
-      turtle.rotation.y=Math.atan2(next.x-p.x,next.z-p.z);
+      const previous=u.lastPoint;
+      const moved=previous&&Math.hypot(p.x-previous.x,p.z-previous.z)>1e-6;
+      turtle.rotation.y=moved?Math.atan2(p.x-previous.x,p.z-previous.z):Math.atan2(next.x-p.x,next.z-p.z);
+      u.lastPoint=p;
       turtle.rotation.x=Math.cos(stroke)*.047;
       turtle.rotation.z=Math.sin(stroke)*.06;
       u.head.rotation.x=.14*Math.sin(stroke*.55)-(reacting ? .26 : 0);

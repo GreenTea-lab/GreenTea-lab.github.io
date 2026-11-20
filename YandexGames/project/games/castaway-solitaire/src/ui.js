@@ -716,8 +716,20 @@ export class UI {
           title:ru?'Сбросить прогресс?':'Reset progress?',
           body:`<p>${ru?'Заново начнутся уровни, стройка и расстановка декора в этом превью.':'Levels, construction and decorations in this preview will start over.'}</p><button class="btn mid sand" type="button" data-reset-preview>${ru?'Сбросить прогресс':'Reset progress'}</button>`,
         });
-        prompt.querySelector('[data-reset-preview]').onclick=()=>save.resetPreview();
+        prompt.querySelector('[data-reset-preview]').onclick=()=>{
+          if(!save.resetPreview())this.toast(ru?'Превью не смогло записать сохранение.':'Could not write the preview save.');
+        };
       };
+      if(save.hasPreviewBackup()){
+        const restore=document.createElement('button');
+        restore.className='btn mid sand preview-reset';
+        restore.type='button';
+        restore.textContent=ru?'Вернуть прежний прогресс':'Restore previous progress';
+        restore.onclick=()=>{
+          if(!save.resetPreview(true))this.toast(ru?'Не удалось открыть копию сохранения.':'Could not open the saved backup.');
+        };
+        m.querySelector('.pb').append(restore);
+      }
     }
     bindSliders(m, st, () => save.write(false));
     m.querySelectorAll('[data-audio-pack]').forEach(select => select.onchange = () => {

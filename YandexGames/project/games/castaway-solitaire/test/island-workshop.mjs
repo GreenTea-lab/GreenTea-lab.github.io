@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
 import { runtime } from './runtime.mjs';
 import { shapeF } from '../src/island.js';
 import { planSites } from '../src/spatial.js';
@@ -155,6 +156,18 @@ try {
   assert.equal(displaced,true,'A new fire moves overlapping decor into storage');
   await page.waitForFunction(()=>__game.island.stages.fire===1);
   await page.getByText(/Декор убран на склад/).waitFor();
+  const fireHits=await page.evaluate(()=>{
+    const I=__game.island,area=I.projectArea('fire',1),site=I.spots.fire;
+    I.camT=null;
+    I.applyCam();
+    I.render();
+    const center=I.project((area.minX+area.maxX)/2,(area.minY+area.maxY)/2,(area.minZ+area.maxZ)/2);
+    const x=site.x,z=area.maxZ+.55;
+    const outside=I.project(x,I.ground(x,z)+.01,z);
+    return [I.pickAt(center.x,center.y),I.pickAt(outside.x,outside.y)];
+  });
+  assert.equal(fireHits[0],'fire');
+  assert.notEqual(fireHits[1],'fire');
   await page.locator('[data-a=settings]').tap();
   const music = ['island','bassa','bossa'];
   const packs = [...music,'draw','place','flip','shuffle','wave','click','error','open','build','buy','gift','decor','unlock'];
@@ -174,6 +187,24 @@ try {
   await page.waitForFunction(() => window.__save && __save.data.settings.musicPack === 'classic');
   assert.equal(await page.evaluate(() => __save.data.settings.soundPack), 'classic');
   assert.deepEqual(errors, []);
+  const file = out + '/offline.html';
+  fs.writeFileSync(file,fs.readFileSync('dist-vk-single/index.html','utf8')
+    .replace('<head>','<head><meta name="castaway-preview-reset" content="reset-test">'));
+  const offline=await R.browser.newPage({locale:'ru-RU'});
+  await offline.addInitScript(()=>{
+    window.__CS_DEBUG={manual:true};
+    if(!localStorage.getItem('castaway_solitaire_v1'))localStorage.setItem('castaway_solitaire_v1',JSON.stringify({
+      level:7,coins:35,settings:{quality:'low',musicVol:.2},
+    }));
+  });
+  await offline.goto(pathToFileURL(file).href);
+  await offline.waitForFunction(()=>window.__game?.ui&&!document.querySelector('#loader'));
+  assert.deepEqual(await offline.evaluate(()=>[__save.data.level,__save.data.coins,__save.data.settings.musicVol]),[1,400,.2]);
+  await offline.locator('[data-a=settings]').click();
+  await offline.getByText('Вернуть прежний прогресс').click();
+  await offline.waitForFunction(()=>window.__game?.ui&&__save.data.level===7);
+  await offline.close();
+  fs.unlinkSync(file);
   fs.writeFileSync(out + '/report.json', JSON.stringify({nature, grid, celebration, life, packs, pierCoasts:6},null,2));
   console.log('PASS decor, pier, celebration and audio', JSON.stringify({nature, grid, celebration}));
 } finally {

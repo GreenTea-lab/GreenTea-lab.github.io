@@ -4,6 +4,8 @@ import { PROJECTS, START_COINS } from './data.js';
 import { restoreDecor } from './decor.js';
 
 const KEY = 'castaway_solitaire_v1';
+const PREVIEW_BACKUP = KEY + '_preview_backup';
+const PREVIEW_RESET = KEY + '_preview_reset';
 
 const DEFAULT = () => ({
   v: 2,
@@ -61,6 +63,15 @@ export const save = {
     d.starsSpent=Math.min(count(d.starsSpent),Object.values(d.levels).reduce((s,l)=>s+l.stars,0));
     if(typeof d.seen!=='object'||Array.isArray(d.seen))d.seen={};
     this.data = d;
+    const reset=location.protocol==='file:'&&document.querySelector('meta[name="castaway-preview-reset"]')?.content;
+    if(reset){
+      try {
+        if(localStorage.getItem(PREVIEW_RESET)!==reset){
+          this.resetPreviewData();
+          localStorage.setItem(PREVIEW_RESET,reset);
+        }
+      } catch {}
+    }
   },
 
   write(cloud = true) {
@@ -79,12 +90,31 @@ export const save = {
     await sdk.saveData(this.data, true);
   },
 
-  resetPreview() {
-    if(location.protocol!=='file:')return;
+  resetPreviewData() {
     const {settings,noAds}=this.data;
-    this.data={...DEFAULT(),settings,noAds};
-    this.write(false);
-    location.reload();
+    const old=localStorage.getItem(KEY);
+    if(old)localStorage.setItem(PREVIEW_BACKUP,old);
+    const fresh={...DEFAULT(),settings,noAds,ts:Date.now()};
+    localStorage.setItem(KEY,JSON.stringify(fresh));
+    this.data=fresh;
+  },
+  hasPreviewBackup() {
+    try {return location.protocol==='file:'&&!!localStorage.getItem(PREVIEW_BACKUP);}
+    catch {return false;}
+  },
+  resetPreview(restore=false) {
+    if(location.protocol!=='file:')return false;
+    try {
+      if(restore){
+        const data=localStorage.getItem(PREVIEW_BACKUP);
+        if(!data)return false;
+        const current=localStorage.getItem(KEY);
+        localStorage.setItem(KEY,data);
+        if(current)localStorage.setItem(PREVIEW_BACKUP,current);
+      }else this.resetPreviewData();
+      location.reload();
+      return true;
+    } catch {return false;}
   },
 
   starsEarned() {
