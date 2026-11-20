@@ -32,12 +32,12 @@ try {
   await page.goto(R.base + '/dist-vk-single/index.html');
   await page.waitForFunction(() => window.__game?.ui && !document.querySelector('#loader'));
   const nature = await page.evaluate(() => {
-    const {naturalPlants, hillPlants, grass} = __game.island;
+    const {naturalPlants, hillPlants, grass,walkers,landAnimals,turtles,gulls} = __game.island;
     return {naturalPlants, hillPlants, grass:grass.spots.length, rocky:grass.spots.filter(p=>__game.island.rockTile(p.x,p.z)).length,
-      adults:__game.island.walkers.length, parrot:__game.island.landAnimals.some(w=>w.species==='parrot')};
+      adults:walkers.length,land:landAnimals.map(w=>w.species),turtles:turtles.length,gulls:gulls.length};
   });
   assert.ok(nature.naturalPlants >= 24 && nature.hillPlants >= 7 && nature.grass >= 100, JSON.stringify(nature));
-  assert.deepEqual([nature.rocky,nature.adults,nature.parrot],[0,2,true]);
+  assert.deepEqual([nature.rocky,nature.adults,nature.land,nature.turtles,nature.gulls],[0,2,['crab'],0,2]);
   await page.waitForSelector('.logo-hidden',{state:'attached'});
   assert.equal(await page.locator('[data-guide-notice]').getAttribute('data-kind'),'decor');
   await page.locator('.guide-dismiss').tap();
@@ -60,10 +60,10 @@ try {
   assert.match(await page.locator('.actor-speech').textContent(),/Привет/);
   await page.waitForFunction(()=>__audio.ctx?.state==='running');
   await page.evaluate(()=>{delete __audio.last.actor;});
-  const parrot=await targetActor('parrot-0');
-  assert.ok(parrot,'A visible point hits the parrot');
-  await page.touchscreen.tap(parrot.x,parrot.y);
-  assert.match(await page.locator('.actor-speech').textContent(),/Кар-р/);
+  const crab=await targetActor('crab-0');
+  assert.ok(crab,'A visible point hits the crab');
+  await page.touchscreen.tap(crab.x,crab.y);
+  assert.match(await page.locator('.actor-speech').textContent(),/Клац/);
   assert.equal(await page.evaluate(()=>typeof __audio.last.actor),'number');
   assert.equal(await page.locator('.voyage-strip').count(), 0);
   await page.locator('.island-nav [data-a=world]').tap();
@@ -139,8 +139,15 @@ try {
     return {celebrating, valid};
   });
   assert.deepEqual(celebration, {celebrating:true, valid:true});
+  assert.ok(await page.evaluate(()=>__game.island.lastArrivals.some(actor=>actor.ru==='Попугай')));
+  const parrot=await targetActor('parrot-0');
+  assert.ok(parrot,'A visible point hits the parrot after building the hut');
+  await page.touchscreen.tap(parrot.x,parrot.y);
+  assert.match(await page.locator('.actor-speech').textContent(),/Кар-р/);
   const life=await page.evaluate(()=>{
     const I=__game.island;
+    I.setStages({...I.stages,pier:1});
+    const arrivedTurtle=I.lastArrivals.some(actor=>actor.ru==='Черепаха');
     const person=I.walkers[0],parrot=I.landAnimals.find(w=>w.species==='parrot');
     person.celebration=person.social=parrot.social=null;
     I.nextSocial=0;
@@ -158,9 +165,9 @@ try {
     __game.previewSelectedDecor(grass);
     const trimmed=__game.placeSelectedDecor(__game.decorPoint)&&!I.hasGrass(grass.x,grass.z);
     __game.cancelDecor();
-    return {social,movingFins,trimmed,free:__save.data.coins===old};
+    return {social,arrivedTurtle,movingFins,trimmed,free:__save.data.coins===old};
   });
-  assert.deepEqual(life,{social:true,movingFins:true,trimmed:true,free:true});
+  assert.deepEqual(life,{social:true,arrivedTurtle:true,movingFins:true,trimmed:true,free:true});
   const displaced=await page.evaluate(()=>{
     const game=__game,I=game.island,fire=I.projectArea('fire',1);
     if(!game.chooseDecor('crate'))return false;
@@ -218,6 +225,7 @@ try {
   await page.waitForFunction(() => window.__save && __save.data.settings.musicPack === 'classic');
   assert.equal(await page.evaluate(() => __save.data.settings.soundPack), 'classic');
   assert.deepEqual(errors, []);
+  await page.close();
   const file = out + '/offline.html';
   fs.writeFileSync(file,fs.readFileSync('dist-vk-single/index.html','utf8')
     .replace('<head>','<head><meta name="castaway-preview-reset" content="reset-test">'));
@@ -232,7 +240,10 @@ try {
   await offline.waitForFunction(()=>window.__game?.ui&&!document.querySelector('#loader'));
   assert.deepEqual(await offline.evaluate(()=>[__save.data.level,__save.data.coins,__save.data.settings.musicVol]),[1,400,.2]);
   await offline.locator('[data-a=settings]').click();
-  await offline.getByText('Вернуть прежний прогресс').click();
+  await Promise.all([
+    offline.waitForEvent('load'),
+    offline.getByRole('button',{name:'Вернуть прежний прогресс'}).click(),
+  ]);
   await offline.waitForFunction(()=>window.__game?.ui&&__save.data.level===7);
   await offline.close();
   fs.unlinkSync(file);

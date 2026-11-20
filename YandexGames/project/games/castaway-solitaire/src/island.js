@@ -1,4 +1,4 @@
-import {WILDLIFE,wildlifeUnlocked} from './wildlife.js';
+import {TURTLE,WILDLIFE,wildlifeUnlocked} from './wildlife.js';
 import {planSites,contains,intersects,movedBox} from './spatial.js';
 import {worldScale,WORLD_PROJECTS} from './world-data.js';
 // 3D-остров в море: рельеф, вода, небо, пальмы, постройки, жители, звери, птицы, камера
@@ -856,8 +856,7 @@ export class Island {
     const wl = this.geomOf(M.wing(-1));
     const wr = this.geomOf(M.wing(1));
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-    // A single gull on the small starting island; a second on the larger coast.
-    for (let i = 0; i < 1 + Math.floor(this.expansion / 3); i++) {
+    for (let i = 0; i < 2; i++) {
       const g = new THREE.Group();
       g.add(new THREE.Mesh(body.geo, mat));
       const l = new THREE.Mesh(wl.geo, mat);
@@ -865,7 +864,10 @@ export class Island {
       l.position.x = -0.1;
       r.position.x = 0.1;
       g.add(l, r);
-      g.userData = { m:g,species:'gull',l,r,a:hash(i,9)*6,rad:12+hash(i,8)*16,y:9+hash(i,7)*7,sp:.15+hash(i,6)*.12,cx:(hash(i,5)-.5)*10,cz:(hash(i,4)-.5)*8 };
+      g.userData = {
+        m:g,species:'gull',l,r,a:.55+i*2.6,rad:(10+i*3)*worldScale(this.expansion),
+        y:7.6+i*1.8,sp:.18+i*.05,cx:i*3-1.5,cz:1,
+      };
       g.scale.setScalar(1.6);
       this.scene.add(g);
       this.gulls.push(g);
@@ -901,14 +903,17 @@ export class Island {
       const m=this.actorMesh(M.crab(),1.2,false),w={id:'crab-'+i,species:'crab',m,x:0,z:3+i*.7,route:[],wait:i*.3,ph:i,speed:1.35,radius:.44};
       w.radius=m.userData.bodyRadius;m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);this.crabs.push(m);
     }
-    for(const def of WILDLIFE)if(wildlifeUnlocked(def,stages))for(let i=0;i<def.count;i++){
+    for(const def of WILDLIFE)if(def!==TURTLE&&wildlifeUnlocked(def,stages))for(let i=0;i<def.count;i++){
       const id=def.id+'-'+i;if(this.landAnimals.some(w=>w.id===id))continue;
-      const near=this.spots[def.requires[0]],m=this.actorMesh(M[def.id](),def.scale),w={id,species:def.id,m,x:near.x+2+i*.8,z:near.z+2,route:[],wait:i*.4,ph:i,speed:def.speed,radius:def.id==='deer'?.6:.46};
+      const near=this.spots[def.requires[0]],m=this.actorMesh(M[def.id](),def.scale);
+      const radius=def.id==='parrot' ? m.userData.bodyRadius : def.id==='deer' ? .6 : .46;
+      const w={id,species:def.id,m,x:near.x+2+i*.8,z:near.z+2,route:[],wait:i*.4,ph:i,speed:def.speed,radius};
       m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);
       if(def.id==='parrot')this.parrot=m;
     }
-    const turtleCount=1+(this.expansion>=2?1:0)+(this.expansion>=5?1:0);
-    while(this.turtles.length<turtleCount){const m=this.makeTurtle(this.turtles.length);this.scene.add(m);this.turtles.push(m);}this.turtle=this.turtles[0];
+    const turtleCount=wildlifeUnlocked(TURTLE,stages)?1+(this.expansion>=2?1:0)+(this.expansion>=5?1:0):0;
+    while(this.turtles.length<turtleCount){const m=this.makeTurtle(this.turtles.length);this.scene.add(m);this.turtles.push(m);}
+    this.turtle=this.turtles[0];
     this.population={people:this.walkers.length,animals:this.landAnimals.length+this.turtles.length};
   }
   swimPoint(angle,lane=0){
@@ -936,6 +941,7 @@ export class Island {
   }
   setStages(stages, animateId = null) {
     const peopleBefore=new Set(this.walkers.map(w=>w.id)),animalsBefore=new Set(this.landAnimals.map(w=>w.species));
+    if(this.turtles.length)animalsBefore.add(TURTLE.id);
     let stored=0;
     for (const p of PROJECTS) {
       if((p.tier||0)>this.expansion)continue;
@@ -950,7 +956,9 @@ export class Island {
     this.maskGrass();
     this.updatePeople(stages);
     this.updateWildlife(stages);
-    this.lastArrivals=[...M.PEOPLE.filter(p=>this.walkers.some(w=>w.id===p.id)&&!peopleBefore.has(p.id)).map(p=>({ru:p.nameRU||'Новый житель',en:p.nameEN||'New neighbour'})),...WILDLIFE.filter(d=>this.landAnimals.some(w=>w.species===d.id)&&!animalsBefore.has(d.id)).map(d=>({ru:d.ru,en:d.en}))];
+    const animalsAfter=new Set(this.landAnimals.map(w=>w.species));
+    if(this.turtles.length)animalsAfter.add(TURTLE.id);
+    this.lastArrivals=[...M.PEOPLE.filter(p=>this.walkers.some(w=>w.id===p.id)&&!peopleBefore.has(p.id)).map(p=>({ru:p.nameRU||'Новый житель',en:p.nameEN||'New neighbour'})),...WILDLIFE.filter(d=>animalsAfter.has(d.id)&&!animalsBefore.has(d.id)).map(d=>({ru:d.ru,en:d.en}))];
     for(const w of this.allActors()){w.route=[];w.celebration=null;w.social=null;this.relocateWalker(w);w.wait=.3;}
     if (animateId && this.spots[animateId]) this.gatherForBuild(animateId);
     return stored;

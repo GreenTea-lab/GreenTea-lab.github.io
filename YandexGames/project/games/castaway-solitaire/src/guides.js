@@ -5,7 +5,7 @@ const controls = {
       ['Телефон','Проведите одним пальцем, чтобы повернуть камеру. Двигайте двумя пальцами вместе, чтобы сдвинуть вид. Сведите или разведите пальцы, чтобы изменить масштаб.'],
     ]},
     {title:'Жители и постройки',icon:'palm',rows:[
-      ['Жители и животные','Нажмите на Робинзона, чтобы он ответил. Нажмите на попугая, краба или другое животное, чтобы услышать его звук.'],
+      ['Жители и животные','Нажмите на Робинзона, чтобы он ответил. Нажмите на краба, чтобы услышать, как он щёлкает клешнями. Попугай появится после постройки хижины.'],
       ['Стройка','Нажмите на постройку или отмеченную площадку. В карточке видны этап, стоимость и баланс звёзд. Жители и животные появляются по мере развития острова.'],
       ['Дневник','В «Дневнике» внизу можно узнать, кто уже на острове, посмотреть задания и забрать награды.'],
     ]},
@@ -21,7 +21,7 @@ const controls = {
       ['Touch','Drag with one finger to orbit. Move two fingers together to pan. Pinch or spread two fingers to zoom.'],
     ]},
     {title:'Residents and buildings',icon:'palm',rows:[
-      ['Residents and animals','Tap Robinson to hear from him. Tap a parrot, crab or another animal to hear its sound.'],
+      ['Residents and animals','Tap Robinson to see what he says. Tap the crab to hear its claws click. The parrot arrives after you build the hut.'],
       ['Building','Tap a building or a marked plot to see its current stage, cost and your star balance. More residents and animals arrive as you develop the island.'],
       ['Journal','Open the Journal at the bottom to meet the islanders, view tasks and claim rewards.'],
     ]},

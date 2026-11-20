@@ -745,22 +745,53 @@ export const PEOPLE = [
 
 export function parrot() {
   const v = new Vox();
-  v.box(0, 0, 0, 1, 2, 1, C.red);
-  v.box(0, 3, 0, 1, 4, 2, C.red);
-  v.set(0, 4, 3, C.yellow);
-  v.set(1, 4, 3, C.yellow);
-  v.set(0, 3, 3, C.dark);
-  v.box(-1, 1, 0, -1, 2, 1, C.blue);
-  v.box(2, 1, 0, 2, 2, 1, C.blue);
-  v.box(0, -1, -2, 1, 0, -1, C.teal);
-  for (const [shin, foot, side] of [[0, -1, -1], [1, 2, 1]]) {
-    v.box(shin, -1, 0, foot, -1, 0, C.orange);
-    v.box(foot, -2, -1, foot, -2, 2, C.orange);
-    v.set(foot + side, -2, 1, 0xffb969);
-    v.set(foot, -2, 2, 0xffb969);
+  const scarlet=0xd83f37, crimson=0xb6283c, crown=0xf65b3b;
+  const gold=0xf0ad39, blue=0x2a71b2, deepBlue=0x264987;
+  const ivory=0xffdfac, skin=0xffe8cd, charcoal=0x312c38;
+  function plumage(cx, cy, cz, rx, ry, rz, color) {
+    for(let x=Math.ceil(cx-rx);x<=cx+rx;x++)
+      for(let y=Math.ceil(cy-ry);y<=cy+ry;y++)
+        for(let z=Math.ceil(cz-rz);z<=cz+rz;z++)
+          if(((x-cx)/rx)**2+((y-cy)/ry)**2+((z-cz)/rz)**2<=1)v.set(x,y,z,color(x,y,z));
   }
-  v.set(0, 4, 2, C.white);
-  v.set(1, 4, 2, C.white);
+  // Leaning body, rounded head and tapered tail, with +Z at the beak.
+  for(let z=-13;z<=-4;z++){
+    const half=z>=-7?2:z>=-10?1:0, y=Math.floor(4+(z+13)*.31);
+    for(let x=-half;x<=half;x++)v.set(x,y,z,x===0&&z>-11 ? crimson : deepBlue);
+    if(y>Math.floor(4+(z+12)*.31))v.set(0,y-1,z,deepBlue);
+    if(z>=-8)v.set(0,y+1,z,scarlet);
+  }
+  plumage(0,7,-1,3.25,4.6,4.6,(x,y,z)=>z>=0 ? scarlet : crimson);
+  plumage(0,10,1,2.65,3.55,3.05,(x,y,z)=>z>=1 ? crown : scarlet);
+  plumage(0,13,2.6,3.2,3.3,3.25,(x,y,z)=>y>=14 ? crown : scarlet);
+  for(const side of [-1,1]){
+    // Scapulars, gold coverts and navy-edged flight feathers.
+    plumage(side*2.6,7,-2.25,1.55,3,4.55,(x,y,z)=>{
+      const feather=z+(y-7)*.65;
+      if(feather>-.7)return y>8?scarlet:crimson;
+      if(feather>-2.95)return gold;
+      return y<6||z<-5?deepBlue:blue;
+    });
+    v.box(side*3,5,-7,side*3,5,-5,blue);
+    v.box(side*2,5,-8,side*2,5,-5,deepBlue);
+    // Bare cheek skin and a small eye on each side of the head.
+    v.box(side*3,12,3,side*3,13,4,skin);
+    v.set(side*3,14,3,skin);
+    v.set(side*3,14,4,charcoal);
+    v.set(side*2,13,5,skin);
+    v.set(side*2,12,5,skin);
+    const leg=side*1;
+    v.box(leg,0,-1,leg,4,-1,0x635263);
+    v.box(leg,0,0,leg,0,2,0x756478);
+    v.set(leg+side,0,1,0x756478);
+    v.set(leg,0,-2,0x514454);
+  }
+  v.box(-1,12,5,1,12,6,charcoal);
+  v.set(0,11,6,charcoal);
+  v.box(-1,13,5,1,14,6,ivory);
+  v.box(-1,13,7,1,13,7,0xe6b77a);
+  v.box(-1,12,7,1,12,7,0xbe8656);
+  v.set(0,11,7,0xaa7450);
   return v;
 }
 

@@ -11,7 +11,7 @@ try{
  await p.goto(R.base+'/dist-vk-single/index.html');await p.waitForFunction(()=>window.__game?.ui&&!document.querySelector('#loader'));await p.addScriptTag({url:R.base+'/'+out+'/audit.js'});
  assert.equal(await p.evaluate(()=>document.documentElement.dataset.theme),'island');
  const starting=await p.evaluate(()=>{const I=__game.island;I.update(.05);I.render();__game.ui.home();document.documentElement.dataset.motion='off';return {people:I.walkers.length,crabs:I.crabs.length,gulls:I.gulls.length,turtles:I.turtles.length,land:I.landAnimals.map(w=>w.species),total:I.population.animals+I.gulls.length};});
- assert.deepEqual(starting,{people:2,crabs:1,gulls:1,turtles:1,land:['crab','parrot','hedgehog'],total:5});
+ assert.deepEqual(starting,{people:2,crabs:1,gulls:2,turtles:0,land:['crab'],total:3});
  await p.screenshot({path:out+'/starting-island.png'});report.push({starting});
  let previousAnimals=0,previousPeople=0;
  for(let tier=0;tier<=5;tier++){
