@@ -53,10 +53,12 @@ try {
       const gaps = renders.slice(1).map((entry, i) => entry.time - renders[i].time).sort((a, b) => a - b);
       return {
         frames: renders.length, p95GapMs: +gaps[Math.floor(gaps.length * 0.95)]?.toFixed(1),
+        backgroundDpr: island.renderer.getPixelRatio(), cardDpr: __game.table.dpr,
         advancing: renders.slice(1).every((entry, i) => entry.angle > renders[i].angle),
       };
     });
     assert.ok(performance.frames >= 12 && performance.advancing, JSON.stringify(performance));
+    assert.ok(performance.cardDpr > performance.backgroundDpr);
     assert.deepEqual(errors, []);
     results.push({ viewport, width: cards.width, scale: cards.scale, ...performance });
     await page.close();

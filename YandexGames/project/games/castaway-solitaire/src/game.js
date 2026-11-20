@@ -119,10 +119,8 @@ export class Game {
   }
   setQuality(q) {
     this.quality = q === 'low' ? 'low' : 'high';
-    const r = this.island.renderer;
-    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.quality === 'low' ? 1 : 2));
-    r.shadowMap.enabled = this.quality !== 'low';
-    this.island.scene.traverse((o) => o.material && (o.material.needsUpdate = true));
+    this.island.quality = this.quality;
+    this.island.applyRenderQuality();
     this.resize();
   }
   setPaused(p) {
@@ -235,7 +233,7 @@ export class Game {
     this.setPaused(false);
     this.freeUndo = FREE_UNDO;
     this.adMore = true;
-    this.island.mode = 'table';
+    this.island.setMode('table');
     this.shade.classList.add('on');
     this.cT.classList.add('on');
     this.ui.hud(n);

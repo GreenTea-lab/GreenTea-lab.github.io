@@ -843,6 +843,20 @@ export class Island {
     const a = this.camera.aspect;
     return (a < 1 ? 34 / Math.max(0.5, a) ** 0.85 : 34)*worldScale(this.expansion);
   }
+  applyRenderQuality() {
+    const background = this.mode === 'table' && this.quality !== 'high';
+    const ratio = Math.min(window.devicePixelRatio || 1,
+      background ? 1 : this.quality === 'high' ? 2 : this.quality === 'mid' ? 1.5 : 1);
+    if (this.renderer.getPixelRatio() !== ratio) this.renderer.setPixelRatio(ratio);
+    const shadows = this.quality !== 'low' && !background;
+    if (this.renderer.shadowMap.enabled !== shadows) {
+      this.renderer.shadowMap.enabled = shadows;
+      this.scene.traverse(object => {
+        if (object.material) object.material.needsUpdate = true;
+      });
+    }
+    this.sun.castShadow = this.quality !== 'low';
+  }
   setMode(mode) {
     if (mode === 'island' && this.mode === 'table') {
       this.applyCam();
@@ -852,6 +866,7 @@ export class Island {
         pitch: Math.atan2(y - ty, Math.hypot(x, z)), dist: Math.hypot(x, y - ty, z)};
     }
     this.mode = mode;
+    this.applyRenderQuality();
     if (mode === 'island') this.flyTo({ yaw: 0.25, pitch: 0.82, dist: this.baseDist(), tx: 0, ty: 0.6, tz: 0.5 }, 1.2);
   }
   flyTo(c, dur = 1) {
