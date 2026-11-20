@@ -533,19 +533,25 @@ export class Island {
     // Ground cover and blooming shrubs appear on every new coast.
     this.naturalPlants = 0;
     this.hillPlants = 0;
-    for (let i = 0; i < 680; i++) {
-      if (this.naturalPlants >= 42 + this.expansion * 10 && this.hillPlants >= 15) break;
+    // Use the centres of individual terraces so plants sit flat on the stepped hill.
+    for (let i = 0; i < 144 && this.hillPlants < 16; i++) {
+      const angle = i * 2.39996;
+      const radius = 2.2 + R(i + 2700) * 2.6;
+      const x = Math.floor((HILL.x + Math.cos(angle) * radius) / TS) * TS + TS / 2;
+      const z = Math.floor((HILL.z + Math.sin(angle) * radius) / TS) * TS + TS / 2;
+      if (!this.isLand(x, z, .065) || this.onPath(x, z)) continue;
+      const model = this.hillPlants < 2 ? DECOR_BY_ID.lantern.model() : meadowFlower(i);
+      if (this.addStatic(list, model, x, z, 0, .59, null, false, false)) this.hillPlants++;
+    }
+    for (let i = 0; i < 680 && this.naturalPlants < 42 + this.expansion * 10; i++) {
       const x = (R(i * 3 + 19) - .5) * this.rx * 1.9;
       const z = (R(i * 3 + 20) - .5) * this.rz * 1.9;
       const hill = Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - .3;
-      if (hill ? this.hillPlants >= 15 : this.naturalPlants >= 42 + this.expansion * 10) continue;
+      if (hill) continue;
       if (!this.isLand(x, z, .075) || this.onPath(x, z) || this.nearSpot(x, z, .24)) continue;
       const shrub = R(i * 3 + 21) < .21;
       const plant = shrub ? M.bush(i, true) : meadowFlower(i);
-      if (this.addStatic(list, plant, x, z, 0, shrub ? .82 : .68, null, false, shrub)) {
-        if (hill) this.hillPlants++;
-        else this.naturalPlants++;
-      }
+      if (this.addStatic(list, plant, x, z, 0, shrub ? .82 : .68, null, false, shrub)) this.naturalPlants++;
     }
     // ракушки, звёзды, коряги на песке
     for (let i = 0; i < 60; i++) {
