@@ -7,6 +7,7 @@ await build({entryPoints:['test/scene-audit.js'],bundle:true,format:'iife',outfi
 const R=await runtime(),errors=[],report=[];
 try{
  const p=await R.browser.newPage({viewport:{width:1280,height:800},locale:'ru-RU'});p.on('pageerror',e=>errors.push(e.message));
+ p.on('console',m=>{if(m.type()==='error'&&/WebGLProgram|shader error/i.test(m.text()))errors.push(m.text());});
  await p.addInitScript(()=>{window.__CS_DEBUG={manual:true};localStorage.setItem('castaway_solitaire_v1',JSON.stringify({coins:1000,level:1001,levels:Object.fromEntries(Array.from({length:1000},(_,i)=>[i+1,{stars:3,best:1000}])),stages:{},settings:{quality:'low'},seen:{coin:1,lock:1,sand:1,keys2:1,wild:1,tableTools:1}}));});
  await p.goto(R.base+'/dist-vk-single/index.html');await p.waitForFunction(()=>window.__game?.ui&&!document.querySelector('#loader'));await p.addScriptTag({url:R.base+'/'+out+'/audit.js'});
  assert.equal(await p.evaluate(()=>document.documentElement.dataset.theme),'island');
@@ -66,6 +67,31 @@ try{
  assert.equal(previousPeople,38);
  assert.ok(report.some(r=>r.inhabitants?.types.includes('squirrel')),'Orchard attracts a squirrel');
  assert.ok(report.some(r=>r.inhabitants?.types.includes('monkey')),'Garden attracts monkeys');
+ const details=await p.evaluate(()=>{
+   const I=__game.island,{beacon,fountain,windmill,smokehouse,fire}=I.projObjs;
+   const matrix=object=>object.grp.children.find(c=>c.isInstancedMesh).instanceMatrix.array[13];
+   const droplets=matrix(fountain),smoke=matrix(smokehouse),embers=matrix(fire);
+   const blades=windmill.model.children.find(c=>c.isGroup);
+   const angle=blades.rotation.z;
+   I.update(.05);
+   I.render();
+   return {
+     landmark:beacon.area.maxY-I.spots.beacon.y,
+     terrace:beacon.area.maxX-beacon.area.minX,
+     lights:beacon.glows.length,
+     beam:beacon.grp.children.some(c=>c.isGroup&&c!==beacon.model),
+     rotations:new Set(Object.values(I.spots).map(s=>s.rot)).size,
+     moving:[droplets!==matrix(fountain),smoke!==matrix(smokehouse),embers!==matrix(fire),angle!==blades.rotation.z],
+     lines:I.walkers.every(w=>w.lines.ru.length>=7&&w.lines.en.length>=7),
+     gait:I.allActors().every(w=>w.m.children[0].geometry.attributes.actorJoint.array.some(n=>n!==0)),
+     batch:I.residentBatch.strides.some(n=>Math.abs(n)>.01)
+   };
+ });
+ assert.ok(details.landmark>=6&&details.terrace>=6&&details.rotations>=12,JSON.stringify(details));
+ assert.equal(details.lights,1);
+ assert.equal(details.beam,false);
+ assert.deepEqual(details.moving,[true,true,true,true]);
+ assert.ok(details.lines&&details.gait&&details.batch,JSON.stringify(details));
  await p.evaluate(()=>{const I=__game.island;I.camT=null;I.cam.dist=I.baseDist()*1.06;I.update(.05);I.render();__game.ui.home();document.documentElement.dataset.motion='off';});await p.screenshot({path:out+'/populated-island.png'});
  const crowd=await p.evaluate(()=>{
    const I=__game.island,{mesh}=I.residentBatch;

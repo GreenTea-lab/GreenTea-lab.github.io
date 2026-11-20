@@ -122,3 +122,7 @@ html[data-theme=island] #shade{background-color:transparent;background-image:rad
 #t{transition:opacity .25s ease;opacity:0}#t.on{opacity:1}
 @media(max-width:600px){.hud-top{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:6px;align-items:start}.hud-top .round{width:48px;height:48px}.hud-top .tl{padding-top:6px}.hud-top .tr{padding-top:6px}.hud-top .chip{height:42px;gap:4px;padding:3px 8px 3px 4px;font-size:18px;border-width:2px}.hud-top .chip>svg{width:27px;height:27px}.hud-top .chip .plus{width:22px;height:22px;font-size:17px;margin-left:1px}.hud-top .hud-c{padding:5px 6px;gap:1px;border-radius:16px;min-width:0}.hud-top .hud-c b{font-size:17px;white-space:nowrap}.hud-top .hud-c .hs svg{width:20px;height:20px}.hud-top .hud-c small{font-size:14px}}
 @media(max-width:360px){.hud-top .chip{font-size:16px;padding-right:5px;gap:3px}.hud-top .chip>svg{width:24px;height:24px}.hud-top .chip .plus{width:20px;height:20px;font-size:16px}.hud-top .hud-c b{font-size:16px}.hud-top .hud-c .hs svg{width:18px;height:18px}}
+.journal-coin,.toast-with-icon{display:flex;align-items:center;gap:5px}
+.journal-coin{font-size:14px;font-weight:900;color:#775114}
+.journal-coin svg,.toast-with-icon svg{display:block;width:22px;height:22px;flex:none}
+.toast-with-icon{justify-content:center;gap:7px}

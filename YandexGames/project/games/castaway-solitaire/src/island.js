@@ -9,6 +9,9 @@ import * as M from './models.js';
 import { NavigationGrid } from './navigation.js';
 import { DECOR_BY_ID, meadowFlower } from './decor.js';
 import { PROJECTS } from './data.js';
+import { bindLimbGeometry, limbMaterial, moveActor } from './actor-motion.js';
+import { residentLines } from './resident-dialogue.js';
+import { animateBuilding } from './building-motion.js';
 
 const TS = 0.5; // размер «блока» рельефа
 const RX = 15;
@@ -63,7 +66,7 @@ export function shapeF(x, z, tier=0) {
   return f;
 }
 
-const HILL = { x: -2.5, z: -6.5, r: 5.2 };
+const HILL = { x: -2.5, z: -6.5, r: 5.2, summit: 3.45 };
 const cellKey = (x,z) => Math.floor(x/TS) + ',' + Math.floor(z/TS);
 const angleFor = turn => turn * Math.PI/2;
 
@@ -202,11 +205,13 @@ export class Island {
     const hd = Math.hypot(x - HILL.x, z - HILL.z);
     if (hd < HILL.r) h += Math.round(4.6 * smooth(HILL.r, 1.2, hd) + (vnoise(x, z, 1.3) - 0.5) * 1.2);
     // площадки под постройки ровные
+    const beacon=this.sitePlan.beacon;
+    if(Math.hypot(x-beacon.x,z-beacon.z)<HILL.summit)return this._beaconH||h;
     for (const p of PROJECTS) {
       if((p.tier||0)>this.expansion)continue;
-      if (p.water) continue;
+      if (p.water||p.id==='beacon') continue;
       const site=this.sitePlan[p.id];
-      if (site && contains(site.box,x,z,.5)) h = p.id === 'beacon' ? (this._beaconH || h) : 2;
+      if (site && contains(site.box,x,z,.5)) h = 2;
     }
     return h;
   }
@@ -219,8 +224,8 @@ export class Island {
     const idx = (i, k) => (i + NX) * D + (k + NZ);
     // сначала холм для площадки маяка
     {
-      const p = PROJECTS.find((q) => q.id === 'beacon');
-      const hd = Math.hypot(p.pos[0] - HILL.x, p.pos[1] - HILL.z);
+      const {x,z}=this.sitePlan.beacon;
+      const hd = Math.hypot(x-HILL.x,z-HILL.z);
       this._beaconH = 2 + Math.round(4.6 * smooth(HILL.r, 1.2, hd));
     }
     for (let i = -NX; i < NX; i++) for (let k = -NZ; k < NZ; k++) hv[idx(i, k)] = this.hvAt(i, k);
@@ -891,9 +896,14 @@ export class Island {
     this.gulls=[g];
   }
 
-  actorMesh(v,scale=1){
+  actorMesh(v,scale=1,species){
     const m=this.meshOf(v,false),box=new THREE.Box3().setFromObject(m),center=box.getCenter(new THREE.Vector3());
     for(const child of m.children){child.position.x-=center.x;child.position.z-=center.z;child.position.y-=box.min.y;}
+    const body=m.children[0];
+    if(bindLimbGeometry(body.geometry,species)){
+      m.gait={value:0};
+      body.material=limbMaterial(this.mat,m.gait);
+    }
     m.scale.setScalar(scale);const size=box.getSize(new THREE.Vector3());m.userData.bodyRadius=Math.hypot(size.x,size.z)*scale/2;return m;
   }
   makeCritters(){this.crabs=[];this.landAnimals=[];this.turtles=[];this.updateWildlife({});}
@@ -939,13 +949,13 @@ export class Island {
   }
   updateWildlife(stages){
     if(!this.crabs.length){
-      const m=this.actorMesh(M.crab(),.74),w={id:'crab-0',species:'crab',m,x:0,z:3,route:[],wait:.3,ph:0,speed:1.35,radius:.44};
+      const m=this.actorMesh(M.crab(),.74,'crab'),w={id:'crab-0',species:'crab',m,x:0,z:3,route:[],wait:.3,ph:0,speed:1.35,radius:.44};
       w.radius=m.userData.bodyRadius;m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);this.crabs.push(m);
     }
     for(const def of WILDLIFE){
       if(def===TURTLE||!wildlifeUnlocked(def,stages)||this.landAnimals.some(w=>w.species===def.id))continue;
       const id=def.id+'-0';
-      const near=this.spots[def.requires[0]],m=this.actorMesh(M[def.id](),def.scale);
+      const near=this.spots[def.requires[0]],m=this.actorMesh(M[def.id](),def.scale,def.id);
       const radius=def.id==='parrot' ? m.userData.bodyRadius : def.id==='deer' ? .6 : .46;
       const w={id,species:def.id,m,x:near.x+2,z:near.z+2,route:[],wait:Math.random(),ph:Math.random()*6,speed:def.speed,radius};
       m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);
@@ -1063,6 +1073,8 @@ export class Island {
     const angle = Math.atan2(site.x - w.x, site.z - w.z);
     const delta = Math.atan2(Math.sin(angle - w.m.rotation.y), Math.cos(angle - w.m.rotation.y));
     w.m.rotation.y += delta * Math.min(1, dt * 9);
+    w.m.gait.value = .6 * Math.sin(phase);
+    w.m.rotation.x = -.13 * Math.abs(Math.sin(phase));
     w.m.rotation.z = Math.sin(phase) * .15;
     w.m.position.set(w.x, this.ground(w.x, w.z) + Math.abs(Math.sin(phase)) * .4, w.z);
     return true;
@@ -1071,7 +1083,11 @@ export class Island {
     const old = this.projObjs[p.id];
     if (old) {
       this.scene.remove(old.grp);
-      old.grp.traverse((c) => c.geometry && c.geometry !== this.markerGeo && c.geometry.dispose && c.geometry.dispose());
+      old.grp.traverse(c=>{
+        if(c.geometry!==this.markerGeo)c.geometry?.dispose();
+        if(c.isSprite||c.userData.ownedMaterial)c.material.dispose();
+        if(c.isInstancedMesh)c.dispose();
+      });
     }
     const sp = this.spots[p.id];
     const grp = new THREE.Group();
@@ -1085,7 +1101,7 @@ export class Island {
       o.model=this.meshOf(marker);
       grp.add(o.model);
     } else {
-      const m = this.meshOf(M.BUILD[p.id](s));
+      const m = this.meshOf(M.BUILD[p.id](s,true));
       if (p.id === 'pier') m.position.y = -0.05;
       grp.add(m);
       o.model=m;
@@ -1100,17 +1116,8 @@ export class Island {
       if(['kiln','market','pavilion','museum','tea'].includes(p.kind)&&s===3)addGlow(0,1.3,1,0xffcf80,1.5);
       if (p.id === 'fire') addGlow(0, 0.35, 0, 0xffa040, 2.4);
       if (p.id === 'beacon' && s === 1) addGlow(0, 0.9, 0, 0xffa040, 2);
-      if (p.id === 'beacon' && s === 3) {
-        addGlow(0, 4.0, 0, 0xfff0b0, 3.4);
-        const beam = new THREE.Mesh(new THREE.ConeGeometry(1.4, 14, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff6c8, transparent: true, opacity: 0.16, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
-        beam.rotation.z = Math.PI / 2;
-        beam.position.x = 7;
-        const piv = new THREE.Group();
-        piv.position.y = 4.0;
-        piv.add(beam);
-        grp.add(piv);
-        o.beam = piv;
-      }
+      if (p.id === 'beacon' && s === 3) addGlow(.05,5.37,.05,0xffe9ae,1.8);
+      o.animate=animateBuilding(this,p,o);
 
     }
     if (anim) {
@@ -1165,10 +1172,10 @@ export class Island {
     for (const def of M.PEOPLE) {
       if ((def.requires && (stages[def.requires[0]]||0)<def.requires[1]) || built < def.from || this.walkers.some((w) => w.id === def.id)) continue;
       const scale=(def.child ? .44 : .64)*(def.size??1);
-      const m = this.actorMesh(M.person(def.look),scale);
+      const m = this.actorMesh(M.person(def.look),scale,'person');
       const index=this.walkers.length;
       const pace=def.pace??(def.child?1.14:.88+hash(index,16)*.17);
-      const w={id:def.id,m,child:!!def.child,lines:def.lines,radius:m.userData.bodyRadius,
+      const w={id:def.id,m,child:!!def.child,lines:residentLines(def),radius:m.userData.bodyRadius,
         pace,speed:pace,runner:def.runner??!!def.child,running:false,wait:.5+hash(index,24)*2,ph:Math.random()*6,route:[]};
       const sp=this.spots[def.requires?.[0]];
       const angle = index===0 ? 2.15 : index===1 ? .78 : index*2.39996;
@@ -1195,7 +1202,10 @@ export class Island {
     const sources=this.walkers.map(({m})=>m.children[0]);
     const vertices=sources.reduce((total,m)=>total+m.geometry.getAttribute('position').count,0);
     const indices=sources.reduce((total,m)=>total+m.geometry.index.count,0);
-    const mesh=new THREE.BatchedMesh(sources.length,vertices,indices,this.mat);
+    const strides=new Float32Array(sources.length);
+    const texture=new THREE.DataTexture(strides,strides.length,1,THREE.RedFormat,THREE.FloatType);
+    texture.needsUpdate=true;
+    const mesh=new THREE.BatchedMesh(sources.length,vertices,indices,limbMaterial(this.mat,{value:texture},true));
     mesh.frustumCulled=false;
     mesh.sortObjects=false;
     const entries=sources.map((source,i)=>{
@@ -1205,24 +1215,35 @@ export class Island {
       actor.visible=false;
       return {actor,local:source.matrix,id,pose:new Float64Array(6).fill(NaN)};
     });
-    if(this.residentBatch){
-      this.scene.remove(this.residentBatch.mesh);
-      this.residentBatch.mesh.dispose();
-    }
-    this.residentBatch={mesh,entries,matrix:new THREE.Matrix4()};
+    this.disposeResidentBatch();
+    this.residentBatch={mesh,entries,matrix:new THREE.Matrix4(),texture,strides};
     this.scene.add(mesh);
+  }
+
+  disposeResidentBatch(){
+    if(!this.residentBatch)return;
+    const {mesh,texture}=this.residentBatch;
+    this.scene.remove(mesh);
+    mesh.material.dispose();
+    mesh.dispose();
+    texture.dispose();
+    this.residentBatch=null;
   }
 
   updateResidentBatch() {
     if(!this.residentBatch)return;
-    const {mesh,entries,matrix}=this.residentBatch;
+    const {mesh,entries,matrix,texture,strides}=this.residentBatch;
+    let animated=false;
     for(const {actor,local,id,pose} of entries){
+      const stride=Math.fround(actor.gait.value);
+      if(strides[id]!==stride){strides[id]=stride;animated=true;}
       const p=actor.position,r=actor.rotation;
       if(pose[0]===p.x&&pose[1]===p.y&&pose[2]===p.z&&pose[3]===r.x&&pose[4]===r.y&&pose[5]===r.z)continue;
       pose[0]=p.x;pose[1]=p.y;pose[2]=p.z;pose[3]=r.x;pose[4]=r.y;pose[5]=r.z;
       actor.updateMatrix();
       mesh.setMatrixAt(id,matrix.multiplyMatrices(actor.matrix,local));
     }
+    if(animated)texture.needsUpdate=true;
   }
   walkable(x,z) {
     return this.isLand(x,z,.07) && !this.blocked(x,z,.42) && Math.hypot(x-HILL.x,z-HILL.z)>HILL.r+.1 && !this.palmPos?.some(p=>Math.hypot(x-p[0],z-p[1])<.5);
@@ -1376,6 +1397,7 @@ export class Island {
     const parrot=w.species==='parrot';
     const sway=Math.sin(phase*(parrot ? 4.5 : 9));
     const bounce=Math.abs(sway)*(parrot ? .055 : w.species ? .19 : .08);
+    w.m.gait.value=sway*(w.species ? .16 : .3);
     w.m.rotation.x=social&&!w.species?Math.sin(phase*5)*.23:0;
     w.m.rotation.z=sway*(parrot ? .07 : .14);
     w.m.position.set(w.x,this.ground(w.x,w.z)+bounce,w.z);
@@ -1431,7 +1453,7 @@ export class Island {
   focus(id) {
     const s = this.spots[id];
     const big = id === 'lookout' || id === 'beacon' || id === 'ship';
-    this.flyTo({ yaw: 0.25, tx: s.x, ty: s.y + (big ? 1.6 : 0.5), tz: s.z, dist: (big ? 20 : 15) * Math.max(1, this.baseDist() / 34) * 0.9, pitch: 0.62 }, 1.1);
+    this.flyTo({ yaw: 0.25, tx: s.x, ty: s.y + (id==='beacon' ? 2.65 : big ? 1.6 : .5), tz: s.z, dist: (big ? 20 : 15) * Math.max(1, this.baseDist() / 34) * 0.9, pitch: 0.62 }, 1.1);
   }
   applyCam() {
     const c = this.cam;
@@ -1571,9 +1593,14 @@ export class Island {
       const z = u.cz + Math.sin(u.a) * u.rad;
       g.position.set(x, u.y + Math.sin(u.a * 3) * 0.6, z);
       g.rotation.y = -u.a;
-      const f = Math.sin(t * 6 + u.a * 10) * 0.6;
-      u.l.rotation.z = f;
-      u.r.rotation.z = -f;
+      const effort=Math.max(0,Math.sin(t*.76+u.a))**.65;
+      const f = Math.sin(t*8.8+u.a*3)*(.055+.61*effort);
+      g.rotation.z=.14+Math.sin(u.a*2)*.1;
+      g.rotation.x=.07*Math.cos(u.a*3);
+      u.l.rotation.z = -.08+f;
+      u.r.rotation.z = .08-f*.94;
+      u.l.rotation.y = f*.12;
+      u.r.rotation.y = -f*.12;
     }
     // Turtle models face +Z. Heading follows the actual ellipse tangent.
     for(const [lane,turtle]of this.turtles.entries()){
@@ -1586,15 +1613,17 @@ export class Island {
       const moved=previous&&Math.hypot(p.x-previous.x,p.z-previous.z)>1e-6;
       turtle.rotation.y=moved?Math.atan2(p.x-previous.x,p.z-previous.z):Math.atan2(next.x-p.x,next.z-p.z);
       u.lastPoint=p;
-      turtle.rotation.x=Math.cos(stroke)*.047;
-      turtle.rotation.z=Math.sin(stroke)*.06;
-      u.head.rotation.x=.14*Math.sin(stroke*.55)-(reacting ? .26 : 0);
+      const glide=.58+.42*Math.sin(t*.9+u.phase)**2;
+      turtle.rotation.x=(Math.cos(stroke)*.06+.027*Math.sin(t*.8))*glide;
+      turtle.rotation.z=Math.sin(stroke*.5)*.085;
+      u.head.rotation.x=.18*Math.sin(stroke*.55)-(reacting ? .32 : 0);
       u.head.rotation.y=Math.sin(t*.85+u.phase)*.14;
       u.head.position.z=.39+Math.sin(stroke)*.025;
       for(const {part,side,rear} of u.flippers){
-        const phase=stroke+(rear?1.4:0);
-        part.rotation.y=side*(.22+Math.sin(phase)*(rear ? .24 : .44));
-        part.rotation.z=side*Math.cos(phase)*(rear ? .22 : .37);
+        const phase=stroke+(rear?1.55:0)+side*.16;
+        part.rotation.y=side*(.19+Math.sin(phase)*(rear ? .24 : .53)*glide);
+        part.rotation.z=side*Math.cos(phase)*(rear ? .19 : .43)*glide;
+        part.rotation.x=Math.sin(phase-.55)*(rear ? .1 : .22)*glide;
       }
     }
     // Residents follow connected dry routes; movement never projects through buildings.
@@ -1604,7 +1633,7 @@ export class Island {
     let routePlanned=false;
     for (const w of actors) {
       if (this.updateCelebration(w,dt)||this.animateActorReaction(w,dt)) continue;
-      let moving=false;
+      let distance=0;
       if(w.wait>0) w.wait-=dt;
       else if(!w.route.length){
         if(!routePlanned){
@@ -1628,38 +1657,22 @@ export class Island {
           if(!(w.species?this.faunaWalkable(nx,nz,w.radius+.06):this.walkable(nx,nz))){w.route=[];w.wait=.4;}
           else {
             this.lookAtActor(w,target.x,target.z,dt);
-            w.x=nx;w.z=nz;moving=true;
+            w.x=nx;w.z=nz;distance=step;
           }
         }
       }
-      const parrot=w.species==='parrot';
-      const hopper=w.species==='monkey'||w.species==='rabbit';
-      const running=moving&&!w.species&&w.running;
-      const pace=parrot ? 5.6 : hopper ? 10.5 : running ? 12 : 9;
-      w.ph+=dt*(moving ? pace : 1.5);
-      const ground=this.ground(w.x,w.z);w.y=Math.max(ground,(w.y??ground)+(ground-(w.y??ground))*Math.min(1,dt*12));
-      const stride=Math.sin(w.ph);
-      w.m.rotation.z=moving?stride*.035:0;
-      if(!w.species)w.m.rotation.x=running ? .11 : 0;
-      const height=parrot ? .15 : hopper ? .32 : running ? .1 : w.child ? .075 : .045;
-      const lift=parrot ? stride**2 : Math.abs(stride);
-      const hop=moving ? lift*height : 0;
-      w.m.position.set(w.x,w.y+hop,w.z);
+      moveActor(w,this.ground(w.x,w.z),dt,distance);
     }
     this.updateActorShadows(actors);
-    // огни, маяк, звери
+    // Огни и постройки с подвижными деталями.
     for (const k in this.projObjs) {
       const o = this.projObjs[k];
       for (const g of o.glows) g.material.opacity = 0.65 + Math.sin(t * 9 + g.id) * 0.12 + Math.sin(t * 23) * 0.06;
-      if (o.beam) o.beam.rotation.y = t * 0.8;
-
+      o.animate?.(t);
     }
   }
   dispose() {
-    if(this.residentBatch){
-      this.scene.remove(this.residentBatch.mesh);
-      this.residentBatch.mesh.dispose();
-    }
+    this.disposeResidentBatch();
     const geometries=new Set(),materials=new Set(),textures=new Set([this.glowTex,this.puffTex,this.oceanU.distTex.value,this.heartTexture]);
     this.scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m){materials.add(m);if(m.map)textures.add(m.map);}});
     for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t?.dispose();this.renderer.dispose();

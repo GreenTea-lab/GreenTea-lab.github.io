@@ -21,6 +21,7 @@ try {
   const page = await R.browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, locale:'ru-RU' });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
+  page.on('console',m=>{if(m.type()==='error'&&/WebGLProgram|shader error/i.test(m.text()))errors.push(m.text());});
   await page.addInitScript(() => {
     window.__CS_DEBUG = {manual:true};
     if (!localStorage.getItem('castaway_solitaire_v1')) {
@@ -71,6 +72,26 @@ try {
   await page.touchscreen.tap(crab.x,crab.y);
   assert.match(await page.locator('.actor-speech').textContent(),/Клац/);
   assert.equal(await page.evaluate(()=>typeof __audio.last.actor),'number');
+  const coinsBefore=await page.evaluate(()=>{
+    Object.assign(__save.data,{wins:3,harvestWins:0});
+    __save.data.stages.garden=1;
+    __game.ui.journal();
+    return __save.data.coins;
+  });
+  assert.match(await page.locator('.journal-coin').textContent(),/\+35 монет/);
+  assert.equal(await page.locator('.journal-coin svg').count(),1);
+  await page.locator('[data-harvest]').tap();
+  assert.match(await page.locator('.toast-with-icon').textContent(),/\+35 монет/);
+  assert.equal(await page.locator('.toast-with-icon svg').count(),1);
+  assert.equal(await page.evaluate(()=>__save.data.coins),coinsBefore+35);
+  await page.locator('[data-harvest]').waitFor();
+  assert.equal(await page.locator('[data-harvest]').isDisabled(),true);
+  await page.locator('[data-x]').tap();
+  await page.locator('[data-harvest]').waitFor({state:'detached'});
+  await page.evaluate(()=>{
+    delete __save.data.stages.garden;
+    Object.assign(__save.data,{wins:0,harvestWins:0});
+  });
   assert.equal(await page.locator('.voyage-strip').count(), 0);
   await page.locator('.island-nav [data-a=world]').tap();
   assert.match(await page.locator('.districts + p').innerText(), /звёзды/);

@@ -22,7 +22,10 @@ const entries=[
  ['treasury',5,[-10,-10.8],'Музей находок','Discovery museum','museum'],
  ['statue',5,[17,7],'Памятник путешествию','Voyage monument','statue'],
 ];
-export const WORLD_PROJECTS=entries.map(([id,tier,pos,ru,en,kind])=>({id,tier,pos,ru,en,kind,r:1.25,rot:0,cost:[8+tier*3,11+tier*4,15+tier*5]}));
+const facing={boathouse:.23,smokehouse:-.3,fishmarket:.14,hammock:-.34,teahouse:.27,
+ orchard:-.18,windmill:.27,guesthouse:-.31,observatory:.25,library:-.18,aviary:.32,
+ pavilion:-.25,treasury:.19};
+export const WORLD_PROJECTS=entries.map(([id,tier,pos,ru,en,kind])=>({id,tier,pos,ru,en,kind,r:1.25,rot:facing[id]||0,cost:[8+tier*3,11+tier*4,15+tier*5]}));
 export const worldScale=tier=>EXPANSIONS[Math.max(0,Math.min(5,tier))-1]?.scale||1;
 export const projectName=(p,lang)=>lang==='ru'?p.ru:p.en;
 export const STAGE_NAMES={ru:['Основание','Обустройство','Последний штрих'],en:['Foundations','Furnishing','Finishing touch']};

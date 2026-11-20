@@ -600,29 +600,40 @@ B.beacon = (s) => {
     v.box(4, 0, 4, 7, 2, 7, C.trunk);
     return v;
   }
-  const h = s === 2 ? 22 : 36;
-  for (let y = 0; y <= h; y++) {
-    const r = 6 - (y / h) * 2;
-    const band = s === 3 && Math.floor(y / 6) % 2 === 1;
-    v.cyl(0, 0, r, y, y, J(band ? C.red : C.white, 0.03), true);
+  const terrace=s===3?30:21;
+  v.cyl(0,0,terrace,0,1,J(C.rockD,.075));
+  v.cyl(0,0,terrace-2,2,3,J(C.rockL,.06));
+  v.cyl(0,0,terrace-3,4,5,J(0xd6c8ae,.05));
+  v.cyl(0,0,terrace-3,6,7,C.rockD,true);
+  for(let i=0;i<18;i++){
+    const angle=i*Math.PI/9,x=Math.round(Math.sin(angle)*(terrace-4)),z=Math.round(Math.cos(angle)*(terrace-4));
+    v.box(x-1,6,z-1,x+1,8,z+1,C.rockL);
   }
-  v.cyl(0, 0, 6.5, 0, 0, C.rockD);
-  v.box(-1, 1, 5, 1, 4, 6, C.woodD);
-  for (let y = 8; y < h - 2; y += 9) v.set(0, y, 5 - Math.round(y / h * 2), C.lamp);
+  const h=s===2?30:48, base=s===3?14:9;
+  for(let y=6;y<=h;y++){
+    const f=(y-6)/(h-6),r=base-f*(s===3?5:2);
+    const band=s===3&&Math.floor((y-6)/8)%2===1;
+    v.cyl(0,0,r,y,y,J(band?C.red:0xffeed7,.035),true);
+  }
+  v.box(-2,6,base-1,2,12,base,C.woodD);
+  v.box(-3,5,base,3,5,base+3,C.rockL);
+  for(let y=16;y<h-3;y+=9){
+    const z=Math.round(base-(y-6)/(h-6)*(s===3?5:2));
+    v.box(-1,y,z,1,y+2,z,C.woodD);
+    v.set(0,y+1,z+1,C.lamp);
+  }
   if (s === 2) {
-    // строительные леса
-    for (const [x, z] of [[-7, -7], [7, -7], [-7, 7], [7, 7]]) post(v, x, z, 0, h + 3, C.woodL);
-    for (let y = 6; y < h; y += 7) v.box(-7, y, 7, 7, y, 7, C.woodL), v.box(-7, y, -7, 7, y, -7, C.woodL);
+    for(const x of [-11,11])for(const z of [-11,11])post(v,x,z,5,h+3,C.woodL);
+    for(let y=11;y<h;y+=7)for(const z of [-11,11])v.box(-11,y,z,11,y,z,C.woodL);
     return v;
   }
-  // фонарь маяка
-  v.cyl(0, 0, 5.5, h + 1, h + 1, C.dark);
-  for (let y = h + 2; y <= h + 5; y++) v.cyl(0, 0, 3.5, y, y, (x, yy, z) => (Math.abs(x) === Math.abs(z) ? C.dark : C.lamp), true);
-  v.cyl(0, 0, 2.5, h + 2, h + 5, C.lamp);
-  for (let k = 0; k < 4; k++) v.cyl(0, 0, 4.5 - k * 1.2, h + 6 + k, h + 6 + k, C.redD);
-  v.set(0, h + 10, 0, C.yellow);
-  // балкон
-  v.cyl(0, 0, 5.5, h - 2, h - 2, C.dark);
+  v.cyl(0,0,11,h-2,h-1,C.dark);
+  v.cyl(0,0,11,h,h+1,C.rockL,true);
+  v.cyl(0,0,7,h+1,h+1,C.dark);
+  v.cyl(0,0,6,h+2,h+7,(x,y,z)=>Math.abs(x)===Math.abs(z)?C.dark:C.lamp,true);
+  v.cyl(0,0,3,h+2,h+7,C.lamp);
+  for(let y=0;y<6;y++)v.cyl(0,0,7.7-y*1.12,h+8+y,h+8+y,y%2?C.red:C.redD);
+  v.set(0,h+14,0,C.yellow);
   return v;
 };
 
@@ -677,7 +688,7 @@ B.ship = (s) => {
   return v;
 };
 
-for(const p of WORLD_PROJECTS)B[p.id]=s=>worldBuilding(p.kind,s,C);
+for(const p of WORLD_PROJECTS)B[p.id]=(s,live)=>worldBuilding(p.kind,s,C,live);
 export const BUILD = B;
 
 // ---------- жители и звери ----------

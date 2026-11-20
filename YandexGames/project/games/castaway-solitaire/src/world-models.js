@@ -1,6 +1,22 @@
 import {Vox} from './vox.js';
+function millBlades(v,s,C,y,z){
+ v.box(-1,y-13,z,1,y+13,z,C.woodL);
+ v.box(-13,y-1,z,13,y+1,z,C.woodL);
+ if(s===3){
+  const canvas=0xffedbe;
+  v.box(2,y+3,z,5,y+13,z,canvas);v.box(-5,y-13,z,-2,y-3,z,canvas);
+  v.box(-13,y+2,z,-3,y+5,z,canvas);v.box(3,y-5,z,13,y-2,z,canvas);
+ }
+}
+
+export function windmillRotor(s,C){
+ const v=new Vox();
+ millBlades(v,s,C,0,0);
+ return v;
+}
+
 // Original voxel structures, sharing the island's material palette.
-export function worldBuilding(kind,s,C){
+export function worldBuilding(kind,s,C,live=false){
  const v=new Vox(),wood=C.wood,stone=C.rockL||0xc8c2ad,cream=0xffedbe,teal=0x378f98,coral=0xe98166;
  v.box(-10,0,-10,10,1,10,C.plank);
  const post=(x,z,h=15)=>v.box(x,2,z,x+1,h,z+1,C.woodD);
@@ -39,11 +55,11 @@ export function worldBuilding(kind,s,C){
  }else if(kind==='mill'){
   v.cyl(0,0,7,2,22,cream);if(s===3)roof(teal,23);
   const h=19;v.cyl(0,8,2,h-2,h+2,C.woodD);
-  v.box(-1,h-13,9,1,h+13,9,C.woodL);v.box(-13,h-1,9,13,h+1,9,C.woodL);
-  if(s===3){v.box(2,h+3,9,5,h+13,9,cream);v.box(-5,h-13,9,-2,h-3,9,cream);v.box(-13,h+2,9,-3,h+5,9,cream);v.box(3,h-5,9,13,h-2,9,cream);}
+  if(!live)millBlades(v,s,C,h,9);
  }else if(kind==='fountain'){
   v.cyl(0,0,10,2,5,stone,true);v.cyl(0,0,9,2,3,0x59c7d1);v.cyl(0,0,3,4,11,stone);v.cyl(0,0,6,10,12,stone,true);v.cyl(0,0,5,10,11,0x66dce0);
-  if(s===3){v.box(0,12,0,0,22,0,0x92e9ec);for(let x=-4;x<=4;x++)v.set(x,19-Math.round(x*x/5),0,0x92e9ec);}
+  v.cyl(0,0,1,12,12,stone);
+  if(s===3&&!live){v.box(0,13,0,0,22,0,0x92e9ec);for(let x=-4;x<=4;x++)v.set(x,19-Math.round(x*x/5),0,0x92e9ec);}
  }else if(kind==='observatory'){
   v.cyl(0,0,9,2,17,cream);v.sphere(0,19,0,9,teal);v.box(0,22,-2,12,24,1,C.woodD);v.box(11,21,-3,13,25,2,0xb6c6cf);
   if(s===3){v.box(-2,2,9,2,13,9,C.woodD);lantern(-9,10);}

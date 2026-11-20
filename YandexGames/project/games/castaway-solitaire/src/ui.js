@@ -2,7 +2,7 @@ import {WILDLIFE,wildlifeUnlocked} from './wildlife.js';
 import {enter,leave,motionEnabled} from './transitions.js';
 import {CHAPTERS,chapterOf} from './campaign.js';
 import {EXPANSIONS} from './world-data.js';
-import {worldState,nextExpansion,canExpand,chapterProgress,TASKS,claimTask,claimChapter,harvestReady,harvest} from './progression.js';
+import {worldState,nextExpansion,canExpand,chapterProgress,TASKS,claimTask,claimChapter,harvestReady,harvestReward,harvest} from './progression.js';
 // DOM-интерфейс: остров (главный экран), стройка, уровни, HUD партии, окна итогов, магазин, настройки
 import { CardArt } from './cards.js';
 import { IC } from './icons.js';
@@ -23,6 +23,11 @@ import { GUIDES } from './guides.js';
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const starsHTML = (n) => [0, 1, 2].map((i) => (i < n ? IC.star : IC.starE)).join('');
 const today = () => new Date().toISOString().slice(0, 10);
+function coinReward(amount){
+  if(LANG!=='ru')return '+'+amount+(amount===1?' coin':' coins');
+  const last=amount%10,teen=amount%100>=11&&amount%100<=14;
+  return '+'+amount+' '+(!teen&&last===1?'монета':!teen&&last>=2&&last<=4?'монеты':'монет');
+}
 
 export class UI {
   constructor(game, root) {
@@ -96,10 +101,16 @@ export class UI {
       build: () => this.buildPanel(),
     };
   }
-  toast(text, ms = 2600) {
+  toast(text, ms = 2600, icon = '') {
     const d = document.createElement('div');
     d.className = 'toast';
-    d.textContent = text;
+    if(icon){
+      const badge=document.createElement('span');
+      badge.innerHTML=icon;
+      badge.setAttribute('aria-hidden','true');
+      d.classList.add('toast-with-icon');
+      d.append(badge,text);
+    }else d.textContent = text;
     // на главном экране — под названием игры, чтобы не закрывать его
     const logo = this.root.querySelector('.logo:not(.logo-hidden)');
     if (logo && logo.offsetHeight) d.style.top = Math.round(logo.getBoundingClientRect().bottom + 10) + 'px';
@@ -286,8 +297,11 @@ export class UI {
       const entries=Array.from(this.bub.children,(button,i)=>{
         const id=list[i].p.id,stage=save.data.stages[id];
         button.onclick=()=>this.project(id);
-        const lift=id==='lookout'||id==='beacon' ? stage?4.6:1.4 : stage?1.8:1.3;
-        return {button,spot:island.spots[id],lift};
+        const spot=island.spots[id];
+        let lift=stage?1.8:1.3;
+        if(id==='lookout')lift=stage?4.6:1.4;
+        if(id==='beacon'&&stage)lift=island.projectArea(id,stage).maxY-spot.y+.4;
+        return {button,spot,lift};
       });
       this.buildMarkers={entries,view:[]};
     }
@@ -836,9 +850,20 @@ export class UI {
       return '<div class="task-card"><div><b>'+esc(ru?task.ru:task.en)+'</b><small>'+Math.min(task.goal,q[task.id])+'/'+task.goal+' · '+task.coins+' '+(ru?'монет':'coins')+'</small></div><button class="btn mid '+(ready&&!claimed?'green':'sand')+'" data-task="'+task.id+'" '+(ready&&!claimed?'':'disabled')+'>'+(claimed?(ru?'Получено':'Claimed'):(ru?'Забрать':'Claim'))+'</button></div>';
     }).join('');
     const ready=harvestReady();
+    const reward=harvestReward();
+    const harvestCard=`<div class="task-card"><div><b>${ru?'Корзина фруктов':'Fruit basket'}</b>
+      <small>${reward?(ru?'Собирайте урожай после каждых трёх побед.':'Collect fruit after every three wins.'):(ru?'Постройте сад, чтобы собирать урожай.':'Build the garden to collect fruit.')}</small>
+      ${reward?`<span class="journal-coin">${IC.coin}${coinReward(reward)}</span>`:''}
+      </div><button class="btn mid ${ready?'green':'sand'}" data-harvest ${ready?'':'disabled'}>${ru?'Собрать':'Harvest'}</button></div>`;
     const finds=CHAPTERS.map((names,ch)=>{const done=j.chapters.includes(ch),p=chapterProgress(ch),ready=p.count===50;return '<button class="find-card '+(done?'collected':'')+'" data-find="'+ch+'" '+(ready&&!done?'':'disabled')+'><span>'+(['✦','⚓','❖','✿','☼'][ch%5])+'</span><b>'+esc(names[ru?0:1])+'</b><small>'+(done?(ru?'В коллекции':'Collected'):ready?(ru?'Забрать находку':'Claim discovery'):p.count+'/50')+'</small></button>';}).join('');
-    const m=this.modal({title:ru?'Дневник Робинзона':'Robinson’s journal',wide:true,body:'<div class="population-summary"><b>'+(ru?'Обитатели острова':'Island neighbours')+'</b><span>'+(ru?'Жители: ':'Residents: ')+this.g.island.walkers.length+' / '+PEOPLE.length+' · '+(ru?'Животные: ':'Animals: ')+this.g.island.population.animals+'</span><small>'+(ru?'Новые жители и животные приходят после улучшений.':'Upgrades bring new neighbours and animals.')+'</small></div><div class="wildlife-list">'+WILDLIFE.map(d=>'<div class="'+(wildlifeUnlocked(d,save.data.stages)?'arrived':'')+'"><b>'+esc(ru?d.ru:d.en)+'</b><small>'+(wildlifeUnlocked(d,save.data.stages)?(ru?'На острове':'On the island'):esc(t('p_'+d.requires[0]))+' · '+(ru?'этап ':'stage ')+d.requires[1])+'</small></div>').join('')+'</div><h3>'+(ru?'Поручения на сегодня':'Today’s requests')+'</h3><div class="task-list">'+tasks+'</div><h3>'+(ru?'Урожай сада':'Garden harvest')+'</h3><div class="task-card"><div><b>'+(ru?'Корзина фруктов':'Fruit basket')+'</b><small>'+(ru?'Постройте сад. Новый урожай после трёх побед.':'Build the garden. New fruit after three wins.')+'</small></div><button class="btn mid '+(ready?'green':'sand')+'" data-harvest '+(ready?'':'disabled')+'>'+(ru?'Собрать':'Harvest')+'</button></div><h3>'+(ru?'Находки путешествия · ':'Voyage discoveries · ')+j.chapters.length+'/20</h3><p class="center">'+(ru?'Завершите 50 уровней главы, чтобы получить находку и монеты.':'Complete all 50 levels of a chapter for a discovery and coins.')+'</p><div class="find-grid">'+finds+'</div>'});
-    const refresh=coins=>{if(coins)this.toast('+'+coins);m.close();this.refreshTop();this.journal();};
+    const m=this.modal({title:ru?'Дневник Робинзона':'Robinson’s journal',wide:true,body:'<div class="population-summary"><b>'+(ru?'Обитатели острова':'Island neighbours')+'</b><span>'+(ru?'Жители: ':'Residents: ')+this.g.island.walkers.length+' / '+PEOPLE.length+' · '+(ru?'Животные: ':'Animals: ')+this.g.island.population.animals+'</span><small>'+(ru?'Новые жители и животные приходят после улучшений.':'Upgrades bring new neighbours and animals.')+'</small></div><div class="wildlife-list">'+WILDLIFE.map(d=>'<div class="'+(wildlifeUnlocked(d,save.data.stages)?'arrived':'')+'"><b>'+esc(ru?d.ru:d.en)+'</b><small>'+(wildlifeUnlocked(d,save.data.stages)?(ru?'На острове':'On the island'):esc(t('p_'+d.requires[0]))+' · '+(ru?'этап ':'stage ')+d.requires[1])+'</small></div>').join('')+'</div><h3>'+(ru?'Поручения на сегодня':'Today’s requests')+'</h3><div class="task-list">'+tasks+'</div><h3>'+(ru?'Урожай сада':'Garden harvest')+'</h3>'+harvestCard+'<h3>'+(ru?'Находки путешествия · ':'Voyage discoveries · ')+j.chapters.length+'/20</h3><p class="center">'+(ru?'Завершите 50 уровней главы, чтобы получить находку и монеты.':'Complete all 50 levels of a chapter for a discovery and coins.')+'</p><div class="find-grid">'+finds+'</div>'});
+    const refresh=coins=>{
+      if(coins){
+        this.toast(coinReward(coins),2800,IC.coin);
+        audio.play('coin');
+      }
+      m.close();this.refreshTop();this.journal();
+    };
     m.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>refresh(claimTask(b.dataset.task)));
     m.querySelectorAll('[data-find]').forEach(b=>b.onclick=()=>refresh(claimChapter(+b.dataset.find)));
     m.querySelector('[data-harvest]').onclick=()=>refresh(harvest());
