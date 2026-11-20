@@ -21,7 +21,7 @@ try {
     const frame = page.frameLocator('iframe');
     const navigation = frame.locator('.island-nav button');
     await navigation.first().waitFor();
-    assert.deepEqual(await navigation.evaluateAll(buttons => buttons.map(button => button.dataset.a)), ['world','build','decor','play','levels']);
+    assert.deepEqual(await navigation.evaluateAll(buttons => buttons.map(button => button.dataset.a)), ['world','build','decor','play','levels','lb']);
     assert.ok(await navigation.evaluateAll(buttons => buttons.every(button => {
       const rect = button.getBoundingClientRect();
       return rect.left >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight;

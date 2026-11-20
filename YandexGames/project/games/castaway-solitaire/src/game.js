@@ -13,7 +13,7 @@ import { buildLevel, rng, MAIN_LEVELS } from './logic.js';
 import { PROJECTS, COST, FREE_UNDO, WIN_COINS, AD_COINS } from './data.js';
 import { initThumbs } from './thumbs.js';
 import { applyCosmetics } from './cosmetics.js';
-import { DECOR_BY_ID, DECOR_LIMIT } from './decor.js';
+import { DECOR_BY_ID, DECOR_LIMIT, GRASS_LIMIT } from './decor.js';
 
 const MIN_AD_GAP = 150 * 1000;
 
@@ -28,9 +28,9 @@ export class Game {
       (navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches);
     this.quality = d.settings.quality === 'low' ? 'low' : d.settings.quality === 'high' ? 'high' : mobile ? 'mid' : 'high';
     this.c3 = c3;
-    this.island = new Island(c3, this.quality,d.expansion,d.decor);
+    this.island = new Island(c3, this.quality,d.expansion,d.decor,d.trimmedGrass);
     initThumbs(this.island.renderer);
-    this.island.setStages(d.stages);
+    if(this.island.setStages(d.stages)) save.write();
     this.shade = document.getElementById('shade');
     this.cT = cT;
     this.table = new Table(cT, {
@@ -150,6 +150,9 @@ export class Game {
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       moved = 0;
       downT = performance.now();
+      if (pts.size === 1 && e.button === 0 && this.decorSelection && !this.decorPoint) {
+        this.previewSelectedDecor(this.island.pickGround(e.clientX,e.clientY),false);
+      }
       if (pts.size === 2) {
         const [a, b] = [...pts.values()];
         pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
@@ -157,7 +160,12 @@ export class Game {
     });
     c.addEventListener('pointermove', (e) => {
       const p = pts.get(e.pointerId);
-      if (!p || this.state !== 'island') return;
+      if (this.state !== 'island' || this.ui.modalOpen || this.ui.transitioning) return;
+      const aiming=this.decorSelection && pts.size<2 && e.buttons!==2 && !e.shiftKey;
+      if(aiming && !this.decorPoint){
+        this.previewSelectedDecor(this.island.pickGround(e.clientX,e.clientY),false);
+      }
+      if(!p)return;
       const dx = e.clientX - p.x;
       const dy = e.clientY - p.y;
       p.x = e.clientX;
@@ -165,7 +173,7 @@ export class Game {
       moved += Math.abs(dx) + Math.abs(dy);
       if (pts.size === 1) {
         if (e.buttons === 2 || e.shiftKey) this.island.pan(dx, dy);
-        else this.island.drag(dx, dy);
+        else if(!aiming) this.island.drag(dx, dy);
       } else if (pts.size === 2 && pinch) {
         const [a, b] = [...pts.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
@@ -181,16 +189,21 @@ export class Game {
       pts.delete(e.pointerId);
       if (pts.size < 2) pinch = null;
       if (e.type === 'pointerup' && this.state === 'island' && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen && !this.ui.transitioning) {
-        if (this.decorSelection) {
+        if (this.decorSelection && e.button === 0) {
           this.previewSelectedDecor(this.island.pickGround(e.clientX, e.clientY));
           return;
         }
-        const id = this.island.pickAt(e.clientX, e.clientY);
-        if (id) this.ui.project(id);
+        if(e.button!==0)return;
+        const target=this.island.pickIsland(e.clientX,e.clientY);
+        if(target?.actor)this.interactActor(target.actor);
+        else if(target?.id)this.ui.project(target.id);
       }
     };
     c.addEventListener('pointerup', up);
     c.addEventListener('pointercancel', up);
+    c.addEventListener('pointerleave', () => {
+      if(this.decorSelection && !this.decorPoint && !pts.size)this.previewSelectedDecor(null,false);
+    });
     c.addEventListener('wheel', (e) => {
       if (this.state !== 'island') return;
       e.preventDefault();
@@ -202,51 +215,83 @@ export class Game {
     if(this.state!=='island'||!expandWorld())return false;
     this.cancelDecor();
     clearTimeout(this.camBack);this.island.dispose();
-    this.island=new Island(this.c3,this.quality,save.data.expansion,save.data.decor);initThumbs(this.island.renderer);this.island.setStages(save.data.stages);this.resize();this.island.setMode('island');
+    this.island=new Island(this.c3,this.quality,save.data.expansion,save.data.decor,save.data.trimmedGrass);initThumbs(this.island.renderer);const stored=this.island.setStages(save.data.stages);this.resize();this.island.setMode('island');
     save.write();
+    if(stored)this.decorStoredNotice(stored);
     audio.play('build');this.ui.home();return true;
   }
-  chooseDecor(type) {
+  canPlaceItem(def) {
+    const inventory=save.data.decor;
+    const grass=!!def.groundCover;
+    return inventory.some(item=>item.type===def.id&&item.x===null) ||
+      (save.data.coins>=def.coins && inventory.filter(item=>!!DECOR_BY_ID[item.type].groundCover===grass).length<(grass?GRASS_LIMIT:DECOR_LIMIT));
+  }
+  chooseDecor(type,removing=false) {
     const def = DECOR_BY_ID[type];
     if (!def || this.state !== 'island') return false;
-    const inventory = save.data.decor;
-    if (!inventory.some(item => item.type === type && item.x === null) &&
-      (inventory.length >= DECOR_LIMIT || save.data.coins < def.coins)) return false;
+    if(!removing&&!this.canPlaceItem(def))return false;
     this.decorSelection = type;
     this.decorPoint = null;
-    this.island.showDecorGrid(def);
+    this.decorAim = null;
+    this.decorTurn = save.data.decor.find(item=>item.type===type&&item.x===null)?.turn || 0;
+    this.decorRemoving=removing;
+    this.island.showDecorGrid(def,this.decorTurn,removing);
     this.ui.placingDecor(def);
     return true;
   }
   cancelDecor() {
     this.decorSelection = null;
     this.decorPoint = null;
+    this.decorAim = null;
     this.island.hideDecorGrid();
     this.ui.placingDecor(null);
   }
-  previewSelectedDecor(point) {
+  previewSelectedDecor(point,lock=true) {
     const def = DECOR_BY_ID[this.decorSelection];
     if (!def) return;
+    const previous=this.decorAim;
+    if(!lock&&previous?.x===point?.x&&previous?.z===point?.z)return;
+    this.decorAim=point;
+    if(lock)this.decorPoint=point;
     const valid = this.island.previewDecor(point);
-    this.decorPoint = valid ? point : null;
-    this.ui.placingDecor(def, valid ? 'ready' : 'blocked');
+    this.ui.placingDecor(def, point ? valid ? 'ready' : 'blocked' : 'select');
+  }
+  unlockDecorPoint() {
+    this.decorPoint=null;
+    const def=DECOR_BY_ID[this.decorSelection];
+    if(def)this.ui.placingDecor(def,this.decorAim?'aim':'select');
+  }
+  rotateSelectedDecor() {
+    const def=DECOR_BY_ID[this.decorSelection];
+    if(!def||!this.decorPoint||this.decorRemoving)return;
+    this.decorTurn=(this.decorTurn+1)%4;
+    this.island.showDecorGrid(def,this.decorTurn);
+    this.previewSelectedDecor(this.decorPoint);
   }
   placeSelectedDecor(point) {
     const def = DECOR_BY_ID[this.decorSelection];
-    if (!def || this.state !== 'island') return false;
+    if (!def || this.state !== 'island' || !point || point!==this.decorPoint) return false;
+    if(this.decorRemoving){
+      if(!this.island.removeGrass(point.x,point.z))return false;
+      save.data.trimmedGrass=[...this.island.trimmedGrass];
+      save.write();
+      this.chooseDecor('grass',true);
+      audio.play('decor');
+      return true;
+    }
     const inventory = save.data.decor;
     const owned = inventory.find(item => item.type === def.id && item.x === null);
     const id = owned?.id ?? Math.max(0, ...inventory.map(item => item.id)) + 1;
-    if (!owned && (inventory.length >= DECOR_LIMIT || save.data.coins < def.coins)) {
+    if (!this.canPlaceItem(def)) {
       this.cancelDecor();
       return false;
     }
-    const item = point && {id, type:def.id, ...point};
+    const item = {id,type:def.id,...point,turn:this.decorTurn};
     if (!item || !this.island.installDecor(item)) {
       this.previewSelectedDecor(point);
       return false;
     }
-    if (owned) Object.assign(owned, item);
+    if (owned) inventory[inventory.indexOf(owned)]=item;
     else {
       inventory.push(item);
       save.data.coins -= def.coins;
@@ -264,6 +309,23 @@ export class Game {
     save.write();
     return true;
   }
+  decorStoredNotice(count) {
+    this.ui.toast(LANG==='ru'?`Декор убран на склад из-за стройки (${count})`:`Decor moved to storage for construction (${count})`,3800);
+  }
+  interactActor(actor) {
+    const lines=actor.lines?.[LANG] || (LANG==='ru'?['Привет!','Рад тебя видеть.','Здесь хорошо жить!']:['Hello!','Good to see you!','I like it here!']);
+    const reactions={
+      crab:['Клац!','Click-clack!'], parrot:['Кар-р!','Squawk!'], gull:['Кья-а!','Scree!'], turtle:['Плюх!','Splash!'],
+      monkey:['У-у-а!','Ooh-ah!'], hedgehog:['Фыр-фыр!','Snuffle!'], dog:['Гав!','Woof!'],
+      rabbit:['Фру-фру!','Sniff!'], goat:['Ме-е!','Baa!'], chicken:['Ко-ко!','Cluck!'],
+      deer:['Ф-фу!','Huff!'], squirrel:['Цок-цок!','Chit-chit!'], duck:['Кря!','Quack!'],
+    };
+    const text=actor.species ? reactions[actor.species]?.[LANG==='ru'?0:1] : lines[(actor.said||0)%lines.length];
+    actor.said=(actor.said||0)+1;
+    actor.tapped=this.island.time;
+    audio.actorSound(actor.species);
+    this.ui.actorSpeech(actor.m,text||'♪');
+  }
   // ---------- стройка ----------
   build(id) {
     const p = PROJECTS.find((q) => q.id === id);
@@ -279,15 +341,18 @@ export class Game {
     this.cancelDecor();
     d.starsSpent += cost;
     d.stages[id] = st + 1;
+    const stored = this.island.storeDecorForProject(id,st+1);
     save.write();
     this.island.focus(id);
     setTimeout(() => {
-      this.island.setStages(d.stages, id);
+      const extra = this.island.setStages(d.stages,id);
+      if(extra)save.write();
       audio.play('build');
       this.ui.toast(t('p_' + id + '_' + (st + 1)) + ' — ' + t('done'));
       const arrivals=this.island.lastArrivals;
       if(arrivals.length)setTimeout(()=>this.ui.toast((LANG==='ru'?'На острове появились: ':'New island arrivals: ')+arrivals.map(p=>LANG==='ru'?p.ru:p.en).join(', '),4000),1800);
       if (id === 'ship' && st + 1 === 3) setTimeout(() => this.ui.toast(t('shipDone'), 4000), 1800);
+      if (stored+extra) setTimeout(()=>this.decorStoredNotice(stored+extra),arrivals.length?5700:2200);
       this.ui.refreshTop();
     }, 700);
     // через пару секунд камера возвращается к общему виду

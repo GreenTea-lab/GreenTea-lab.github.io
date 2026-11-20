@@ -32,9 +32,12 @@ try {
   await page.waitForFunction(() => window.__game?.ui && !document.querySelector('#loader'));
   const nature = await page.evaluate(() => {
     const {naturalPlants, hillPlants, grass} = __game.island;
-    return {naturalPlants, hillPlants, grass:grass.spots.length};
+    return {naturalPlants, hillPlants, grass:grass.spots.length, rocky:grass.spots.filter(p=>__game.island.rockTile(p.x,p.z)).length,
+      adults:__game.island.walkers.length, parrot:__game.island.landAnimals.some(w=>w.species==='parrot')};
   });
-  assert.ok(nature.naturalPlants >= 24 && nature.hillPlants >= 7 && nature.grass >= 140, JSON.stringify(nature));
+  assert.ok(nature.naturalPlants >= 24 && nature.hillPlants >= 7 && nature.grass >= 100, JSON.stringify(nature));
+  assert.deepEqual([nature.rocky,nature.adults,nature.parrot],[0,2,true]);
+  await page.waitForSelector('.logo-hidden',{state:'attached'});
   assert.equal(await page.locator('.voyage-strip').count(), 0);
   await page.locator('.island-nav [data-a=world]').tap();
   assert.match(await page.locator('.districts + p').innerText(), /звёзды/);
@@ -45,23 +48,24 @@ try {
   await page.locator('[data-x]').tap();
   await page.locator('.pb').waitFor({state:'detached'});
   await page.locator('[data-a=decor]').tap();
-  assert.equal(await page.locator('[data-decor]').count(), 13);
+  assert.equal(await page.locator('[data-decor]').count(), 19);
   await page.screenshot({path:out + '/decor-catalog.png'});
   await page.locator('[data-decor=bench]').tap();
   await page.waitForFunction(() => !__game.ui.transitioning);
   const grid = await page.evaluate(() => __game.island.decorPicker.available);
-  assert.ok(grid >= 100, `Bench cells: ${grid}`);
-  assert.equal(await page.locator('[data-decor-confirm]').isDisabled(), true);
+  assert.ok(grid > 244, `Bench cells: ${grid}`);
+  assert.equal(await page.locator('[data-decor-confirm]').count(), 0);
   const point = await page.evaluate(() => {
     const island = __game.island;
     island.update(.05);
     island.render();
+    const rotated=island.decorShape(island.decorPicker.shape.def,1);
     for (let x = -11.75; x < 12; x += .5) for (let z = -6.75; z < 9; z += .5) {
       const item = {id:9999, type:'bench', x, z};
       const p = island.project(x, island.ground(x, z), z);
       if (document.elementFromPoint(p.x, p.y)?.id !== 'c') continue;
       const hit = island.pickGround(p.x, p.y);
-      if (!hit || hit.x !== x || hit.z !== z || !island.installDecor(item)) continue;
+      if (!hit || hit.x !== x || hit.z !== z || !island.decorPlacement(rotated,x,z) || !island.installDecor(item)) continue;
       island.storeDecor(item.id);
       return {...p, xWorld:x, zWorld:z};
     }
@@ -69,10 +73,15 @@ try {
   assert.ok(point, 'A valid bench position can be tapped');
   const before = await page.evaluate(() => __save.data.coins);
   assert.equal(await page.evaluate(() => __game.placeSelectedDecor({x:0,z:17})), false);
-  assert.equal(await page.evaluate(() => __save.data.coins), before);
+  await page.mouse.move(point.x,point.y);
+  const hover=await page.evaluate(()=>[__game.island.decorPicker.ghost.visible,__game.island.decorPicker.footprint,__game.decorPoint,__save.data.coins]);
+  assert.ok(hover[0] && hover[1]>=2 && !hover[2] && hover[3]===before,JSON.stringify(hover));
+  assert.equal(await page.locator('[data-decor-confirm]').count(),0);
   await page.touchscreen.tap(point.x, point.y);
   assert.equal(await page.evaluate(() => __save.data.coins), before);
   assert.equal(await page.evaluate(() => __game.island.decorPicker.ghost.visible), true);
+  await page.locator('[data-decor-rotate]').tap();
+  assert.equal(await page.evaluate(() => __game.island.decorPicker.ghost.rotation.y),Math.PI/2);
   await page.evaluate(() => __game.island.render());
   await page.screenshot({path:out + '/decor-placement.png'});
   await page.locator('[data-decor-confirm]').tap();
@@ -80,6 +89,7 @@ try {
   assert.equal(await page.evaluate(() => __game.island.decorPicker), null);
   await page.reload();
   await page.waitForFunction(() => window.__game?.island.playerDecor.size === 1);
+  assert.equal(await page.evaluate(() => __save.data.decor[0].turn),1);
   await page.locator('[data-a=decor]').tap();
   await page.locator('[data-store-decor]').tap();
   await page.locator('[data-decor=bench]').tap();
@@ -102,6 +112,49 @@ try {
     return {celebrating, valid};
   });
   assert.deepEqual(celebration, {celebrating:true, valid:true});
+  const life=await page.evaluate(()=>{
+    const I=__game.island;
+    const person=I.walkers[0],parrot=I.landAnimals.find(w=>w.species==='parrot');
+    person.celebration=person.social=parrot.social=null;
+    I.nextSocial=0;
+    parrot.x=person.x+1.2;parrot.z=person.z;
+    I.startSocial();
+    const social=person.social?.partner===parrot&&parrot.social?.partner===person;
+    const turtle=I.turtles[0], fin=turtle.userData.flippers[0].part;
+    I.update(.05);
+    const before=fin.rotation.y;
+    I.update(.1);
+    const movingFins=before!==fin.rotation.y;
+    const old=__save.data.coins;
+    const grass=I.grass.spots.find(p=>I.hasGrass(p.x,p.z));
+    __game.chooseDecor('grass',true);
+    __game.previewSelectedDecor(grass);
+    const trimmed=__game.placeSelectedDecor(__game.decorPoint)&&!I.hasGrass(grass.x,grass.z);
+    __game.cancelDecor();
+    return {social,movingFins,trimmed,free:__save.data.coins===old};
+  });
+  assert.deepEqual(life,{social:true,movingFins:true,trimmed:true,free:true});
+  await page.evaluate(()=>__game.interactActor(__game.island.walkers[0]));
+  assert.match(await page.locator('.actor-speech').textContent(),/Привет/);
+  const displaced=await page.evaluate(()=>{
+    const game=__game,I=game.island,fire=I.projectArea('fire',1);
+    if(!game.chooseDecor('crate'))return false;
+    const {shape}=I.decorPicker;
+    for(let i=Math.floor(fire.minX*2)-1;i<=Math.ceil(fire.maxX*2);i++)for(let j=Math.floor(fire.minZ*2)-1;j<=Math.ceil(fire.maxZ*2);j++){
+      const x=(i+.5)/2,z=(j+.5)/2,placement=I.decorPlacement(shape,x,z);
+      if(!placement||!I.overlaps(placement,fire))continue;
+      game.previewSelectedDecor({x,z});
+      if(!game.placeSelectedDecor(game.decorPoint))return false;
+      const crate=__save.data.decor.find(item=>item.type==='crate');
+      __save.data.levels[2]={stars:3,best:100};
+      game.build('fire');
+      return crate.x===null&&crate.z===null&&!I.playerDecor.has(crate.id);
+    }
+    return false;
+  });
+  assert.equal(displaced,true,'A new fire moves overlapping decor into storage');
+  await page.waitForFunction(()=>__game.island.stages.fire===1);
+  await page.getByText(/Декор убран на склад/).waitFor();
   await page.locator('[data-a=settings]').tap();
   const music = ['island','bassa','bossa'];
   const packs = [...music,'draw','place','flip','shuffle','wave','click','error','open','build','buy','gift','decor','unlock'];
@@ -121,7 +174,7 @@ try {
   await page.waitForFunction(() => window.__save && __save.data.settings.musicPack === 'classic');
   assert.equal(await page.evaluate(() => __save.data.settings.soundPack), 'classic');
   assert.deepEqual(errors, []);
-  fs.writeFileSync(out + '/report.json', JSON.stringify({nature, grid, celebration, packs, pierCoasts:6},null,2));
+  fs.writeFileSync(out + '/report.json', JSON.stringify({nature, grid, celebration, life, packs, pierCoasts:6},null,2));
   console.log('PASS decor, pier, celebration and audio', JSON.stringify({nature, grid, celebration}));
 } finally {
   await R.close();

@@ -26,6 +26,19 @@ const RECORDINGS = {
   buy: buyRecording, gift: giftRecording, decor: decorRecording, unlock: unlockRecording,
 };
 const PLAYLIST = ['island', 'bassa', 'bossa'];
+const ACTOR_CALLS = {
+  parrot: ['sawtooth',820,1260,.105],
+  gull: ['triangle',450,710,.19],
+  monkey: ['triangle',360,640,.15],
+  dog: ['square',180,79,.09],
+  rabbit: ['sine',690,890,.055],
+  goat: ['triangle',270,220,.18],
+  chicken: ['triangle',440,270,.065],
+  duck: ['square',380,160,.135],
+  hedgehog: ['triangle',540,330,.065],
+  deer: ['sine',175,105,.20],
+  squirrel: ['square',860,610,.075],
+};
 const SFX_RECORDINGS = {
   draw: ['draw', .4, .09], deal: ['draw', .2, .085], place: ['place', .39, .05],
   flip: ['flip', .25, .07], shuffle: ['shuffle', .22, .3], wave: ['wave', .11, .25, 1.25],
@@ -233,6 +246,21 @@ class AudioEngine {
     s.connect(f).connect(g).connect(out || this.sfx);
     s.start(t, Math.random() * 0.5);
     s.stop(t + dur + 0.02);
+  }
+
+  actorSound(species) {
+    if(!this._ok('actor',.18))return;
+    if(species==='turtle'){
+      this._noise(.32,.12,'bandpass',1350,440);
+      this._osc('sine',370,145,.2,.065);
+    }else if(species==='crab'){
+      this._noise(.065,.12,'bandpass',2750,1380);
+      this._noise(.065,.1,'bandpass',2150,1060,undefined,.1);
+    }else{
+      const [voice,high,low,time]=ACTOR_CALLS[species]??['sine',495,690,.14];
+      this._osc(voice,high,low,time,.06);
+      this._osc(voice,high*1.16,low*.87,time*.72,.042,undefined,time+.04);
+    }
   }
 
   play(name, p = 0) {

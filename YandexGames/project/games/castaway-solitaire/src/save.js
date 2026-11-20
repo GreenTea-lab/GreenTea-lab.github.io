@@ -24,6 +24,7 @@ const DEFAULT = () => ({
   plays: 0,
   wins: 0,
   decor: [],
+  trimmedGrass: [],
 });
 
 export const save = {
@@ -47,6 +48,7 @@ export const save = {
     d.settings = Object.assign(def.settings, d.settings || {});
     d.stages = Object.assign(def.stages, d.stages || {});
     d.decor = restoreDecor(d.decor);
+    d.trimmedGrass = Array.isArray(d.trimmedGrass) ? [...new Set(d.trimmedGrass.filter(key=>typeof key==='string'&&/^-?\d{1,2},-?\d{1,2}$/.test(key)))].slice(0,7000) : [];
     d.levels = d.levels && typeof d.levels === 'object' ? d.levels : {};
     d.daily = Object.assign(def.daily, d.daily || {});
     d.seen = d.seen || {};
@@ -75,6 +77,14 @@ export const save = {
       localStorage.setItem(KEY, JSON.stringify(this.data));
     } catch (e) {}
     await sdk.saveData(this.data, true);
+  },
+
+  resetPreview() {
+    if(location.protocol!=='file:')return;
+    const {settings,noAds}=this.data;
+    this.data={...DEFAULT(),settings,noAds};
+    this.write(false);
+    location.reload();
   },
 
   starsEarned() {

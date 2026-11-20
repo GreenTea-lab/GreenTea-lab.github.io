@@ -29,6 +29,8 @@ jobs:
       - run: node test/island-workshop.mjs
       - if: ${{ !cancelled() }}
         run: node test/first-voyage-mobile.mjs
+      - if: ${{ !cancelled() }}
+        run: npm run test:living
       - run: npm run test:release
       - if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

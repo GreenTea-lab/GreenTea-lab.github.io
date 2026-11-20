@@ -13,11 +13,11 @@ function bunch(color) {
   return plant;
 }
 
-function bench() {
+function bench(color = C.plank) {
   const v = new Vox();
   for (const x of [-5, 5]) for (const z of [-2, 2]) v.box(x, 0, z, x, z < 0 ? 7 : 3, z, C.trunkD);
-  v.box(-6, 3, -2, 6, 3, 2, C.plank);
-  v.box(-6, 5, -2, 6, 7, -2, C.woodL);
+  v.box(-6, 3, -2, 6, 3, 2, color);
+  v.box(-6, 5, -2, 6, 7, -2, color);
   return v;
 }
 
@@ -30,17 +30,41 @@ function lantern() {
   return v;
 }
 
-function flag() {
+function flag(color = 0x44b8c6) {
   const v = new Vox();
   v.box(-1, 0, -1, 1, 0, 1, C.rock);
   v.box(0, 1, 0, 0, 15, 0, C.woodD);
-  v.box(1, 10, 0, 5, 14, 0, (x, y) => (x + y) % 3 ? 0x44b8c6 : 0xffd57e);
+  v.box(1, 10, 0, 5, 14, 0, (x, y) => (x + y) % 3 ? color : 0xffd57e);
+  return v;
+}
+
+function grass() {
+  const v = new Vox();
+  for (const [x,z,h] of [[-2,0,3],[0,-1,5],[1,1,3],[2,-2,4],[-1,2,2]]) {
+    v.box(x,0,z,x,h-1,z,C.grassD);
+    v.set(x+1,h,z,C.frondL);
+  }
+  return v;
+}
+
+function planter() {
+  const v = new Vox();
+  v.box(-4,0,-3,4,3,3,(x,y) => y % 2 ? C.plank : C.trunkD);
+  v.box(-3,4,-2,3,4,2,C.soil);
+  for (const [x,z,color] of [[-2,0,0xea718e],[0,-1,0xffd056],[2,1,0x9f75df]]) {
+    v.box(x,5,z,x,8,z,C.grassD);
+    v.box(x-1,9,z,x+1,9,z,color);
+    v.set(x,10,z,0xffedac);
+  }
   return v;
 }
 
 export const DECOR = [
+  {id:'grass', ru:'Трава', en:'Grass', coins:0, groundCover:true, model:grass},
   {id:'hibiscus', ru:'Гибискус', en:'Hibiscus', coins:25, model:() => bunch(0xec5573)},
   {id:'goldflowers', ru:'Жёлтые цветы', en:'Golden flowers', coins:25, model:() => bunch(0xffbf44)},
+  {id:'violets', ru:'Фиалки', en:'Violets', coins:25, model:() => bunch(0x9d73d9)},
+  {id:'whiteflowers', ru:'Белые цветы', en:'White flowers', coins:25, model:() => bunch(0xffedce)},
   {id:'wildflowers', ru:'Полевые цветы', en:'Wildflowers', coins:25, model:() => flowers(9)},
   {id:'shrub', ru:'Цветущий куст', en:'Flowering shrub', coins:40, model:() => bush(26, true)},
   {id:'palm', ru:'Кокосовая пальма', en:'Coconut palm', coins:80, tree:true, model:() => palm(31, 25)},
@@ -50,10 +74,14 @@ export const DECOR = [
   {id:'crate', ru:'Ящик', en:'Crate', coins:35, model:() => crate()},
   {id:'barrel', ru:'Бочка', en:'Barrel', coins:35, model:() => barrel()},
   {id:'bench', ru:'Скамейка', en:'Bench', coins:60, model:bench},
+  {id:'bluebench', ru:'Голубая скамейка', en:'Blue bench', coins:60, model:() => bench(0x54a5b9)},
+  {id:'planter', ru:'Ящик с цветами', en:'Flower box', coins:55, model:planter},
   {id:'lantern', ru:'Фонарь', en:'Lantern', coins:65, model:lantern},
   {id:'flag', ru:'Флажок', en:'Flag', coins:50, model:flag},
+  {id:'coralflag', ru:'Коралловый флажок', en:'Coral flag', coins:50, model:() => flag(0xe37365)},
 ];
 export const DECOR_LIMIT = 36;
+export const GRASS_LIMIT = 160;
 export const DECOR_BY_ID = Object.fromEntries(DECOR.map(item => [item.id, item]));
 export const meadowFlower = seed => bunch([0xcc70d9, 0xffbf44, 0xf2797d, 0xffefe0][seed % 4]);
 
@@ -65,8 +93,8 @@ export function restoreDecor(value) {
       !Number.isSafeInteger(item.id) || item.id < 1 || seen.has(item.id)) return false;
     seen.add(item.id);
     return true;
-  }).slice(0, DECOR_LIMIT).map(({id, type, x, z}) => {
+  }).slice(0, DECOR_LIMIT + GRASS_LIMIT).map(({id, type, x, z, turn}) => {
     const placed = Number.isFinite(x) && Number.isFinite(z) && Math.abs(x) <= 23 && Math.abs(z) <= 18;
-    return {id, type, x: placed ? x : null, z: placed ? z : null};
+    return {id, type, x: placed ? x : null, z: placed ? z : null, turn: Number.isInteger(turn) ? (turn % 4 + 4) % 4 : 0};
   });
 }

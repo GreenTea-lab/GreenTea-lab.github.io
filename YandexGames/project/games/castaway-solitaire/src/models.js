@@ -728,10 +728,11 @@ export function person(look) {
 }
 
 export const PEOPLE = [
-  { id: 'robin', look: { shirt: 0xf2efe6, hair: 0x7a5232, pants: 0x5a7fb0, hat: 'straw', beard: true }, from: 0 },
-  { id: 'mila', look: { shirt: 0xf59ab5, hair: 0x3d2b22, pants: 0x46b3a6, hat: 'flower', skin: 0xe8b48a }, from: 3 },
+  { id: 'robin', nameRU:'Робинзон',nameEN:'Robinson',look: { shirt: 0xf2efe6, hair: 0x7a5232, pants: 0x5a7fb0, hat: 'straw', beard: true }, from: 0, lines:{ru:['Привет! Осваиваюсь на острове.','Тут ещё столько дел!'],en:['Hello! I’m settling in.','So much to do on this island!']} },
+  { id: 'mila', nameRU:'Мила',nameEN:'Mila',look: { shirt: 0xf59ab5, hair: 0x3d2b22, pants: 0x46b3a6, hat: 'flower', skin: 0xe8b48a }, from: 0, lines:{ru:['Как тихо у берега.','Хочу посадить здесь цветы.'],en:['It’s so quiet on the shore.','I’d love to plant flowers here.']} },
   { id: 'cap', look: { shirt: 0x5a8fd6, hair: 0xdedede, pants: 0x3c4660, hat: 'captain', beard: true }, from: 9 },
-  { id: 'kid', look: { shirt: 0xf7cf4a, hair: 0xb06a3a, pants: 0x6aaa58 }, from: 15 },
+  { id: 'kid', nameRU:'Тим',nameEN:'Tim',child:true,look: { shirt: 0xf7cf4a, hair: 0xb06a3a, pants: 0x6aaa58 }, from: 5, lines:{ru:['Я нашёл ракушку!','Давай посмотрим на попугая!'],en:['I found a shell!','Let’s go see the parrot!']} },
+  { id: 'kid2', nameRU:'Лея',nameEN:'Leah',child:true,look: { shirt: 0x98a6f5, hair: 0x594335, pants: 0xe28261, hat:'flower' }, from: 12, lines:{ru:['А ты видел обезьянок?','Можно я побегаю у моря?'],en:['Have you seen the monkeys?','Can I run by the sea?']} },
   { id: 'lina', look: { shirt: 0xf0b475, hair: 0x402c25, pants: 0x376b87, hat:'flower',skin:0xc68c60 }, from: 27 },
   { id: 'omar', look: { shirt: 0x64a6a4, hair: 0x352c28, pants: 0xd2b17b, hat:'straw',skin:0xb47b50 }, from: 42 },
   { id: 'iris', look: { shirt: 0x998bc6, hair: 0xede1c9, pants: 0x416c87, hat:'flower' }, from: 57 },
@@ -805,11 +806,47 @@ export function chicken() {
 
 export function turtle() {
   const v = new Vox();
-  v.box(-3, 1, -3, 3, 2, 3, 0x6aa04a);
-  v.box(-2, 3, -2, 2, 3, 2, 0x88b85a);
-  v.box(-1, 1, 4, 1, 2, 5, 0xa5c77a);
-  for (const [x, z] of [[-3, -3], [3, -3], [-3, 3], [3, 3]]) v.set(x + Math.sign(x), 0, z, 0xa5c77a);
-  v.set(-1, 2, 6, C.dark), v.set(1, 2, 6, C.dark);
+  v.box(-3, 0, -3, 3, 1, 3, 0x749754);
+  v.box(-3, 2, -2, 3, 2, 2, 0x588647);
+  v.box(-2, 3, -2, 2, 3, 2, (x,y,z)=>(x+z)%2===0?0x88b85a:0x709e51);
+  v.box(-1, 4, -1, 1, 4, 1, 0x7ea747);
+  v.set(0,0,-4,0xa5c77a);
+  return v;
+}
+export function turtleHead() {
+  const v=new Vox();
+  v.box(-1,0,0,1,1,2,0xa5c77a);
+  v.set(-1,1,2,C.dark);
+  v.set(1,1,2,C.dark);
+  v.set(0,0,3,0x88ac63);
+  return v;
+}
+export function turtleFlipper(side, rear) {
+  const v=new Vox();
+  const span=rear?2:3;
+  for(let x=0;x<=span;x++){
+    v.set(x*side,0,-Math.floor(x/2),x===span?0x7da85e:0xa5c77a);
+    if(x<span)v.set(x*side,0,1-Math.floor(x/2),0x8eb870);
+  }
+  return v;
+}
+export function monkey() {
+  const v=new Vox(),brown=0x895738,skin=0xdcb287;
+  v.box(-2,2,-1,2,5,1,brown);
+  v.box(-1,3,2,1,5,2,skin);
+  v.box(-2,6,-1,2,9,2,0x996744);
+  v.box(-1,6,3,1,8,3,skin);
+  for(const side of [-1,1]){
+    v.box(side*3,7,0,side*3,8,1,skin);
+    v.box(side*3,2,0,side*3,5,1,brown);
+    v.set(side*3,2,1,skin);
+    v.box(side,0,0,side,1,1,brown);
+    v.set(side,8,3,C.dark);
+  }
+  v.set(0,6,3,0x673e2a);
+  v.box(0,2,-4,0,2,-2,brown);
+  v.box(0,3,-5,0,5,-5,brown);
+  v.set(0,5,-4,brown);
   return v;
 }
 

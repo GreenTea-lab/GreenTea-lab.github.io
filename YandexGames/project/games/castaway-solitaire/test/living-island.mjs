@@ -10,8 +10,8 @@ try{
  await p.addInitScript(()=>{window.__CS_DEBUG={manual:true};localStorage.setItem('castaway_solitaire_v1',JSON.stringify({coins:1000,level:1001,levels:Object.fromEntries(Array.from({length:1000},(_,i)=>[i+1,{stars:3,best:1000}])),stages:{},settings:{quality:'low'},seen:{coin:1,lock:1,sand:1,keys2:1,wild:1,tableTools:1}}));});
  await p.goto(R.base+'/dist-vk-single/index.html');await p.waitForFunction(()=>window.__game?.ui&&!document.querySelector('#loader'));await p.addScriptTag({url:R.base+'/'+out+'/audit.js'});
  assert.equal(await p.evaluate(()=>document.documentElement.dataset.theme),'island');
- const starting=await p.evaluate(()=>{const I=__game.island;I.update(.05);I.render();__game.ui.home();document.documentElement.dataset.motion='off';return {crabs:I.crabs.length,gulls:I.gulls.length,turtles:I.turtles.length,land:I.landAnimals.map(w=>w.species),total:I.population.animals+I.gulls.length+1};});
- assert.deepEqual(starting,{crabs:1,gulls:1,turtles:1,land:['crab','hedgehog'],total:5});
+ const starting=await p.evaluate(()=>{const I=__game.island;I.update(.05);I.render();__game.ui.home();document.documentElement.dataset.motion='off';return {people:I.walkers.length,crabs:I.crabs.length,gulls:I.gulls.length,turtles:I.turtles.length,land:I.landAnimals.map(w=>w.species),total:I.population.animals+I.gulls.length};});
+ assert.deepEqual(starting,{people:2,crabs:1,gulls:1,turtles:1,land:['crab','parrot','hedgehog'],total:5});
  await p.screenshot({path:out+'/starting-island.png'});report.push({starting});
  let previousAnimals=0,previousPeople=0;
  for(let tier=0;tier<=5;tier++){
@@ -35,8 +35,9 @@ try{
   assert.ok(motion.stats.every(s=>s.invalid===0&&s.buried===0&&s.jumps===0),JSON.stringify(motion));assert.ok(motion.stats.filter(s=>s.species==='crab').every(s=>s.distance>(tier===0||tier===5?8:1)),JSON.stringify(motion.stats));assert.ok(motion.minTurtleDot>.995);assert.equal(motion.turtleCollisions,0);
   console.log('PASS coast',tier,inhabitants);
  }
- assert.equal(previousPeople,12);
+ assert.equal(previousPeople,13);
  assert.ok(report.some(r=>r.inhabitants?.types.includes('squirrel')),'Orchard attracts a squirrel');
+ assert.ok(report.some(r=>r.inhabitants?.types.includes('monkey')),'Garden attracts monkeys');
  await p.evaluate(()=>{const I=__game.island;I.camT=null;I.cam.dist=I.baseDist()*1.06;I.update(.05);I.render();__game.ui.home();document.documentElement.dataset.motion='off';});await p.screenshot({path:out+'/populated-island.png'});
  // Scale changes layout only, keeping card order and all gameplay state intact.
  await p.evaluate(()=>__game.playLevel(1));await p.evaluate(()=>{for(let i=0;i<80;i++)__game.table.update(.05);__game.island.update(.05);__game.island.render();__game.table.render();});

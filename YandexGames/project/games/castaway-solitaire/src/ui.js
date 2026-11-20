@@ -16,7 +16,8 @@ import { PROJECTS, TOTAL_STEPS, COST, AD_COINS, AD_COOLDOWN, DAILY } from './dat
 import { MAIN_LEVELS } from './logic.js';
 import { THEMES, BACKS, cosmeticState, selectCosmetic, applyCosmetics } from './cosmetics.js';
 import { projThumb, modelThumb } from './thumbs.js';
-import { DECOR, DECOR_BY_ID, DECOR_LIMIT } from './decor.js';
+import { DECOR, DECOR_BY_ID, DECOR_LIMIT, GRASS_LIMIT } from './decor.js';
+import { PEOPLE } from './models.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const starsHTML = (n) => [0, 1, 2].map((i) => (i < n ? IC.star : IC.starE)).join('');
@@ -97,7 +98,7 @@ export class UI {
     d.className = 'toast';
     d.textContent = text;
     // на главном экране — под названием игры, чтобы не закрывать его
-    const logo = this.root.querySelector('.logo');
+    const logo = this.root.querySelector('.logo:not(.logo-hidden)');
     if (logo && logo.offsetHeight) d.style.top = Math.round(logo.getBoundingClientRect().bottom + 10) + 'px';
     this.tst.innerHTML = '';
     this.tst.appendChild(d);
@@ -165,19 +166,23 @@ export class UI {
     const d = save.data;
     const daily = d.daily.day !== today();
     const lvl = d.level;
+    const remaining=(this.titleUntil ||= performance.now()+4500)-performance.now();
+    clearTimeout(this.titleTimer);
     this.changeScreen(`
       <div class="top">
         <div class="tl">${this.coinsChip()}${this.starsChip()}</div>
       </div>
-      <div class="rcol"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Журнал острова':'Island journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button><button class="btn round hit" data-a="lb" aria-label="records">${IC.trophy}</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
-      <div class="logo"><b>${esc(t('title'))}</b><i>${esc(t('subtitle'))}</i></div>
+      <div class="rcol"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Журнал острова':'Island journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
+      <div class="logo${remaining<=0?' logo-hidden':''}"><b>${esc(t('title'))}</b><i>${esc(t('subtitle'))}</i></div>
       <div class="bottom island-nav">
         <div class="side"><button class="btn round hit" data-a="world" aria-label="${LANG==='ru'?'Расширить остров':'Expand island'}">${IC.palm}</button><span>${LANG==='ru'?'Расширить':'Expand'}</span></div>
         <div class="side"><button class="btn round hit" data-a="build" aria-label="${esc(t('build'))}" style="position:relative">${IC.hammer}<span class="badge" id="buildBadge" style="display:none"></span></button><span>${esc(t('build'))}</span></div>
         <div class="side"><button class="btn round hit" data-a="decor" aria-label="${LANG==='ru'?'Декор острова':'Island decor'}">${IC.bag}</button><span>${LANG==='ru'?'Декор':'Decor'}</span></div>
         <button class="btn big hit pulse" data-a="play" style="flex-direction:column;gap:0;height:76px;line-height:1.05">${esc(t('play'))}<small>${esc(t('levelN', { n: lvl }))}</small></button>
         <div class="side"><button class="btn round hit" data-a="levels">${IC.cards}</button><span>${esc(t('levels'))}</span></div>
+        <div class="side"><button class="btn round hit" data-a="lb" aria-label="${LANG==='ru'?'Рейтинг':'Ranking'}">${IC.trophy}</button><span>${LANG==='ru'?'Рейтинг':'Ranking'}</span></div>
       </div>`);
+    if(remaining>0)this.titleTimer=setTimeout(()=>this.scr.querySelector('.logo')?.classList.add('logo-hidden'),remaining);
     this.bind(this.scr, {
       ...this.common(),
       play: () => this.g.playLevel(save.data.level),
@@ -206,6 +211,7 @@ export class UI {
   }
   // метки над постройками (вызывается каждый кадр на острове)
   updateBubble() {
+    this.updateActorSpeech();
     if (this.screen !== 'home' || this.modalOpen || this.g.decorSelection) {
       if (this.bub.innerHTML) this.bub.innerHTML = '';
       this._bubKey = '';
@@ -238,23 +244,58 @@ export class UI {
     });
   }
 
+  actorSpeech(mesh,text) {
+    this.speech?.node.remove();
+    const node=document.createElement('div');
+    node.className='actor-speech';
+    node.textContent=text;
+    node.setAttribute('role','status');
+    this.scr.append(node);
+    this.speech={mesh,node,until:performance.now()+2250};
+    this.updateActorSpeech();
+  }
+  updateActorSpeech() {
+    const speech=this.speech;
+    if(!speech)return;
+    if(this.screen!=='home'||this.modalOpen||this.g.decorSelection||!speech.node.isConnected||performance.now()>speech.until){
+      speech.node.remove();
+      this.speech=null;
+      return;
+    }
+    const {x,y,z}=speech.mesh.position;
+    const p=this.g.island.project(x,y+1.15,z);
+    speech.node.hidden=!p.vis;
+    speech.node.style.left=Math.max(52,Math.min(innerWidth-52,p.x))+'px';
+    speech.node.style.top=p.y+'px';
+  }
+
   // ---------- стройка ----------
   placingDecor(def, status = 'select') {
     this.scr.querySelector('.decor-placement')?.remove();
     if (!def) return;
     const ru = LANG === 'ru';
     const bar = document.createElement('div');
-    bar.className = 'decor-placement';
+    bar.className = 'decor-placement hit';
+    const locked=!!this.g.decorPoint, removing=this.g.decorRemoving;
+    const footprint=this.g.island.decorPicker?.footprint||0;
     const help = status === 'blocked'
       ? (ru ? 'Здесь не поместится. Попробуйте свободный участок суши.' : 'It won’t fit here. Try an open spot on land.')
-      : status === 'ready' ? (ru ? 'Можно поставить здесь или выбрать другую клетку.' : 'Place here or choose another tile.')
-        : (ru ? 'Выберите зелёную клетку.' : 'Choose a green tile.');
-    bar.innerHTML = `<div><b>${esc(def[ru ? 'ru' : 'en'])}</b><small role="status">${esc(help)}</small></div>
+      : locked ? (ru ? 'Место зафиксировано.' : 'Position locked.')
+        : (ru ? 'Наведите на клетку или проведите пальцем. Нажмите, чтобы зафиксировать.' : 'Point or drag a finger to preview. Tap a tile to lock it.');
+    const count=footprint&&!removing?` · ${footprint} ${ru?'кл.':'tiles'}`:'';
+    bar.innerHTML = `<div><b>${removing?(ru?'Убрать траву':'Remove grass'):esc(def[ru ? 'ru' : 'en'])}${count}</b><small>${esc(help)}</small></div>
       <div class="decor-placement-actions">
-        <button class="btn mid green" type="button" data-decor-confirm ${status === 'ready' ? '' : 'disabled'}>${ru ? 'Поставить' : 'Place'}</button>
+        ${locked?`<button class="btn mid green" type="button" data-decor-confirm ${status === 'ready' ? '' : 'disabled'}>${removing?(ru?'Убрать':'Remove'):(ru?'Поставить':'Place')}</button>
+        ${removing?'':`<button class="btn mid sea" type="button" data-decor-rotate aria-label="${ru?'Повернуть на 90°':'Rotate 90°'}" title="${ru?'Повернуть':'Rotate'}">↻</button>`}
+        <button class="btn mid sand" type="button" data-decor-unlock>${ru?'Сменить место':'Move'}</button>`:''}
         <button class="btn mid sand" type="button" data-decor-cancel>${ru ? 'Отмена' : 'Cancel'}</button>
       </div>`;
-    bar.querySelector('[data-decor-confirm]').onclick = () => this.g.placeSelectedDecor(this.g.decorPoint);
+    const confirm=bar.querySelector('[data-decor-confirm]');
+    if(confirm)confirm.onclick=()=>this.g.placeSelectedDecor(this.g.decorPoint);
+    const rotate=bar.querySelector('[data-decor-rotate]');
+    if(rotate)rotate.onclick=()=>this.g.rotateSelectedDecor();
+    const unlock=bar.querySelector('[data-decor-unlock]');
+    if(unlock)unlock.onclick=()=>this.g.unlockDecorPoint();
     bar.querySelector('[data-decor-cancel]').onclick = () => this.g.cancelDecor();
     this.scr.append(bar);
   }
@@ -263,10 +304,10 @@ export class UI {
     const ru = LANG === 'ru', data = save.data, lang = ru ? 'ru' : 'en';
     const items = DECOR.map(def => {
       const stored = data.decor.filter(item => item.type === def.id && item.x === null).length;
-      const disabled = !stored && (data.coins < def.coins || data.decor.length >= DECOR_LIMIT);
+      const disabled = !this.g.canPlaceItem(def);
       return `<button class="decor-item" type="button" data-decor="${def.id}" ${disabled ? 'disabled' : ''}>
         <img src="${modelThumb('decor-' + def.id, def.model)}" alt=""><b>${esc(def[lang])}</b>
-        <small>${stored ? (ru ? 'На складе: ' : 'In storage: ') + stored : fmt(def.coins) + (ru ? ' монет' : ' coins')}</small>
+        <small>${stored ? (ru ? 'На складе: ' : 'In storage: ') + stored : def.coins ? fmt(def.coins) + (ru ? ' монет' : ' coins') : (ru?'Бесплатно':'Free')}</small>
       </button>`;
     }).join('');
     const placed = data.decor.filter(item => item.x !== null).map(item =>
@@ -274,9 +315,11 @@ export class UI {
     const m = this.modal({
       title: ru ? 'Декор острова' : 'Island decor', wide: true,
       body: `<p>${ru ? 'Выберите предмет и место на острове. Монеты спишутся после установки. Убранный декор можно поставить снова бесплатно.' : 'Choose an item and a spot on the island. Coins are charged after placement. Store items and place them again for free.'}</p>
-        <p>${ru ? 'Монеты' : 'Coins'} ${fmt(data.coins)} · ${ru ? 'Предметы' : 'Items'} ${data.decor.length}/${DECOR_LIMIT}</p>
+        <p>${ru ? 'Монеты' : 'Coins'} ${fmt(data.coins)} · ${ru ? 'Предметы' : 'Items'} ${data.decor.filter(item=>item.type!=='grass').length}/${DECOR_LIMIT} · ${ru?'Трава':'Grass'} ${data.decor.filter(item=>item.type==='grass').length}/${GRASS_LIMIT}</p>
+        <button class="btn mid sand" type="button" data-remove-grass>${ru?'Убрать траву':'Remove grass'}</button>
         <div class="decor-grid">${items}</div>${placed ? `<h3>${ru ? 'На острове' : 'On the island'}</h3>${placed}` : ''}`,
     });
+    m.querySelector('[data-remove-grass]').onclick=()=>{if(this.g.chooseDecor('grass',true))m.close();};
     m.querySelectorAll('[data-decor]').forEach(b => b.onclick = () => {
       if (this.g.chooseDecor(b.dataset.decor)) m.close();
     });
@@ -661,6 +704,21 @@ export class UI {
         <div class="setrow"><span>${esc(t('quality'))}</span><div class="seg"><button data-q="high" class="${this.g.quality !== 'low' ? 'on' : ''}">${esc(t('qHigh'))}</button><button data-q="low" class="${this.g.quality === 'low' ? 'on' : ''}">${esc(t('qLow'))}</button></div></div></div>`,
     });
     const appearance=document.createElement('button');appearance.className='btn mid sea';appearance.dataset.appearance='1';appearance.innerHTML=IC.scene+(LANG==='ru'?'Фон партии и оформление':'Game scene and appearance');m.querySelector('.pb').appendChild(appearance);appearance.onclick=()=>{m.close();this.cosmetics();};
+    if(location.protocol==='file:'){
+      const reset=document.createElement('button');
+      reset.className='btn mid sand preview-reset';
+      reset.type='button';
+      reset.textContent=ru?'Сбросить прогресс превью':'Reset preview progress';
+      m.querySelector('.pb').appendChild(reset);
+      reset.onclick=()=>{
+        m.close();
+        const prompt=this.modal({
+          title:ru?'Сбросить прогресс?':'Reset progress?',
+          body:`<p>${ru?'Заново начнутся уровни, стройка и расстановка декора в этом превью.':'Levels, construction and decorations in this preview will start over.'}</p><button class="btn mid sand" type="button" data-reset-preview>${ru?'Сбросить прогресс':'Reset progress'}</button>`,
+        });
+        prompt.querySelector('[data-reset-preview]').onclick=()=>save.resetPreview();
+      };
+    }
     bindSliders(m, st, () => save.write(false));
     m.querySelectorAll('[data-audio-pack]').forEach(select => select.onchange = () => {
       st[select.dataset.audioPack] = select.value;
@@ -700,7 +758,7 @@ export class UI {
     }).join('');
     const ready=harvestReady();
     const finds=CHAPTERS.map((names,ch)=>{const done=j.chapters.includes(ch),p=chapterProgress(ch),ready=p.count===50;return '<button class="find-card '+(done?'collected':'')+'" data-find="'+ch+'" '+(ready&&!done?'':'disabled')+'><span>'+(['✦','⚓','❖','✿','☼'][ch%5])+'</span><b>'+esc(names[ru?0:1])+'</b><small>'+(done?(ru?'В коллекции':'Collected'):ready?(ru?'Забрать находку':'Claim discovery'):p.count+'/50')+'</small></button>';}).join('');
-    const m=this.modal({title:ru?'Дневник Робинзона':'Robinson’s journal',wide:true,body:'<div class="population-summary"><b>'+(ru?'Обитатели острова':'Island neighbours')+'</b><span>'+(ru?'Жители: ':'Residents: ')+this.g.island.walkers.length+' / 12 · '+(ru?'Животные: ':'Animals: ')+this.g.island.population.animals+'</span><small>'+(ru?'Новые жители и животные приходят после улучшений.':'Upgrades bring new neighbours and animals.')+'</small></div><div class="wildlife-list">'+WILDLIFE.map(d=>'<div class="'+(wildlifeUnlocked(d,save.data.stages)?'arrived':'')+'"><b>'+esc(ru?d.ru:d.en)+'</b><small>'+(wildlifeUnlocked(d,save.data.stages)?(ru?'На острове':'On the island'):esc(t('p_'+d.requires[0]))+' · '+(ru?'этап ':'stage ')+d.requires[1])+'</small></div>').join('')+'</div><h3>'+(ru?'Поручения на сегодня':'Today’s requests')+'</h3><div class="task-list">'+tasks+'</div><h3>'+(ru?'Урожай сада':'Garden harvest')+'</h3><div class="task-card"><div><b>'+(ru?'Корзина фруктов':'Fruit basket')+'</b><small>'+(ru?'Постройте сад. Новый урожай после трёх побед.':'Build the garden. New fruit after three wins.')+'</small></div><button class="btn mid '+(ready?'green':'sand')+'" data-harvest '+(ready?'':'disabled')+'>'+(ru?'Собрать':'Harvest')+'</button></div><h3>'+(ru?'Находки путешествия · ':'Voyage discoveries · ')+j.chapters.length+'/20</h3><p class="center">'+(ru?'Завершите 50 уровней главы, чтобы получить находку и монеты.':'Complete all 50 levels of a chapter for a discovery and coins.')+'</p><div class="find-grid">'+finds+'</div>'});
+    const m=this.modal({title:ru?'Дневник Робинзона':'Robinson’s journal',wide:true,body:'<div class="population-summary"><b>'+(ru?'Обитатели острова':'Island neighbours')+'</b><span>'+(ru?'Жители: ':'Residents: ')+this.g.island.walkers.length+' / '+PEOPLE.length+' · '+(ru?'Животные: ':'Animals: ')+this.g.island.population.animals+'</span><small>'+(ru?'Новые жители и животные приходят после улучшений.':'Upgrades bring new neighbours and animals.')+'</small></div><div class="wildlife-list">'+WILDLIFE.map(d=>'<div class="'+(wildlifeUnlocked(d,save.data.stages)?'arrived':'')+'"><b>'+esc(ru?d.ru:d.en)+'</b><small>'+(wildlifeUnlocked(d,save.data.stages)?(ru?'На острове':'On the island'):esc(t('p_'+d.requires[0]))+' · '+(ru?'этап ':'stage ')+d.requires[1])+'</small></div>').join('')+'</div><h3>'+(ru?'Поручения на сегодня':'Today’s requests')+'</h3><div class="task-list">'+tasks+'</div><h3>'+(ru?'Урожай сада':'Garden harvest')+'</h3><div class="task-card"><div><b>'+(ru?'Корзина фруктов':'Fruit basket')+'</b><small>'+(ru?'Постройте сад. Новый урожай после трёх побед.':'Build the garden. New fruit after three wins.')+'</small></div><button class="btn mid '+(ready?'green':'sand')+'" data-harvest '+(ready?'':'disabled')+'>'+(ru?'Собрать':'Harvest')+'</button></div><h3>'+(ru?'Находки путешествия · ':'Voyage discoveries · ')+j.chapters.length+'/20</h3><p class="center">'+(ru?'Завершите 50 уровней главы, чтобы получить находку и монеты.':'Complete all 50 levels of a chapter for a discovery and coins.')+'</p><div class="find-grid">'+finds+'</div>'});
     const refresh=coins=>{if(coins)this.toast('+'+coins);m.close();this.refreshTop();this.journal();};
     m.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>refresh(claimTask(b.dataset.task)));
     m.querySelectorAll('[data-find]').forEach(b=>b.onclick=()=>refresh(claimChapter(+b.dataset.find)));
