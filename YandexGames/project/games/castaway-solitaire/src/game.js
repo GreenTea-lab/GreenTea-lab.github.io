@@ -98,7 +98,7 @@ export class Game {
   }
 
   addCoins(n) {
-    save.data.coins += n;
+    save.creditCoins(n);
     save.write();
     this.ui && this.ui.refreshTop();
   }
@@ -143,13 +143,15 @@ export class Game {
     let moved = 0;
     let downT = 0;
     let pinch = null;
+    let multiTouch = false;
     c.addEventListener('pointerdown', (e) => {
       audio.unlock();
-      if (this.state !== 'island' || this.ui.modalOpen || sdk.adActive) return;
+      if (this.state !== 'island' || this.ui.modalOpen || this.ui.transitioning || sdk.adActive) return;
       c.setPointerCapture(e.pointerId);
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       moved = 0;
       downT = performance.now();
+      multiTouch = pts.size > 1;
       if (pts.size === 1 && e.button === 0 && this.decorSelection && !this.decorPoint) {
         this.previewSelectedDecor(this.island.pickGround(e.clientX,e.clientY),false);
       }
@@ -161,7 +163,8 @@ export class Game {
     c.addEventListener('pointermove', (e) => {
       const p = pts.get(e.pointerId);
       if (this.state !== 'island' || this.ui.modalOpen || this.ui.transitioning) return;
-      const aiming=this.decorSelection && pts.size<2 && e.buttons!==2 && !e.shiftKey;
+      const orbit=e.pointerType==='touch'||(e.buttons&2)!==0;
+      const aiming=this.decorSelection&&pts.size<2&&(e.buttons&2)===0&&!e.shiftKey;
       if(aiming && !this.decorPoint){
         this.previewSelectedDecor(this.island.pickGround(e.clientX,e.clientY),false);
       }
@@ -172,8 +175,10 @@ export class Game {
       p.y = e.clientY;
       moved += Math.abs(dx) + Math.abs(dy);
       if (pts.size === 1) {
-        if (e.buttons === 2 || e.shiftKey) this.island.pan(dx, dy);
-        else if(!aiming) this.island.drag(dx, dy);
+        if(!aiming){
+          if(orbit&&!e.shiftKey)this.island.drag(dx,dy);
+          else this.island.pan(dx,dy);
+        }
       } else if (pts.size === 2 && pinch) {
         const [a, b] = [...pts.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
@@ -188,7 +193,7 @@ export class Game {
       if (!pts.has(e.pointerId)) return;
       pts.delete(e.pointerId);
       if (pts.size < 2) pinch = null;
-      if (e.type === 'pointerup' && this.state === 'island' && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen && !this.ui.transitioning) {
+      if (e.type === 'pointerup' && this.state === 'island' && !multiTouch && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen && !this.ui.transitioning) {
         if (this.decorSelection && e.button === 0) {
           this.previewSelectedDecor(this.island.pickGround(e.clientX, e.clientY));
           return;
@@ -205,7 +210,7 @@ export class Game {
       if(this.decorSelection && !this.decorPoint && !pts.size)this.previewSelectedDecor(null,false);
     });
     c.addEventListener('wheel', (e) => {
-      if (this.state !== 'island') return;
+      if (this.state !== 'island' || this.ui.modalOpen || this.ui.transitioning) return;
       e.preventDefault();
       this.island.zoom(e.deltaY > 0 ? 1.1 : 0.9);
     }, { passive: false });
@@ -499,9 +504,10 @@ export class Game {
     const n = this.n;
     const prev = d.levels[n] || { stars: 0, best: 0 };
     const reward = WIN_COINS(r.stars, n) + r.coins;
+    const firstCoins = reward>0 && !d.seen.earnedCoins;
     d.levels[n] = { stars: Math.max(prev.stars, r.stars), best: Math.max(prev.best, r.score) };
     d.level = Math.max(d.level, n + 1);
-    d.coins += reward;
+    save.creditCoins(reward);
     d.wins++;
     recordVoyageWin(this.table.g.cards.length,r.best);
     save.write();
@@ -512,7 +518,7 @@ export class Game {
     const firstProject = available?.ok && !Object.values(d.stages).some(stage => stage > 0)
       ? available.p.id : null;
     this.ui.win({ n, stars: r.stars, score: r.score, best: prev.best > r.score ? prev.best : 0,
-      coins: reward, left: r.left, canBuild: available?.ok, firstProject });
+      coins: reward, left: r.left, canBuild: available?.ok, firstProject, firstCoins });
   }
   doubleReward(coins, done, finished) {
     sdk.showRewarded(() => {

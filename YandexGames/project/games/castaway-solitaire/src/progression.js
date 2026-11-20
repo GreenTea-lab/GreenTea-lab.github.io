@@ -22,7 +22,7 @@ export const TASKS=[
  {id:'cards',goal:60,coins:30,ru:'Уберите 60 карт',en:'Clear 60 cards'},
  {id:'streak',goal:8,coins:35,ru:'Соберите цепочку из 8 карт',en:'Build an 8-card streak'},
 ];
-export function claimTask(id){const q=worldState().daily,t=TASKS.find(t=>t.id===id);if(!t||q.claimed.includes(id)||q[id]<t.goal)return 0;q.claimed.push(id);save.data.coins+=t.coins;save.write();return t.coins;}
-export function claimChapter(ch){const j=worldState();if(!CHAPTERS[ch]||j.chapters.includes(ch)||chapterProgress(ch).count<50)return 0;j.chapters.push(ch);const coins=150+ch*15;save.data.coins+=coins;save.write();return coins;}
+export function claimTask(id){const q=worldState().daily,t=TASKS.find(t=>t.id===id);if(!t||q.claimed.includes(id)||q[id]<t.goal)return 0;q.claimed.push(id);save.creditCoins(t.coins);save.write();return t.coins;}
+export function claimChapter(ch){const j=worldState();if(!CHAPTERS[ch]||j.chapters.includes(ch)||chapterProgress(ch).count<50)return 0;j.chapters.push(ch);const coins=150+ch*15;save.creditCoins(coins);save.write();return coins;}
 export function harvestReady(){return (save.data.stages.garden||0)>0&&save.data.wins-(save.data.harvestWins||0)>=3;}
-export function harvest(){if(!harvestReady())return 0;const coins=25+save.data.stages.garden*10+(save.data.stages.orchard||0)*10;save.data.harvestWins=save.data.wins;save.data.coins+=coins;save.write();return coins;}
+export function harvest(){if(!harvestReady())return 0;const coins=25+save.data.stages.garden*10+(save.data.stages.orchard||0)*10;save.data.harvestWins=save.data.wins;save.creditCoins(coins);save.write();return coins;}

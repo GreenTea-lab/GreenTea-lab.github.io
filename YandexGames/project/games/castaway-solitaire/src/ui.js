@@ -18,6 +18,7 @@ import { THEMES, BACKS, cosmeticState, selectCosmetic, applyCosmetics } from './
 import { projThumb, modelThumb } from './thumbs.js';
 import { DECOR, DECOR_BY_ID, DECOR_LIMIT, GRASS_LIMIT } from './decor.js';
 import { PEOPLE } from './models.js';
+import { GUIDES } from './guides.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const starsHTML = (n) => [0, 1, 2].map((i) => (i < n ? IC.star : IC.starE)).join('');
@@ -80,6 +81,7 @@ export class UI {
     const jb=this.root.querySelector('#journalBadge');
     if(jb){const j=worldState(),q=j.daily;const ready=TASKS.some(x=>q[x.id]>=x.goal&&!q.claimed.includes(x.id))||CHAPTERS.some((_,ch)=>!j.chapters.includes(ch)&&chapterProgress(ch).count===50)||harvestReady();jb.style.display=ready?'':'none';}
     this.refreshBoost && this.refreshBoost();
+    this.refreshGuideNotice();
   }
   bind(el, handlers) {
     el.querySelectorAll('[data-a]').forEach((b) => {
@@ -172,7 +174,7 @@ export class UI {
       <div class="top">
         <div class="tl">${this.coinsChip()}${this.starsChip()}</div>
       </div>
-      <div class="rcol"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Журнал острова':'Island journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
+      <div class="rcol"><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button><button class="btn round hit island-help" data-a="guide" aria-label="${LANG==='ru'?'Управление островом':'Island controls'}">?</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
       <div class="logo${remaining<=0?' logo-hidden':''}"><b>${esc(t('title'))}</b><i>${esc(t('subtitle'))}</i></div>
       <div class="bottom island-nav">
         <div class="side"><button class="btn round hit" data-a="world" aria-label="${LANG==='ru'?'Расширить остров':'Expand island'}">${IC.palm}</button><span>${LANG==='ru'?'Расширить':'Expand'}</span></div>
@@ -181,7 +183,8 @@ export class UI {
         <button class="btn big hit pulse" data-a="play" style="flex-direction:column;gap:0;height:76px;line-height:1.05">${esc(t('play'))}<small>${esc(t('levelN', { n: lvl }))}</small></button>
         <div class="side"><button class="btn round hit" data-a="levels">${IC.cards}</button><span>${esc(t('levels'))}</span></div>
         <div class="side"><button class="btn round hit" data-a="lb" aria-label="${LANG==='ru'?'Рейтинг':'Ranking'}">${IC.trophy}</button><span>${LANG==='ru'?'Рейтинг':'Ranking'}</span></div>
-      </div>`);
+        <div class="side"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Дневник Робинзона':'Robinson’s journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><span>${LANG==='ru'?'Дневник':'Journal'}</span></div>
+      </div><div class="guide-notice" data-guide-notice></div>`);
     if(remaining>0)this.titleTimer=setTimeout(()=>this.scr.querySelector('.logo')?.classList.add('logo-hidden'),remaining);
     this.bind(this.scr, {
       ...this.common(),
@@ -189,6 +192,7 @@ export class UI {
       levels: () => this.levels(),
       world: () => this.world(),
       journal: () => this.journal(),
+      guide: () => this.guide('controls'),
       cosmetics: () => this.cosmetics(),
       decor: () => this.decor(),
       settings: () => this.settings(),
@@ -198,7 +202,61 @@ export class UI {
     this.refreshTop();
     this.bub.innerHTML = '';
     this._bubKey = '';
-    if(!save.data.seen.tableTools){save.data.seen.tableTools=1;save.write(false);this.toast(LANG==='ru'?'Фон партии — ваш остров. Масштаб и кнопка «Фон» находятся над картами.':'Your island is the game scene. Card size and Scene are above the cards.',5000);}
+  }
+  acknowledgeGuide(kind) {
+    const key=kind+'Guide';
+    if(!save.data.seen[key]){
+      save.data.seen[key]=1;
+      save.write();
+    }
+    this.refreshGuideNotice();
+  }
+  refreshGuideNotice() {
+    const notice=this.scr.querySelector('[data-guide-notice]');
+    if(!notice)return;
+    const {seen}=save.data,ru=LANG==='ru';
+    const kind=this.g.decorSelection ? '' : seen.earnedCoins&&!seen.decorGuide ? 'decor' : seen.controlsGuide ? '' : 'controls';
+    if(notice.dataset.kind===kind)return;
+    notice.dataset.kind=kind;
+    notice.innerHTML='';
+    if(!kind)return;
+    const decor=kind==='decor';
+    notice.innerHTML=`<div>${decor?IC.bag:IC.scene}<span><b>${decor?(ru?'Первые монеты получены':'You received your first coins'):(ru?'Осмотр острова':'Explore the island')}</b>
+      <small>${decor?(ru?'На монеты можно купить декор для острова.':'Use coins to decorate the island.'):(ru?'Поворот камеры, жители и управление картами.':'Camera controls, islanders and playing cards.')}</small></span></div>
+      <button class="btn mid sand" data-guide-open>${ru?'Обучение':'Guide'}</button>
+      <button class="guide-dismiss" aria-label="${ru?'Скрыть подсказку':'Dismiss tip'}">×</button>`;
+    notice.querySelector('[data-guide-open]').onclick=()=>this.guide(kind);
+    notice.querySelector('.guide-dismiss').onclick=()=>this.acknowledgeGuide(kind);
+  }
+  guide(kind) {
+    const ru=LANG==='ru', isDecor=kind==='decor';
+    const steps=GUIDES[kind][ru?'ru':'en'];
+    this.acknowledgeGuide(kind);
+    let step=0;
+    const m=this.modal({title:isDecor?(ru?'Как расставить декор':'How to decorate'):(ru?'Управление островом':'Island controls'),body:''});
+    const body=m.querySelector('.pb');
+    const render=()=>{
+      const {title,icon,rows}=steps[step],last=step===steps.length-1;
+      body.innerHTML=`<div class="guide-step"><div class="guide-title">${IC[icon]}<h3 tabindex="-1">${esc(title)}</h3><small>${step+1} / ${steps.length}</small></div>
+        <dl>${rows.map(([name,text])=>`<div><dt>${esc(name)}</dt><dd>${esc(text)}</dd></div>`).join('')}</dl>
+        <div class="guide-actions">
+          ${step?`<button class="btn mid sand" data-guide-back>${ru?'Назад':'Back'}</button>`:
+            !isDecor?`<button class="btn mid sand" data-guide-recenter>${ru?'Общий вид':'Reset view'}</button>`:''}
+          <button class="btn mid ${last?'green':'sea'}" data-guide-next>${last?(isDecor?(ru?'К декору':'Open Decor'):(ru?'На остров':'Back to island')):(ru?'Дальше':'Next')}</button>
+        </div></div>`;
+      const back=body.querySelector('[data-guide-back]');
+      if(back)back.onclick=()=>{step--;render();};
+      const recenter=body.querySelector('[data-guide-recenter]');
+      if(recenter)recenter.onclick=()=>{m.close();this.g.island.setMode('island');};
+      body.querySelector('[data-guide-next]').onclick=()=>{
+        if(!last){step++;render();return;}
+        m.close();
+        if(isDecor)this.decor();
+      };
+      body.querySelector('h3').focus({preventScroll:true});
+      body.scrollTop=0;
+    };
+    render();
   }
   // постройки для меток над островом: все, на которые хватает звёзд (до 4), иначе самая дешёвая
   bubbleList() {
@@ -272,6 +330,7 @@ export class UI {
   // ---------- стройка ----------
   placingDecor(def, status = 'select') {
     this.scr.querySelector('.decor-placement')?.remove();
+    this.refreshGuideNotice();
     if (!def) return;
     const ru = LANG === 'ru';
     const bar = document.createElement('div');
@@ -316,9 +375,11 @@ export class UI {
       title: ru ? 'Декор острова' : 'Island decor', wide: true,
       body: `<p>${ru ? 'Выберите предмет и место на острове. Монеты спишутся после установки. Убранный декор можно поставить снова бесплатно.' : 'Choose an item and a spot on the island. Coins are charged after placement. Store items and place them again for free.'}</p>
         <p>${ru ? 'Монеты' : 'Coins'} ${fmt(data.coins)} · ${ru ? 'Предметы' : 'Items'} ${data.decor.filter(item=>item.type!=='grass').length}/${DECOR_LIMIT} · ${ru?'Трава':'Grass'} ${data.decor.filter(item=>item.type==='grass').length}/${GRASS_LIMIT}</p>
-        <button class="btn mid sand" type="button" data-remove-grass>${ru?'Убрать траву':'Remove grass'}</button>
+        <div class="decor-catalog-tools"><button class="btn mid sand" type="button" data-remove-grass>${ru?'Убрать траву':'Remove grass'}</button>
+        <button class="btn mid sand" type="button" data-decor-guide>${ru?'Как расставлять':'How to place items'}</button></div>
         <div class="decor-grid">${items}</div>${placed ? `<h3>${ru ? 'На острове' : 'On the island'}</h3>${placed}` : ''}`,
     });
+    m.querySelector('[data-decor-guide]').onclick=()=>{m.close();this.guide('decor');};
     m.querySelector('[data-remove-grass]').onclick=()=>{if(this.g.chooseDecor('grass',true))m.close();};
     m.querySelectorAll('[data-decor]').forEach(b => b.onclick = () => {
       if (this.g.chooseDecor(b.dataset.decor)) m.close();
@@ -537,7 +598,7 @@ export class UI {
     });
   }
   win(r) {
-    const { n, stars, score, best, coins, canBuild, firstProject } = r;
+    const { n, stars, score, best, coins, canBuild, firstProject, firstCoins } = r;
     const projectName = firstProject && t('p_' + firstProject);
     const m = this.modal({
       ribbon: t('win'),
@@ -545,6 +606,7 @@ export class UI {
       body: `<div class="stars3">${[0, 1, 2].map((i) => `<i style="animation-delay:${0.25 + i * 0.3}s">${i < stars ? IC.star : IC.starE}</i>`).join('')}</div>
         <p class="center" style="margin:0 0 6px">${esc(t('winSub', { n: r.left }))}</p>
         <div class="res"><div>${esc(t('score'))}: <b>${fmt(score)}</b>${best ? `<small>${esc(t('best'))} ${fmt(best)}</small>` : ''}</div><div>${IC.coin}<b id="wc">+${fmt(coins)}</b></div></div>
+        ${firstCoins?`<p class="center first-build-note" data-first-decor>${LANG==='ru'?'На острове появится обучение декору.':'A decor guide is now available on your island.'}</p>`:''}
         <div class="col">${sdk.canReward()?`<button class="btn mid sea" data-a="x2">${IC.film}${esc(t('x2'))}</button>`:''}
         ${firstProject ? `<p class="center first-build-note">${esc(t('firstBuildHint', {name: projectName}))}</p>
           <button class="btn big green first-build-button" data-a="first-build">${IC.hammer}${esc(t('firstBuild', {name: projectName}))}</button>
@@ -673,7 +735,7 @@ export class UI {
     this.bind(m, {
       take: () => {
         if(d.day===today())return;
-        save.data.coins += DAILY[streak];
+        save.creditCoins(DAILY[streak]);
         d.day = today();
         d.streak = streak + 1;
         save.write();

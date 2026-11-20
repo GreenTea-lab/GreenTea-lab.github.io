@@ -21,13 +21,48 @@ try {
     const frame = page.frameLocator('iframe');
     const navigation = frame.locator('.island-nav button');
     await navigation.first().waitFor();
-    assert.deepEqual(await navigation.evaluateAll(buttons => buttons.map(button => button.dataset.a)), ['world','build','decor','play','levels','lb']);
+    assert.deepEqual(await navigation.evaluateAll(buttons => buttons.map(button => button.dataset.a)), ['world','build','decor','play','levels','lb','journal']);
     assert.ok(await navigation.evaluateAll(buttons => buttons.every(button => {
       const rect = button.getBoundingClientRect();
       return rect.left >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight;
     })));
-    await frame.locator('[data-a=play]').tap();
     const game = page.frames().find(f => f.url().includes('/dist-vk/'));
+    assert.equal(await frame.locator('[data-guide-notice]').getAttribute('data-kind'),'controls');
+    assert.equal(await game.evaluate(()=>!!__save.data.seen.earnedCoins),false);
+    await frame.locator('[data-guide-open]').tap();
+    assert.match(await frame.locator('.guide-step').innerText(),/правую кнопку/);
+    assert.match(await frame.locator('.guide-step').innerText(),/двумя пальцами/);
+    if(viewport.width===390){
+      await page.screenshot({path:`${output}/island-guide-${viewport.width}.png`});
+      await frame.locator('[data-guide-next]').tap();
+      assert.match(await frame.locator('.guide-title').innerText(),/Жители и постройки/);
+      await frame.locator('[data-guide-next]').tap();
+      assert.match(await frame.locator('.guide-step').innerText(),/клавишей Z/);
+      await frame.locator('[data-guide-back]').tap();
+      assert.match(await frame.locator('.guide-title').innerText(),/Жители и постройки/);
+    }
+    await frame.locator('[data-x]').tap();
+    assert.equal(await frame.locator('[data-guide-notice]').getAttribute('data-kind'),'');
+    if(viewport.width===390){
+      await game.waitForFunction(()=>!__game.ui.transitioning);
+      await game.evaluate(()=>{__game.island.camT=null;});
+      const before=await game.evaluate(()=>({...__game.island.cam}));
+      const touch=await page.context().newCDPSession(page);
+      const gesture=(type,positions)=>touch.send('Input.dispatchTouchEvent',{type,touchPoints:positions.map(([x,y],id)=>({x,y,id}))});
+      await gesture('touchStart',[[180,360]]);
+      await gesture('touchMove',[[220,385]]);
+      await gesture('touchEnd',[]);
+      const afterOrbit=await game.evaluate(()=>({...__game.island.cam}));
+      assert.notEqual(afterOrbit.yaw,before.yaw);
+      await gesture('touchStart',[[156,355],[190,355]]);
+      await gesture('touchMove',[[145,372],[218,372]]);
+      await gesture('touchEnd',[]);
+      const afterPinch=await game.evaluate(()=>({...__game.island.cam}));
+      assert.notEqual(afterPinch.dist,afterOrbit.dist);
+      assert.notEqual(afterPinch.tx,afterOrbit.tx);
+      await touch.detach();
+    }
+    await frame.locator('[data-a=play]').tap();
     await game.waitForFunction(() => __game.table.busy === 0);
     assert.equal(await game.evaluate(() => __game.quality), 'mid');
     assert.match(await frame.locator('#tip').innerText(), /на 7 можно положить 6 или 8/);
@@ -79,6 +114,30 @@ try {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
+  await page.goto(base + '/dist-vk-single/index.html');
+  await page.waitForFunction(()=>window.__game?.ui);
+  const camera=()=>page.evaluate(()=>{
+    const {yaw,pitch,tx,tz,dist}=__game.island.cam;
+    return {yaw,pitch,tx,tz,dist};
+  });
+  await page.evaluate(()=>{__game.island.camT=null;});
+  const start=await camera();
+  await page.mouse.move(186,360);
+  await page.mouse.down({button:'right'});
+  await page.mouse.move(226,378,{steps:4});
+  await page.mouse.up({button:'right'});
+  const orbit=await camera();
+  assert.notEqual(orbit.yaw,start.yaw);
+  assert.notEqual(orbit.pitch,start.pitch);
+  assert.equal(orbit.tx,start.tx);
+  await page.mouse.down({button:'left'});
+  await page.mouse.move(180,395,{steps:4});
+  await page.mouse.up({button:'left'});
+  const pan=await camera();
+  assert.equal(pan.yaw,orbit.yaw);
+  assert.notEqual(pan.tx,orbit.tx);
+  await page.mouse.wheel(0,80);
+  await page.waitForFunction(dist=>__game.island.cam.dist!==dist,pan.dist);
   await page.goto(base + '/dist-single/gallery.html');
   assert.equal(await page.locator('#coasts button').count(), 6);
   assert.equal(await page.locator('article').count(), 25);

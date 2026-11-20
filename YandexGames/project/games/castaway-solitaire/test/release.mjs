@@ -71,6 +71,7 @@ try{
   for(const i of actions){if(i<0)g.table.draw();else g.table.play(i);for(let k=0;k<35;k++)g.table.update(.05);}
  },winningActions(1));
  await f.waitForSelector('.ribbon',{timeout:12000});
+ assert.ok(await f.locator('[data-first-decor]').isVisible());
  assert.ok(await f.evaluate(()=>__save.data.levels[1]?.stars>=2));
  assert.ok(await f.evaluate(()=>__game.ui.affordable()>0));
  assert.equal(await page.evaluate(()=>log.some(x=>x.handler==='VKWebAppShowNativeAds')),false);
@@ -80,6 +81,14 @@ try{
  assert.ok(await f.locator('#mod .panel h2').filter({hasText:'Хижина'}).isVisible());
  await f.locator('[data-a=go]').click();await f.waitForTimeout(800);
  assert.equal(await f.evaluate(()=>__save.data.stages.hut),1);
+ assert.equal(await f.locator('[data-guide-notice]').getAttribute('data-kind'),'decor');
+ await f.locator('[data-guide-open]').click();
+ assert.match(await f.locator('.guide-step').innerText(),/зафиксировать/);
+ await f.locator('[data-guide-next]').click();
+ assert.match(await f.locator('.guide-step').innerText(),/повернуть предмет на 90°/);
+ await f.locator('[data-guide-next]').click();
+ assert.ok(await f.locator('[data-decor=grass]').isVisible());
+ await f.locator('[data-x]').click();
  // Long ad: one request, mute, input blocked beyond the availability timeout.
  await f.evaluate(()=>{window.__CS_DEBUG.manual=false;__game.playLevel(2);});await f.waitForFunction(()=>__game.table.busy===0);
  await page.evaluate(()=>holdAds=true);const before=await f.evaluate(()=>__save.data.coins);

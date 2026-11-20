@@ -39,6 +39,32 @@ try {
   assert.ok(nature.naturalPlants >= 24 && nature.hillPlants >= 7 && nature.grass >= 100, JSON.stringify(nature));
   assert.deepEqual([nature.rocky,nature.adults,nature.parrot],[0,2,true]);
   await page.waitForSelector('.logo-hidden',{state:'attached'});
+  assert.equal(await page.locator('[data-guide-notice]').getAttribute('data-kind'),'decor');
+  await page.locator('.guide-dismiss').tap();
+  await page.locator('.guide-dismiss').tap();
+  const targetActor=id=>page.evaluate(id=>{
+    const I=__game.island;
+    I.update(.05);
+    I.render();
+    const actor=I.allActors().find(w=>w.id===id);
+    const {x,y,z}=actor.m.position;
+    const p=I.project(x,y+(actor.species?.length ? .32 : .66),z);
+    for(const dy of [0,-4,4,-8,8])for(const dx of [0,-4,4,-8,8]){
+      const x=p.x+dx,y=p.y+dy;
+      if(document.elementFromPoint(x,y)?.id==='c'&&I.pickIsland(x,y)?.actor===actor)return {x,y};
+    }
+  },id);
+  const resident=await targetActor('robin');
+  assert.ok(resident,'A visible point hits Robinson');
+  await page.touchscreen.tap(resident.x,resident.y);
+  assert.match(await page.locator('.actor-speech').textContent(),/Привет/);
+  await page.waitForFunction(()=>__audio.ctx?.state==='running');
+  await page.evaluate(()=>{delete __audio.last.actor;});
+  const parrot=await targetActor('parrot-0');
+  assert.ok(parrot,'A visible point hits the parrot');
+  await page.touchscreen.tap(parrot.x,parrot.y);
+  assert.match(await page.locator('.actor-speech').textContent(),/Кар-р/);
+  assert.equal(await page.evaluate(()=>typeof __audio.last.actor),'number');
   assert.equal(await page.locator('.voyage-strip').count(), 0);
   await page.locator('.island-nav [data-a=world]').tap();
   assert.match(await page.locator('.districts + p').innerText(), /звёзды/);
@@ -135,8 +161,6 @@ try {
     return {social,movingFins,trimmed,free:__save.data.coins===old};
   });
   assert.deepEqual(life,{social:true,movingFins:true,trimmed:true,free:true});
-  await page.evaluate(()=>__game.interactActor(__game.island.walkers[0]));
-  assert.match(await page.locator('.actor-speech').textContent(),/Привет/);
   const displaced=await page.evaluate(()=>{
     const game=__game,I=game.island,fire=I.projectArea('fire',1);
     if(!game.chooseDecor('crate'))return false;

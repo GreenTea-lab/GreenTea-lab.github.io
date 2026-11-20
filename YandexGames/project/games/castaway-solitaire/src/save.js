@@ -62,6 +62,7 @@ export const save = {
     d.levels=Object.fromEntries(Object.entries(d.levels).filter(([n,l])=>/^\d+$/.test(n)&&+n>0&&l&&typeof l==='object').map(([n,l])=>[n,{stars:Math.min(3,count(l.stars)),best:count(l.best)}]));
     d.starsSpent=Math.min(count(d.starsSpent),Object.values(d.levels).reduce((s,l)=>s+l.stars,0));
     if(typeof d.seen!=='object'||Array.isArray(d.seen))d.seen={};
+    if(d.wins>0||Object.keys(d.levels).length||d.daily.streak>0)d.seen.earnedCoins=1;
     this.data = d;
     const reset=location.protocol==='file:'&&document.querySelector('meta[name="castaway-preview-reset"]')?.content;
     if(reset){
@@ -80,6 +81,12 @@ export const save = {
       localStorage.setItem(KEY, JSON.stringify(this.data));
     } catch (e) {}
     if (cloud) sdk.saveData(this.data);
+  },
+
+  creditCoins(amount) {
+    if(amount<=0)return;
+    this.data.coins+=amount;
+    this.data.seen.earnedCoins=1;
   },
 
   async flush() {
