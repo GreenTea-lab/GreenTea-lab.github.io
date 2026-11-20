@@ -47,15 +47,31 @@ try {
       await game.waitForFunction(()=>!__game.ui.transitioning);
       await game.evaluate(()=>{__game.island.camT=null;});
       const before=await game.evaluate(()=>({...__game.island.cam}));
+      const point=await game.evaluate(()=>{
+        const canvas=document.querySelector('#c');
+        window.cameraPointers=[];
+        for(const type of ['pointerdown','pointermove','pointerup','pointercancel']){
+          canvas.addEventListener(type,event=>window.cameraPointers.push([type,event.pointerType,event.clientX,event.clientY]));
+        }
+        for(let y=214;y<innerHeight-235;y+=30){
+          for(let x=30;x<innerWidth-145;x+=24){
+            if([0,34,65].every(dx=>document.elementFromPoint(x+dx,y)===canvas))return {x,y};
+          }
+        }
+      });
+      assert.ok(point,'An unobstructed part of the island is available for gestures');
+      const frameBounds=await page.locator('iframe').boundingBox();
+      const x=point.x+frameBounds.x,y=point.y+frameBounds.y;
       const touch=await page.context().newCDPSession(page);
       const gesture=(type,positions)=>touch.send('Input.dispatchTouchEvent',{type,touchPoints:positions.map(([x,y],id)=>({x,y,id}))});
-      await gesture('touchStart',[[180,360]]);
-      await gesture('touchMove',[[220,385]]);
+      await gesture('touchStart',[[x,y]]);
+      await gesture('touchMove',[[x+20,y+10]]);
+      await gesture('touchMove',[[x+40,y+25]]);
       await gesture('touchEnd',[]);
       const afterOrbit=await game.evaluate(()=>({...__game.island.cam}));
-      assert.notEqual(afterOrbit.yaw,before.yaw);
-      await gesture('touchStart',[[156,355],[190,355]]);
-      await gesture('touchMove',[[145,372],[218,372]]);
+      assert.notEqual(afterOrbit.yaw,before.yaw,JSON.stringify(await game.evaluate(()=>window.cameraPointers)));
+      await gesture('touchStart',[[x,y],[x+34,y]]);
+      await gesture('touchMove',[[x+3,y+10],[x+65,y+16]]);
       await gesture('touchEnd',[]);
       const afterPinch=await game.evaluate(()=>({...__game.island.cam}));
       assert.notEqual(afterPinch.dist,afterOrbit.dist);
