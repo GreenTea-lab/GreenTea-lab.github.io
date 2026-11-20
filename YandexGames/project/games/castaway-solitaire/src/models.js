@@ -450,12 +450,12 @@ B.garden = (s) => {
 B.pier = (s) => {
   // строится от берега (z=0) в сторону моря (+z); y=0 — уровень песка, вода ниже
   const v = new Vox();
-  const len = s === 1 ? 26 : 46;
+  const len = [0, 43, 61, 73][s];
   for (let z = 0; z < len; z++) {
     for (let x = -3; x <= 3; x++) v.set(x, 0, z, (z % 3 === 0 ? C.woodD : (x + z) % 5 === 0 ? C.woodL : C.plank));
     if (z % 6 === 0) {
-      post(v, -4, z, -8, 2, C.trunkD);
-      post(v, 4, z, -8, 2, C.trunkD);
+      post(v, -4, z, -16, 2, C.trunkD);
+      post(v, 4, z, -16, 2, C.trunkD);
     }
   }
   if (s >= 2) {

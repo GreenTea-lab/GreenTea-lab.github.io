@@ -4,12 +4,14 @@ import path from 'node:path';
 const fonts=fs.readdirSync('static').filter(f=>f.endsWith('.woff2'));
 const images=fs.readdirSync('static/backgrounds').filter(f=>f.endsWith('.webp')).map(f=>'backgrounds/'+f);
 const licenses=['@fontsource/nunito/LICENSE','@fontsource/lobster/LICENSE','three/LICENSE','@vkontakte/vk-bridge/LICENSE'];
-const notices=licenses.map(f=>f+'\n'+fs.readFileSync('node_modules/'+f,'utf8')).join('\n\n');
+const notices=licenses.map(f=>f+'\n'+fs.readFileSync('node_modules/'+f,'utf8')).join('\n\n')+
+  '\n\n'+fs.readFileSync('static/audio/CREDITS.txt','utf8');
 let html=fs.readFileSync('static/index.html','utf8').replace('</head>','<style>'+fs.readFileSync('static/polish.css','utf8')+'</style></head>');
 for(const vk of [false,true]){
   const out=vk?'dist-vk':'dist',single=vk?'dist-vk-single':'dist-single';
   for(const dir of [out,single]){fs.rmSync(dir,{recursive:true,force:true});fs.mkdirSync(dir,{recursive:true});}
   await build({entryPoints:['src/main.js'],bundle:true,minify:true,format:'iife',target:['es2019'],outfile:out+'/game.js',legalComments:'none',
+    loader:{'.ogg':'dataurl','.wav':'dataurl','.flac':'dataurl'},
     ...(vk?{plugins:[{name:'vk-sdk',setup(b){b.onResolve({filter:/\/sdk\.js$/},a=>a.importer.startsWith(path.resolve('src')+path.sep)?{path:path.resolve('src/sdk_vk.js')}:null);}}]}:{})});
   fs.mkdirSync(out+'/backgrounds',{recursive:true});
   for(const f of [...fonts,...images])fs.copyFileSync('static/'+f,out+'/'+f);

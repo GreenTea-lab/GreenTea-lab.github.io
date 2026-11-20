@@ -1,6 +1,21 @@
-// Синтезированные звуки, шум прибоя и музыка (WebAudio, без файлов)
+// Audio recordings and the original WebAudio score share volume and pause controls.
 import { Music } from './music.js';
 import { SONGS } from './songs.js';
+import islandLoop from '../static/audio/island.ogg';
+import drawRecording from '../static/audio/draw.wav';
+import placeRecording from '../static/audio/place.wav';
+import flipRecording from '../static/audio/flip.wav';
+import shuffleRecording from '../static/audio/deal.wav';
+import waveRecording from '../static/audio/wave.flac';
+
+const RECORDINGS = {
+  island: islandLoop, draw: drawRecording, place: placeRecording, flip: flipRecording,
+  shuffle: shuffleRecording, wave: waveRecording,
+};
+const SFX_RECORDINGS = {
+  draw: ['draw', .4, .09], deal: ['draw', .2, .085], place: ['place', .39, .05],
+  flip: ['flip', .25, .07], shuffle: ['shuffle', .22, .3], wave: ['wave', .2, .25, 1.25],
+};
 
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
@@ -20,6 +35,8 @@ class AudioEngine {
     this.step = 0;
     this.nextTime = 0;
     this.timer = null;
+    this.musicPack = this.soundPack = 'island';
+    this.recordings = {};
   }
 
   // Вызывается по первому жесту пользователя
@@ -47,6 +64,7 @@ class AudioEngine {
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
       if (this.wantMusic) this.startMusic();
       this.seaStart();
+      this.loadRecordings();
     }
     if (this.ctx.state === 'suspended' && this.suspendReasons.size === 0) this._resumeSafe();
   }
@@ -88,7 +106,43 @@ class AudioEngine {
   startMusic() {
     this.wantMusic = true;
     if (!this.ctx) return;
-    this.mus.start();
+    if (this.musicPack === 'island' && this.recordings.island) {
+      if (this.recordedMusic) return;
+      this.mus.stop();
+      const source = this.ctx.createBufferSource();
+      source.buffer = this.recordings.island;
+      source.loop = true;
+      const gain = this.ctx.createGain();
+      gain.gain.value = .27;
+      source.connect(gain).connect(this.music);
+      source.start();
+      this.recordedMusic = source;
+    } else {
+      if (this.recordedMusic) {
+        this.recordedMusic.stop();
+        this.recordedMusic.disconnect();
+        this.recordedMusic = null;
+      }
+      this.mus.start();
+    }
+  }
+  setPacks(music, sound) {
+    this.musicPack = music === 'classic' ? 'classic' : 'island';
+    this.soundPack = sound === 'classic' ? 'classic' : 'island';
+    if (this.ctx) this.loadRecordings();
+    if (this.wantMusic) this.startMusic();
+  }
+  loadRecordings() {
+    for (const [name, url] of Object.entries(RECORDINGS)) {
+      if ((name === 'island' ? this.musicPack : this.soundPack) !== 'island' ||
+          Object.hasOwn(this.recordings, name)) continue;
+      this.recordings[name] = null;
+      fetch(url).then(response => response.arrayBuffer()).then(bytes => this.ctx.decodeAudioData(bytes))
+        .then(buffer => {
+          this.recordings[name] = buffer;
+          if (name === 'island' && this.wantMusic) this.startMusic();
+        }).catch(() => { /* The corresponding synthesized sound stays available. */ });
+    }
   }
   // 0 — меню, 1 — игра
   setIntensity(v) {
@@ -145,6 +199,22 @@ class AudioEngine {
   }
 
   play(name, p = 0) {
+    const preset = this.soundPack === 'island' && SFX_RECORDINGS[name];
+    const buffer = preset && this.recordings[preset[0]];
+    if (buffer) {
+      const [, volume, gap, limit] = preset;
+      if (!this._ok(name, gap)) return;
+      const source = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+      source.buffer = buffer;
+      source.connect(gain).connect(this.sfx);
+      const now = this.ctx.currentTime;
+      const duration = Math.min(buffer.duration, limit ?? Infinity);
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+      source.start(now, 0, duration);
+      return;
+    }
     const o = (...a) => this._osc(...a);
     const n = (...a) => this._noise(...a);
     switch (name) {

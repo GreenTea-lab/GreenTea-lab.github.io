@@ -1,6 +1,7 @@
 // Сохранения: localStorage + облако Яндекса (берётся более свежая версия)
 import { sdk } from './sdk.js';
 import { PROJECTS, START_COINS } from './data.js';
+import { restoreDecor } from './decor.js';
 
 const KEY = 'castaway_solitaire_v1';
 
@@ -22,6 +23,7 @@ const DEFAULT = () => ({
   seen: {}, // показанные объяснения механик
   plays: 0,
   wins: 0,
+  decor: [],
 });
 
 export const save = {
@@ -44,6 +46,7 @@ export const save = {
     d.v=2;
     d.settings = Object.assign(def.settings, d.settings || {});
     d.stages = Object.assign(def.stages, d.stages || {});
+    d.decor = restoreDecor(d.decor);
     d.levels = d.levels && typeof d.levels === 'object' ? d.levels : {};
     d.daily = Object.assign(def.daily, d.daily || {});
     d.seen = d.seen || {};

@@ -27,10 +27,13 @@ export function initThumbs(r) {
 }
 
 export function projThumb(id, stage) {
-  const key = id + stage;
+  return modelThumb(id + stage, () => M.BUILD[id](stage));
+}
+
+export function modelThumb(key, model) {
   if (cache[key]) return cache[key];
   if (!renderer) return '';
-  const g = M.BUILD[id](stage).build(M.VS, 0, 0);
+  const g = model().build(M.VS, 0, 0);
   const grp = new THREE.Group();
   if (g.geo) grp.add(new THREE.Mesh(g.geo, mat));
   if (g.glow) grp.add(new THREE.Mesh(g.glow, glowMat));

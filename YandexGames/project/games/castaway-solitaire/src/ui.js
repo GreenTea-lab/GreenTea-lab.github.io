@@ -15,7 +15,8 @@ import { slidersHTML, bindSliders, volumeCss } from './volume.js';
 import { PROJECTS, TOTAL_STEPS, COST, AD_COINS, AD_COOLDOWN, DAILY } from './data.js';
 import { MAIN_LEVELS } from './logic.js';
 import { THEMES, BACKS, cosmeticState, selectCosmetic, applyCosmetics } from './cosmetics.js';
-import { projThumb } from './thumbs.js';
+import { projThumb, modelThumb } from './thumbs.js';
+import { DECOR, DECOR_BY_ID, DECOR_LIMIT } from './decor.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const starsHTML = (n) => [0, 1, 2].map((i) => (i < n ? IC.star : IC.starE)).join('');
@@ -169,6 +170,7 @@ export class UI {
         <div class="tl">${this.coinsChip()}${this.starsChip()}</div>
       </div>
       <div class="rcol"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Журнал острова':'Island journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button><button class="btn round hit" data-a="lb" aria-label="records">${IC.trophy}</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
+      <div class="rcol-decor"><button class="btn round hit" data-a="decor" aria-label="${LANG==='ru'?'Декор острова':'Island decor'}" title="${LANG==='ru'?'Декор острова':'Island decor'}">${IC.palm}</button></div>
       <div class="logo"><b>${esc(t('title'))}</b><i>${esc(t('subtitle'))}</i></div>
       <div class="voyage-strip"><div><small>${LANG==='ru'?'Глава':'Chapter'} ${chapterOf(lvl)+1} / 20</small><b>${esc(CHAPTERS[chapterOf(lvl)][LANG==='ru'?0:1])}</b><span>${chapterProgress(chapterOf(lvl)).count} / 50 · ${LANG==='ru'?'Берег':'Coast'} ${save.data.expansion||0}/5</span></div><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Расширить':'Expand'}</button></div>
       <div class="bottom">
@@ -183,6 +185,7 @@ export class UI {
       world: () => this.world(),
       journal: () => this.journal(),
       cosmetics: () => this.cosmetics(),
+      decor: () => this.decor(),
       settings: () => this.settings(),
       lb: () => this.leaderboard(),
       daily: () => this.daily(),
@@ -236,10 +239,52 @@ export class UI {
   }
 
   // ---------- стройка ----------
+  placingDecor(def, blocked = false) {
+    this.scr.querySelector('.decor-placement')?.remove();
+    if (!def) return;
+    const ru = LANG === 'ru';
+    const bar = document.createElement('div');
+    bar.className = 'decor-placement';
+    const help = blocked
+      ? (ru ? 'Здесь не поместится. Попробуйте свободный участок суши.' : 'It won’t fit here. Try an open spot on land.')
+      : (ru ? 'Нажмите на свободный участок суши.' : 'Tap an open spot on land.');
+    bar.innerHTML = `<div><b>${esc(def[ru ? 'ru' : 'en'])}</b><small>${esc(help)}</small></div><button class="btn mid sand" type="button">${ru ? 'Отмена' : 'Cancel'}</button>`;
+    bar.querySelector('button').onclick = () => this.g.cancelDecor();
+    this.scr.append(bar);
+  }
+  decor() {
+    this.g.cancelDecor();
+    const ru = LANG === 'ru', data = save.data, lang = ru ? 'ru' : 'en';
+    const items = DECOR.map(def => {
+      const stored = data.decor.filter(item => item.type === def.id && item.x === null).length;
+      const disabled = !stored && (data.coins < def.coins || data.decor.length >= DECOR_LIMIT);
+      return `<button class="decor-item" type="button" data-decor="${def.id}" ${disabled ? 'disabled' : ''}>
+        <img src="${modelThumb('decor-' + def.id, def.model)}" alt=""><b>${esc(def[lang])}</b>
+        <small>${stored ? (ru ? 'На складе: ' : 'In storage: ') + stored : fmt(def.coins) + (ru ? ' монет' : ' coins')}</small>
+      </button>`;
+    }).join('');
+    const placed = data.decor.filter(item => item.x !== null).map(item =>
+      `<div class="decor-stored"><span>${esc(DECOR_BY_ID[item.type][lang])}</span><button class="btn mid sand" data-store-decor="${item.id}">${ru ? 'Убрать' : 'Store'}</button></div>`).join('');
+    const m = this.modal({
+      title: ru ? 'Декор острова' : 'Island decor', wide: true,
+      body: `<p>${ru ? 'Выберите предмет и место на острове. Монеты спишутся после установки. Убранный декор можно поставить снова бесплатно.' : 'Choose an item and a spot on the island. Coins are charged after placement. Store items and place them again for free.'}</p>
+        <p>${ru ? 'Монеты' : 'Coins'} ${fmt(data.coins)} · ${ru ? 'Предметы' : 'Items'} ${data.decor.length}/${DECOR_LIMIT}</p>
+        <div class="decor-grid">${items}</div>${placed ? `<h3>${ru ? 'На острове' : 'On the island'}</h3>${placed}` : ''}`,
+    });
+    m.querySelectorAll('[data-decor]').forEach(b => b.onclick = () => {
+      if (this.g.chooseDecor(b.dataset.decor)) m.close();
+    });
+    m.querySelectorAll('[data-store-decor]').forEach(b => b.onclick = () => {
+      if (this.g.storeDecor(Number(b.dataset.storeDecor))) {
+        m.close();
+        this.decor();
+      }
+    });
+  }
   buildPanel() {
     const body = () => {
       const s = save.stars();
-      return `<div class="row"><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Новые берега':'New shores'}</button></div><p class="center" style="margin-top:12px">${esc(t('starsHint'))}</p><div class="plist">${this.projects().map((p) => {
+      return `<div class="row"><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Новые берега':'New shores'}</button><button class="btn mid sand" data-a="decor">${LANG==='ru'?'Декор':'Decor'}</button></div><p class="center" style="margin-top:12px">${esc(t('starsHint'))}</p><div class="plist">${this.projects().map((p) => {
         const st = save.data.stages[p.id];
         const done = st >= 3;
         const cost = done ? 0 : p.cost[st];
@@ -250,7 +295,7 @@ export class UI {
       }).join('')}</div>`;
     };
     const m = this.modal({ title: t('buildT'), body: body(), wide: true });
-    this.bind(m,{world:()=>{m.close();this.world();}});
+    this.bind(m,{world:()=>{m.close();this.world();},decor:()=>{m.close();this.decor();}});
     m.querySelectorAll('[data-b]').forEach((b) => {
       b.onclick = () => {
         m.close();
@@ -594,14 +639,27 @@ export class UI {
   // ---------- настройки и рекорды ----------
   settings() {
     const st = save.data.settings;
+    const ru = LANG === 'ru';
+    const audioSelect = (key, label) => `<label class="setrow audio-pack"><span>${label}</span>
+      <select data-audio-pack="${key}"><option value="island" ${st[key] !== 'classic' ? 'selected' : ''}>${ru ? 'Островная' : 'Island'}</option>
+      <option value="classic" ${st[key] === 'classic' ? 'selected' : ''}>${ru ? 'Классическая' : 'Classic'}</option></select></label>`;
     const m = this.modal({
       title: t('settings'),
       body: `<div class="col">${slidersHTML(st, { music: t('music'), sound: t('sound') }, { music: IC.music, sound: IC.sound })}
+        ${audioSelect('musicPack', ru ? 'Мелодия' : 'Music pack')}
+        ${audioSelect('soundPack', ru ? 'Озвучка карт' : 'Sound effects')}
+        <small class="audio-attribution">${ru ? 'Островная запись' : 'Island recordings'} · Brandon Morris, AntumDeluge, Brian MacIntosh, jasinski (CC0)</small>
         <div class="setrow"><span>${esc(t('hints'))}</span><div class="seg"><button data-h="1" class="${st.hints ? 'on' : ''}">${esc(t('on'))}</button><button data-h="0" class="${st.hints ? '' : 'on'}">${esc(t('off'))}</button></div></div>
         <div class="setrow"><span>${esc(t('quality'))}</span><div class="seg"><button data-q="high" class="${this.g.quality !== 'low' ? 'on' : ''}">${esc(t('qHigh'))}</button><button data-q="low" class="${this.g.quality === 'low' ? 'on' : ''}">${esc(t('qLow'))}</button></div></div></div>`,
     });
     const appearance=document.createElement('button');appearance.className='btn mid sea';appearance.dataset.appearance='1';appearance.innerHTML=IC.scene+(LANG==='ru'?'Фон партии и оформление':'Game scene and appearance');m.querySelector('.pb').appendChild(appearance);appearance.onclick=()=>{m.close();this.cosmetics();};
     bindSliders(m, st, () => save.write(false));
+    m.querySelectorAll('[data-audio-pack]').forEach(select => select.onchange = () => {
+      st[select.dataset.audioPack] = select.value;
+      audio.setPacks(st.musicPack, st.soundPack);
+      save.write();
+      audio.play('flip');
+    });
     m.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => {
       st.hints = b.dataset.h === '1';
       save.write(false);

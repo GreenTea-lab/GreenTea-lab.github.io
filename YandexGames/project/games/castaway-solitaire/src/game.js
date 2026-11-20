@@ -13,6 +13,7 @@ import { buildLevel, rng, MAIN_LEVELS } from './logic.js';
 import { PROJECTS, COST, FREE_UNDO, WIN_COINS, AD_COINS } from './data.js';
 import { initThumbs } from './thumbs.js';
 import { applyCosmetics } from './cosmetics.js';
+import { DECOR_BY_ID, DECOR_LIMIT } from './decor.js';
 
 const MIN_AD_GAP = 150 * 1000;
 
@@ -20,13 +21,14 @@ export class Game {
   async start(c3, cT, uiRoot) {
     await save.load();
     const d = save.data;
+    audio.setPacks(d.settings.musicPack, d.settings.soundPack);
     worldState();
     sdk.noAds = !!d.noAds;
     const mobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) ||
       (navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches);
     this.quality = d.settings.quality === 'low' ? 'low' : d.settings.quality === 'high' ? 'high' : mobile ? 'mid' : 'high';
     this.c3 = c3;
-    this.island = new Island(c3, this.quality,d.expansion);
+    this.island = new Island(c3, this.quality,d.expansion,d.decor);
     initThumbs(this.island.renderer);
     this.island.setStages(d.stages);
     this.shade = document.getElementById('shade');
@@ -71,6 +73,10 @@ export class Game {
     window.addEventListener('resize', () => this.resize());
     this.islandInput();
     window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.decorSelection && !this.ui.modalOpen) {
+        this.cancelDecor();
+        return;
+      }
       if(e.target.closest?.('button,input,textarea,select'))return;
       if(this.paused || sdk.adActive)return;
       if (e.key === 'Escape' && this.state === 'level' && !this.ui.modalOpen && !this.paused && !sdk.adActive) this.ui.pause();
@@ -174,7 +180,11 @@ export class Game {
       if (!pts.has(e.pointerId)) return;
       pts.delete(e.pointerId);
       if (pts.size < 2) pinch = null;
-      if (this.state === 'island' && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen) {
+      if (e.type === 'pointerup' && this.state === 'island' && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen && !this.ui.transitioning) {
+        if (this.decorSelection) {
+          this.placeSelectedDecor(this.island.pickGround(e.clientX, e.clientY));
+          return;
+        }
         const id = this.island.pickAt(e.clientX, e.clientY);
         if (id) this.ui.project(id);
       }
@@ -190,9 +200,58 @@ export class Game {
 
   expandIsland() {
     if(this.state!=='island'||!expandWorld())return false;
+    this.cancelDecor();
     clearTimeout(this.camBack);this.island.dispose();
-    this.island=new Island(this.c3,this.quality,save.data.expansion);initThumbs(this.island.renderer);this.island.setStages(save.data.stages);this.resize();this.island.setMode('island');
+    this.island=new Island(this.c3,this.quality,save.data.expansion,save.data.decor);initThumbs(this.island.renderer);this.island.setStages(save.data.stages);this.resize();this.island.setMode('island');
+    save.write();
     audio.play('build');this.ui.home();return true;
+  }
+  chooseDecor(type) {
+    const def = DECOR_BY_ID[type];
+    if (!def || this.state !== 'island') return false;
+    const inventory = save.data.decor;
+    if (!inventory.some(item => item.type === type && item.x === null) &&
+      (inventory.length >= DECOR_LIMIT || save.data.coins < def.coins)) return false;
+    this.decorSelection = type;
+    this.ui.placingDecor(def);
+    return true;
+  }
+  cancelDecor() {
+    this.decorSelection = null;
+    this.ui.placingDecor(null);
+  }
+  placeSelectedDecor(point) {
+    const def = DECOR_BY_ID[this.decorSelection];
+    if (!def || this.state !== 'island') return false;
+    const inventory = save.data.decor;
+    const owned = inventory.find(item => item.type === def.id && item.x === null);
+    const id = owned?.id ?? Math.max(0, ...inventory.map(item => item.id)) + 1;
+    if (!owned && (inventory.length >= DECOR_LIMIT || save.data.coins < def.coins)) {
+      this.cancelDecor();
+      return false;
+    }
+    const item = point && {id, type:def.id, ...point};
+    if (!item || !this.island.installDecor(item)) {
+      this.ui.placingDecor(def, true);
+      return false;
+    }
+    if (owned) Object.assign(owned, item);
+    else {
+      inventory.push(item);
+      save.data.coins -= def.coins;
+    }
+    save.write();
+    this.cancelDecor();
+    this.ui.refreshTop();
+    audio.play('build');
+    return true;
+  }
+  storeDecor(id) {
+    const item = save.data.decor.find(piece => piece.id === id);
+    if (!item || !this.island.storeDecor(id)) return false;
+    item.x = item.z = null;
+    save.write();
+    return true;
   }
   // ---------- стройка ----------
   build(id) {
@@ -206,6 +265,7 @@ export class Game {
       this.ui.toast(t('needStars', { n: cost }));
       return;
     }
+    this.cancelDecor();
     d.starsSpent += cost;
     d.stages[id] = st + 1;
     save.write();
@@ -221,11 +281,12 @@ export class Game {
     }, 700);
     // через пару секунд камера возвращается к общему виду
     clearTimeout(this.camBack);
-    this.camBack = setTimeout(() => this.state === 'island' && this.island.setMode('island'), 4200);
+    this.camBack = setTimeout(() => this.state === 'island' && this.island.setMode('island'), 6000);
   }
 
   // ---------- партия ----------
   playLevel(n) {
+    this.cancelDecor();
     this.ui.closeModals();
     this.n = n;
     const def = buildLevel(n);

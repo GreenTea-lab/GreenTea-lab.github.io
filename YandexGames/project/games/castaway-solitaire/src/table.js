@@ -63,6 +63,7 @@ export class Table {
     this.sprites = this.g.cards.map(() => ({ x: 0, y: 0, r: 0, sx: 1, face: false, flip: -1, shake: 0, hidden: false, z: 0, glow: 0 }));
     this.wasteSpr = [];
     this.layout(false);
+    audio.play('shuffle');
     // раздача: карты вылетают из колоды
     const order = this.g.cards.map((c, i) => i).sort((a, b) => this.g.cards[a].row - this.g.cards[b].row || this.g.cards[a].x - this.g.cards[b].x);
     order.forEach((i, k) => {

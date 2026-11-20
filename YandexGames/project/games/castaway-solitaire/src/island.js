@@ -7,6 +7,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { hash, Vox } from './vox.js';
 import * as M from './models.js';
 import { findRoute } from './navigation.js';
+import { DECOR_BY_ID, meadowFlower } from './decor.js';
 import { PROJECTS } from './data.js';
 
 const TS = 0.5; // размер «блока» рельефа
@@ -61,7 +62,7 @@ export function shapeF(x, z, tier=0) {
 const HILL = { x: -2.5, z: -6.5, r: 5.2 };
 
 export class Island {
-  constructor(canvas, quality = 'high', expansion=0) {
+  constructor(canvas, quality = 'high', expansion=0, decor=[]) {
     this.expansion=expansion;this.rx=15*worldScale(expansion);this.rz=11*worldScale(expansion);
     this.canvas = canvas;
     this.quality = quality;
@@ -90,6 +91,10 @@ export class Island {
     this.buildTerrain();
     this.makeOcean();
     this.placeSpots();
+    this.playerDecor = new Map();
+    for (const item of decor) {
+      if (item.x !== null && !this.installDecor(item, true)) item.x = item.z = null;
+    }
     this.makeDecor();
     this.makeClouds();
     this.makeBirds();
@@ -237,7 +242,7 @@ export class Island {
         let top;
         if (h <= 0) top = h < 0 ? 0xd9c48e : 0xe6d29b;
         else if (h === 1) top = f < 0.04 ? 0xf0d9a0 : 0xf3dca0;
-        else if (h >= 5) top = hash(i, k, 9) > 0.35 ? 0xb9b2a6 : 0x9fc96a;
+        else if (h >= 5) top = vnoise(xc + 1, zc - 1, 2.1) > .49 ? 0x92b66d : 0xb9b2a6;
         else top = f < 0.13 ? (hash(i, k) > 0.5 ? 0xb8d37a : 0xd9d690) : hash(i, k, 2) > 0.8 ? 0x96d468 : 0x86cf62;
         if (h >= 1 && h <= 2 && this.onPath(xc, zc)) top = hash(i, k, 4) > 0.5 ? 0xe8d39a : 0xdcc489;
         top = new THREE.Color(top).offsetHSL(0, 0, j).getHex();
@@ -428,7 +433,7 @@ export class Island {
   geomOf(v) {
     return v.build(M.VS, 0, 0);
   }
-  addStatic(list,v,x,z,rot=0,scale=1,y=null,tree=false) {
+  addStatic(list,v,x,z,rot=0,scale=1,y=null,tree=false,blocks=true) {
     const bounds=footBox(v,x,z,rot,scale),water=y!==null;
     if(Object.values(this.spots).some(p=>intersects(bounds,p.box,.22)))return false;
     // A tree needs dry, level ground under its trunk, not under its whole crown.
@@ -439,9 +444,62 @@ export class Island {
     if(!water && (Math.min(...heights)<.4||Math.max(...heights)-Math.min(...heights)>.1))return false;
     const base=y??(Math.max(...heights)-v.minY*M.VS*scale),minY=base+v.minY*M.VS*scale,maxY=base+(v.maxY+1)*M.VS*scale;
     if(this.staticEntries.some(b=>intersects(bounds,b,.14)&&minY<b.maxY+.12&&maxY>b.minY-.12))return false;
-    const entry={...bounds,minY,maxY,x,z,water,tree,nav:footBox(v,x,z,rot,scale,Math.min(v.maxY,v.minY+8))};this.staticEntries.push(entry);
+    const entry={...bounds,minY,maxY,x,z,water,tree,blocks,nav:footBox(v,x,z,rot,scale,Math.min(v.maxY,v.minY+8))};this.staticEntries.push(entry);
     const g=this.geomOf(v),matrix=new THREE.Matrix4().compose(new THREE.Vector3(x,base,z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),rot),new THREE.Vector3(scale,scale,scale));
     if(g.geo)list.solid.push(g.geo.applyMatrix4(matrix));if(g.glow)list.glow.push(g.glow.applyMatrix4(matrix));return true;
+  }
+  installDecor(item, relocate = false) {
+    const def = DECOR_BY_ID[item.type];
+    if (!def || this.playerDecor.has(item.id)) return false;
+    const model = def.model();
+    const list = { solid: [], glow: [] };
+    const place = (x, z) => {
+      if (!this.isLand(x, z, .02) || this.onPath(x, z)) return false;
+      if (!relocate && this.allActors().some(actor => Math.hypot(actor.x - x, actor.z - z) < 1.3)) return false;
+      if (!this.addStatic(list, model, x, z, 0, 1, null, !!def.tree)) return false;
+      const entry = this.staticEntries.at(-1);
+      const group = new THREE.Group();
+      for (const [parts, material] of [[list.solid, this.mat], [list.glow, this.glowMat]]) {
+        for (const geometry of parts) {
+          const mesh = new THREE.Mesh(geometry, material);
+          mesh.castShadow = mesh.receiveShadow = true;
+          group.add(mesh);
+        }
+      }
+      this.scene.add(group);
+      this.playerDecor.set(item.id, {group, entry});
+      Object.assign(item, {x, z});
+      this.refreshPaths();
+      return true;
+    };
+    if (place(item.x, item.z)) return true;
+    if (!relocate) return false;
+    for (let radius = .5; radius <= 5; radius += .5) {
+      for (let i = 0; i < 16; i++) {
+        const angle = i * Math.PI / 8;
+        const x = Math.round((item.x + radius * Math.cos(angle)) * 4) / 4;
+        const z = Math.round((item.z + radius * Math.sin(angle)) * 4) / 4;
+        if (place(x, z)) return true;
+      }
+    }
+    return false;
+  }
+  storeDecor(id) {
+    const placed = this.playerDecor.get(id);
+    if (!placed) return false;
+    this.scene.remove(placed.group);
+    placed.group.traverse(object => object.geometry?.dispose());
+    this.staticEntries.splice(this.staticEntries.indexOf(placed.entry), 1);
+    this.playerDecor.delete(id);
+    this.refreshPaths();
+    return true;
+  }
+  refreshPaths() {
+    this.navCache?.clear();
+    for (const actor of this.landAnimals ? this.allActors() : []) {
+      actor.route = [];
+      this.relocateWalker(actor);
+    }
   }
   nearSpot(x,z,pad=1.2){return Object.values(this.spots).some(p=>contains(p.box,x,z,pad));}
   makeDecor() {
@@ -472,19 +530,22 @@ export class Island {
       if(this.palmPos.some(p=>Math.hypot(p[0]-x,p[1]-z)<2.1))continue;
       if(this.addStatic(list,M.palm(50+dx,26),x,z,dx,.9,null,true))this.palmPos.push([x,z]);
     }
-    // кусты, цветы, камни
-    for (let i = 0; i < 80; i++) {
-      const x = (R(i * 3 + 1) - 0.5) * this.rx * 1.8;
-      const z = (R(i * 3 + 2) - 0.5) * this.rz * 1.8;
-      const f = this.shapeF(x, z);
-      if (f < 0.12 || this.nearSpot(x, z, 0.9)) continue;
-      const g = this.ground(x, z);
-      if (g < 0.9) continue;
-      const t = R(i * 3 + 3);
-      if (Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - 1 && t < 0.5) this.addStatic(list, M.rock(i, 0.8 + t), x, z, t * 6);
-      else if (t < 0.45) this.addStatic(list, M.bush(i, t < 0.15), x, z, t * 9);
-      else if (t < 0.8) this.addStatic(list, M.flowers(i), x, z, 0);
-      else this.addStatic(list, M.rock(i, 0.6), x, z, t * 6);
+    // Ground cover and blooming shrubs appear on every new coast.
+    this.naturalPlants = 0;
+    this.hillPlants = 0;
+    for (let i = 0; i < 680; i++) {
+      if (this.naturalPlants >= 42 + this.expansion * 10 && this.hillPlants >= 15) break;
+      const x = (R(i * 3 + 19) - .5) * this.rx * 1.9;
+      const z = (R(i * 3 + 20) - .5) * this.rz * 1.9;
+      const hill = Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - .3;
+      if (hill ? this.hillPlants >= 15 : this.naturalPlants >= 42 + this.expansion * 10) continue;
+      if (!this.isLand(x, z, .075) || this.onPath(x, z) || this.nearSpot(x, z, .24)) continue;
+      const shrub = R(i * 3 + 21) < .21;
+      const plant = shrub ? M.bush(i, true) : meadowFlower(i);
+      if (this.addStatic(list, plant, x, z, 0, shrub ? .82 : .68, null, false, shrub)) {
+        if (hill) this.hillPlants++;
+        else this.naturalPlants++;
+      }
     }
     // ракушки, звёзды, коряги на песке
     for (let i = 0; i < 60; i++) {
@@ -660,7 +721,66 @@ export class Island {
     this.updatePeople(stages);
     this.updateWildlife(stages);
     this.lastArrivals=[...M.PEOPLE.filter(p=>this.walkers.some(w=>w.id===p.id)&&!peopleBefore.has(p.id)).map(p=>({ru:p.nameRU||'Новый житель',en:p.nameEN||'New neighbour'})),...WILDLIFE.filter(d=>this.landAnimals.some(w=>w.species===d.id)&&!animalsBefore.has(d.id)).map(d=>({ru:d.ru,en:d.en}))];
-    for(const w of this.allActors()){w.route=[];this.relocateWalker(w);w.wait=.3;}
+    for(const w of this.allActors()){w.route=[];w.celebration=null;this.relocateWalker(w);w.wait=.3;}
+    if (animateId && this.spots[animateId]) this.gatherForBuild(animateId);
+  }
+  gatherForBuild(id) {
+    const site = this.spots[id];
+    const distance = actor => Math.hypot(actor.x - site.x, actor.z - site.z);
+    const residents = [...this.walkers].sort((a, b) => distance(a) - distance(b)).slice(0, 4);
+    const actors = this.allActors();
+    const claimed = [];
+    for (const resident of residents) {
+      const options = [];
+      for (let z = -8; z <= 8; z += .5) {
+        for (let x = -8; x <= 8; x += .5) {
+          const point = {x: site.x + x, z: site.z + z};
+          if (Math.hypot(x, z) > 8 || !this.walkable(point.x, point.z) ||
+              !this.actorRegionHas(resident, point.x, point.z) ||
+              claimed.some(p => Math.hypot(p.x - point.x, p.z - point.z) < 1.1) ||
+              actors.some(a => a !== resident && Math.hypot(a.x - point.x, a.z - point.z) < .85)) continue;
+          // Prefer the near edge of the lot, with a short approach for the resident.
+          options.push({point, score: Math.hypot(x, z) * 2 + Math.hypot(point.x - resident.x, point.z - resident.z)});
+        }
+      }
+      options.sort((a, b) => a.score - b.score);
+      for (const {point} of options.slice(0, 8)) {
+        const route = findRoute(resident, point, (x, z) => this.walkable(x, z));
+        if (!route.length || route.length > 43) continue;
+        resident.celebration = {site, point: route.at(-1), deadline: this.time + 9, started: null};
+        resident.route = route;
+        resident.wait = 0;
+        claimed.push(resident.celebration.point);
+        break;
+      }
+    }
+  }
+  updateCelebration(w, dt) {
+    const event = w.celebration;
+    if (!event) return false;
+    const {site, point, started} = event;
+    const arrived = Math.hypot(w.x - point.x, w.z - point.z) < .15;
+    if (started === null && this.time < event.deadline && !arrived) {
+      if (!w.route.length && w.wait <= 0) {
+        w.route = findRoute(w, point, (x, z) => this.walkable(x, z));
+        if (!w.route.length) w.celebration = null;
+      }
+      return false;
+    }
+    if ((started === null && !arrived) || (started !== null && this.time - started >= 1.8)) {
+      w.celebration = null;
+      w.route = [];
+      w.wait = .5;
+      return false;
+    }
+    if (started === null) event.started = this.time;
+    const phase = (this.time - event.started) * Math.PI * 2.3;
+    const angle = Math.atan2(site.x - w.x, site.z - w.z);
+    const delta = Math.atan2(Math.sin(angle - w.m.rotation.y), Math.cos(angle - w.m.rotation.y));
+    w.m.rotation.y += delta * Math.min(1, dt * 9);
+    w.m.rotation.z = Math.sin(phase) * .15;
+    w.m.position.set(w.x, this.ground(w.x, w.z) + Math.abs(Math.sin(phase)) * .4, w.z);
+    return true;
   }
   placeProject(p, s, anim) {
     const old = this.projObjs[p.id];
@@ -828,7 +948,7 @@ export class Island {
   }
   blocked(x,z,pad=.22) {
     for(const id in this.spots)if(contains(this.spots[id].box,x,z,pad))return true;
-    return this.staticEntries.some(b=>!b.water&&contains(b.nav,x,z,pad));
+    return this.staticEntries.some(b=>!b.water&&b.blocks!==false&&contains(b.nav,x,z,pad));
   }
 
   // ---------- камера ----------
@@ -941,6 +1061,13 @@ export class Island {
     }
     return best;
   }
+  pickGround(px, py) {
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(new THREE.Vector2(px / this.w * 2 - 1, 1 - py / this.h * 2), this.camera);
+    const {point} = ray.intersectObject(this.terrain)[0] || {};
+    if (!point) return null;
+    return {x: Math.round(point.x * 4) / 4, z: Math.round(point.z * 4) / 4};
+  }
 
   // ---------- кадр ----------
   update(dt) {
@@ -1019,19 +1146,21 @@ export class Island {
       turtle.rotation.z=Math.sin(t*2+turtle.userData.phase)*.035;
     }
     // Residents follow connected dry routes; movement never projects through buildings.
-    for (const w of this.allActors()) {
+    const actors = this.allActors();
+    for (const w of actors) {
+      if (this.updateCelebration(w, dt)) continue;
       let moving=false;
       if(w.wait>0) w.wait-=dt;
       else if(!w.route?.length){this.pickTarget(w);if(!w.route?.length&&!this.tryYield(w))w.wait=.6;}
       else {
         const target=w.route[0],dx=target.x-w.x,dz=target.z-w.z,d=Math.hypot(dx,dz);
-        if(d<.045){w.route.shift();if(!w.route.length)w.wait=w.species?.length ? .3+Math.random()*1.2 : 2+Math.random()*4;}
+        if(d<.045){w.route.shift();if(!w.route.length && !w.celebration)w.wait=w.species?.length ? .3+Math.random()*1.2 : 2+Math.random()*4;}
         else {
-          const step=Math.min((w.speed||.9)*dt,d),nx=w.x+dx/d*step,nz=w.z+dz/d*step;
+          const step=Math.min((w.celebration ? 2.5 : w.speed || .9)*dt,d),nx=w.x+dx/d*step,nz=w.z+dz/d*step;
           if(!(w.species?this.faunaWalkable(nx,nz,w.radius+.06):this.walkable(nx,nz))){w.route=[];w.wait=.4;}
           else {
             // Let nearby residents pass without overlapping or shoving each other.
-            const near=this.allActors().some(v=>v!==w && Math.hypot(v.x-nx,v.z-nz)<(w.radius||.24)+(v.radius||.24)+.04 && Math.hypot(v.x-nx,v.z-nz)<Math.hypot(v.x-w.x,v.z-w.z)-.001);
+            const near=actors.some(v=>v!==w && Math.hypot(v.x-nx,v.z-nz)<(w.radius||.24)+(v.radius||.24)+.04 && Math.hypot(v.x-nx,v.z-nz)<Math.hypot(v.x-w.x,v.z-w.z)-.001);
             if(!near){w.x=nx;w.z=nz;moving=true;w.blockTime=0;}
             else {w.blockTime=(w.blockTime||0)+dt;if(w.blockTime>1.25){w.route=[];w.blockTime=0;if(!this.tryYield(w))w.wait=.3+Math.random()*.3;}}
             const angle=Math.atan2(dx,dz)+(w.species==='crab'?Math.PI/2:0),delta=Math.atan2(Math.sin(angle-w.m.rotation.y),Math.cos(angle-w.m.rotation.y));

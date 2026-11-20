@@ -55,6 +55,19 @@ html[data-theme=island] #shade{background-color:transparent;background-image:rad
 .tip strong{display:block;margin-top:3px;color:#226576;font-size:.91em}
 .first-build-note{margin:0;font-size:clamp(15px,3.8vw,18px);line-height:1.3}
 .first-build-button{white-space:normal;min-height:56px;height:auto;padding:8px 14px;line-height:1.15}
+.rcol-decor{position:absolute;right:calc(10px + var(--safe-right,0px));bottom:calc(114px + var(--safe-bottom,0px))}
+.rcol-decor button{background:linear-gradient(#fffdf2,#e8edd8)}
+.decor-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
+.decor-item{display:grid;justify-items:center;gap:3px;min-width:0;padding:7px;background:#f0ead7;border:2px solid #d6c6a3;border-radius:12px;line-height:1.16;font-size:14px}
+.decor-item:disabled{opacity:.48}
+.decor-item img{width:72px;height:72px;object-fit:contain;background:#e0edcd;border-radius:8px}
+.decor-item small{font-size:12px;color:#6d533e}
+.decor-stored{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0}
+.decor-placement{position:absolute;left:50%;bottom:calc(100px + var(--safe-bottom,0px));transform:translateX(-50%);width:min(92vw,480px);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 11px;background:#fff9e9;color:#3b3027;border:2px solid #745a40;border-radius:12px;box-shadow:0 5px 12px #0004}
+.decor-placement small{display:block;font-size:13px;line-height:1.2}
+.audio-pack select{font:inherit;font-size:15px;color:#3a2a1e;background:#fff9e8;border:1px solid #cbb58a;border-radius:8px;padding:6px}
+.audio-attribution{font-size:12px;color:#705b44}
+@media(max-width:600px){.rcol-decor .round{width:48px;height:48px}.decor-grid{grid-template-columns:repeat(2,1fr)}.decor-placement .btn{height:36px;padding:0 6px;font-size:14px}}
 #mod{position:absolute;inset:0;z-index:2;pointer-events:none}#tst{position:absolute;inset:0;z-index:3;pointer-events:none}
 #ui-fx{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
 #ui-fx *,#ui-fx .ui-ghost{pointer-events:none!important}

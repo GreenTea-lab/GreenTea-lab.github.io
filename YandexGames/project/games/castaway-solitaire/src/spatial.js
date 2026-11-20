@@ -27,16 +27,19 @@ export function planSites(tier,shape){
   let anchor=p.pos;
   if(p.id==='pier'){
    let shore=2;while(shore<16&&shape(p.pos[0],shore+.25)>.025)shore+=.25;
-   anchor=[p.pos[0],shore-2];
+   anchor=[p.pos[0],shore-1.65];
   }
   // Search whole footprints, not just the model's pivot point.
   for(let ring=0;ring<=24&&!best;ring++){
    const radius=ring*.5,angles=ring?Math.max(12,ring*8):1;
    for(let k=0;k<angles;k++){
     const a=k/angles*Math.PI*2,x=Math.round((anchor[0]+Math.cos(a)*radius)*2)/2,z=Math.round((anchor[1]+Math.sin(a)*radius)*2)/2,box=movedBox(b,x,z);
-    if(box.minX< -22||box.maxX>22||box.minZ< -17||box.maxZ>17||reserved.some(q=>intersects(box,q,.4)))continue;
+    if(box.minX< -22||box.maxX>22||box.minZ< -17||box.maxZ>(p.water?23:17)||reserved.some(q=>intersects(box,q,.4)))continue;
     const samples=[[x,z],[box.minX,box.minZ],[box.maxX,box.minZ],[box.minX,box.maxZ],[box.maxX,box.maxZ]];
-    if(samples.some(([xx,zz])=>shape(xx,zz)<(p.water?-.22:.055)))continue;
+    if(p.water){
+      // The shore approach must be dry and even the first stage must extend across the waterline.
+      if(samples.slice(0,3).some(([xx,zz])=>shape(xx,zz)<.035)||shape(x,z+3.2)>-.045)continue;
+    }else if(samples.some(([xx,zz])=>shape(xx,zz)<.055))continue;
     // Keep every ordinary building off the central rocky hill.
     if(p.id!=='beacon'&&samples.some(([xx,zz])=>Math.hypot(xx+2.5,zz+6.5)<5.4))continue;
     best={x,z,rot:p.rot,r:p.r,box};break;
