@@ -8,7 +8,10 @@ const { browser, base, close } = await runtime();
 const results = [];
 try {
   for (const viewport of [{ width: 390, height: 844 }, { width: 320, height: 568 }, { width: 844, height: 390 }]) {
-    const page = await browser.newPage({ viewport, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+    const page = await browser.newPage({
+      viewport, isMobile: true, hasTouch: true, deviceScaleFactor: 2,
+      userAgent: 'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+    });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.addInitScript(() => {
@@ -19,6 +22,7 @@ try {
     await frame.locator('[data-a=play]').tap();
     const game = page.frames().find(f => f.url().includes('/dist-vk/'));
     await game.waitForFunction(() => __game.table.busy === 0);
+    assert.equal(await game.evaluate(() => __game.quality), 'mid');
     assert.match(await frame.locator('#tip').innerText(), /на 7 можно положить 6 или 8/);
     const scale = frame.locator('#cardScale');
     await scale.fill(await scale.getAttribute('max'));

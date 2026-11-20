@@ -22,7 +22,8 @@ export class Game {
     const d = save.data;
     worldState();
     sdk.noAds = !!d.noAds;
-    const mobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && innerWidth < 900);
+    const mobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches);
     this.quality = d.settings.quality === 'low' ? 'low' : d.settings.quality === 'high' ? 'high' : mobile ? 'mid' : 'high';
     this.c3 = c3;
     this.island = new Island(c3, this.quality,d.expansion);
