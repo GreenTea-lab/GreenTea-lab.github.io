@@ -19,6 +19,13 @@ try {
     });
     await page.goto(base + '/parent?lang=ru&platform=mobile_android');
     const frame = page.frameLocator('iframe');
+    const navigation = frame.locator('.island-nav button');
+    await navigation.first().waitFor();
+    assert.deepEqual(await navigation.evaluateAll(buttons => buttons.map(button => button.dataset.a)), ['world','build','decor','play','levels']);
+    assert.ok(await navigation.evaluateAll(buttons => buttons.every(button => {
+      const rect = button.getBoundingClientRect();
+      return rect.left >= 0 && rect.right <= innerWidth && rect.bottom <= innerHeight;
+    })));
     await frame.locator('[data-a=play]').tap();
     const game = page.frames().find(f => f.url().includes('/dist-vk/'));
     await game.waitForFunction(() => __game.table.busy === 0);
@@ -58,11 +65,13 @@ try {
       return {
         frames: renders.length, p95GapMs: +gaps[Math.floor(gaps.length * 0.95)]?.toFixed(1),
         backgroundDpr: island.renderer.getPixelRatio(), cardDpr: __game.table.dpr,
+        angle: Math.atan2(island.camera.position.y - .6, Math.hypot(island.camera.position.x, island.camera.position.z)) * 180 / Math.PI,
         advancing: renders.slice(1).every((entry, i) => entry.angle > renders[i].angle),
       };
     });
     assert.ok(performance.frames >= 12 && performance.advancing, JSON.stringify(performance));
     assert.ok(performance.cardDpr > performance.backgroundDpr);
+    assert.ok(Math.abs(performance.angle - 45) < .1);
     assert.deepEqual(errors, []);
     results.push({ viewport, width: cards.width, scale: cards.scale, ...performance });
     await page.close();

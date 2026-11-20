@@ -30,18 +30,33 @@ try {
   });
   await page.goto(R.base + '/dist-vk-single/index.html');
   await page.waitForFunction(() => window.__game?.ui && !document.querySelector('#loader'));
-  const nature = await page.evaluate(() => [__game.island.naturalPlants, __game.island.hillPlants]);
-  assert.ok(nature[0] >= 32 && nature[1] >= 8, JSON.stringify(nature));
+  const nature = await page.evaluate(() => {
+    const {naturalPlants, hillPlants, grass} = __game.island;
+    return {naturalPlants, hillPlants, grass:grass.spots.length};
+  });
+  assert.ok(nature.naturalPlants >= 24 && nature.hillPlants >= 7 && nature.grass >= 140, JSON.stringify(nature));
+  assert.equal(await page.locator('.voyage-strip').count(), 0);
+  await page.locator('.island-nav [data-a=world]').tap();
+  assert.match(await page.locator('.districts + p').innerText(), /звёзды/);
+  await page.locator('[data-x]').tap();
+  await page.locator('.districts').waitFor({state:'detached'});
+  await page.locator('.island-nav [data-a=build]').tap();
+  assert.match(await page.locator('.pb').innerText(), /Баланс звёзд: 3/);
+  await page.locator('[data-x]').tap();
+  await page.locator('.pb').waitFor({state:'detached'});
   await page.locator('[data-a=decor]').tap();
   assert.equal(await page.locator('[data-decor]').count(), 13);
   await page.screenshot({path:out + '/decor-catalog.png'});
   await page.locator('[data-decor=bench]').tap();
   await page.waitForFunction(() => !__game.ui.transitioning);
+  const grid = await page.evaluate(() => __game.island.decorPicker.available);
+  assert.ok(grid >= 100, `Bench cells: ${grid}`);
+  assert.equal(await page.locator('[data-decor-confirm]').isDisabled(), true);
   const point = await page.evaluate(() => {
     const island = __game.island;
     island.update(.05);
     island.render();
-    for (let x = -12; x < 12; x += .5) for (let z = -7; z < 9; z += .5) {
+    for (let x = -11.75; x < 12; x += .5) for (let z = -6.75; z < 9; z += .5) {
       const item = {id:9999, type:'bench', x, z};
       const p = island.project(x, island.ground(x, z), z);
       if (document.elementFromPoint(p.x, p.y)?.id !== 'c') continue;
@@ -56,14 +71,21 @@ try {
   assert.equal(await page.evaluate(() => __game.placeSelectedDecor({x:0,z:17})), false);
   assert.equal(await page.evaluate(() => __save.data.coins), before);
   await page.touchscreen.tap(point.x, point.y);
+  assert.equal(await page.evaluate(() => __save.data.coins), before);
+  assert.equal(await page.evaluate(() => __game.island.decorPicker.ghost.visible), true);
+  await page.evaluate(() => __game.island.render());
+  await page.screenshot({path:out + '/decor-placement.png'});
+  await page.locator('[data-decor-confirm]').tap();
   assert.equal(await page.evaluate(() => __save.data.coins), before - 60);
+  assert.equal(await page.evaluate(() => __game.island.decorPicker), null);
   await page.reload();
   await page.waitForFunction(() => window.__game?.island.playerDecor.size === 1);
   await page.locator('[data-a=decor]').tap();
   await page.locator('[data-store-decor]').tap();
   await page.locator('[data-decor=bench]').tap();
   await page.waitForFunction(() => !__game.ui.transitioning);
-  assert.equal(await page.evaluate(p => __game.placeSelectedDecor({x:p.xWorld,z:p.zWorld}), point), true);
+  await page.evaluate(p => __game.previewSelectedDecor({x:p.xWorld,z:p.zWorld}), point);
+  await page.locator('[data-decor-confirm]').tap();
   assert.equal(await page.evaluate(() => __save.data.coins), before - 60);
 
   await page.evaluate(() => __game.build('hut'));
@@ -81,9 +103,17 @@ try {
   });
   assert.deepEqual(celebration, {celebrating:true, valid:true});
   await page.locator('[data-a=settings]').tap();
-  const packs = ['island','draw','place','flip','shuffle','wave'];
+  const music = ['island','bassa','bossa'];
+  const packs = [...music,'draw','place','flip','shuffle','wave','click','error','open','build','buy','gift','decor','unlock'];
   await page.waitForFunction(names => names.every(name => __audio.recordings[name]), packs);
-  assert.equal(await page.evaluate(() => !!__audio.recordedMusic), true);
+  const played = [];
+  for (let i = 0; i < music.length; i++) {
+    const track = await page.evaluate(() => __audio.recordedTrack);
+    played.push(track);
+    await page.evaluate(() => __audio.recordedMusic.stop());
+    await page.waitForFunction(last => __audio.recordedTrack !== last, track);
+  }
+  assert.deepEqual(played.sort(), music.sort());
   await page.locator('[data-audio-pack=musicPack]').selectOption('classic');
   await page.locator('[data-audio-pack=soundPack]').selectOption('classic');
   assert.deepEqual(await page.evaluate(() => [!!__audio.recordedMusic, __audio.soundPack]), [false,'classic']);
@@ -91,8 +121,8 @@ try {
   await page.waitForFunction(() => window.__save && __save.data.settings.musicPack === 'classic');
   assert.equal(await page.evaluate(() => __save.data.settings.soundPack), 'classic');
   assert.deepEqual(errors, []);
-  fs.writeFileSync(out + '/report.json', JSON.stringify({nature, celebration, packs, pierCoasts:6},null,2));
-  console.log('PASS decor, pier, celebration and audio', JSON.stringify({nature, celebration}));
+  fs.writeFileSync(out + '/report.json', JSON.stringify({nature, grid, celebration, packs, pierCoasts:6},null,2));
+  console.log('PASS decor, pier, celebration and audio', JSON.stringify({nature, grid, celebration}));
 } finally {
   await R.close();
 }

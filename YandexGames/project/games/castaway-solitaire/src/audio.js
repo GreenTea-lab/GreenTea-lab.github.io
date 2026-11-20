@@ -2,19 +2,37 @@
 import { Music } from './music.js';
 import { SONGS } from './songs.js';
 import islandLoop from '../static/audio/island.ogg';
+import bassaLoop from '../static/audio/bassa.mp3';
+import bossaLoop from '../static/audio/bossa.mp3';
 import drawRecording from '../static/audio/draw.wav';
 import placeRecording from '../static/audio/place.wav';
 import flipRecording from '../static/audio/flip.wav';
 import shuffleRecording from '../static/audio/deal.wav';
 import waveRecording from '../static/audio/wave.flac';
+import clickRecording from '../static/audio/ui-click.wav';
+import errorRecording from '../static/audio/ui-error.wav';
+import openRecording from '../static/audio/menu-open.wav';
+import buildRecording from '../static/audio/craft.wav';
+import buyRecording from '../static/audio/buy.wav';
+import giftRecording from '../static/audio/chest-open.wav';
+import decorRecording from '../static/audio/place-item.wav';
+import unlockRecording from '../static/audio/jingle-quest-complete.wav';
 
 const RECORDINGS = {
-  island: islandLoop, draw: drawRecording, place: placeRecording, flip: flipRecording,
+  island: islandLoop, bassa: bassaLoop, bossa: bossaLoop,
+  draw: drawRecording, place: placeRecording, flip: flipRecording,
   shuffle: shuffleRecording, wave: waveRecording,
+  click: clickRecording, error: errorRecording, open: openRecording, build: buildRecording,
+  buy: buyRecording, gift: giftRecording, decor: decorRecording, unlock: unlockRecording,
 };
+const PLAYLIST = ['island', 'bassa', 'bossa'];
 const SFX_RECORDINGS = {
   draw: ['draw', .4, .09], deal: ['draw', .2, .085], place: ['place', .39, .05],
-  flip: ['flip', .25, .07], shuffle: ['shuffle', .22, .3], wave: ['wave', .2, .25, 1.25],
+  flip: ['flip', .25, .07], shuffle: ['shuffle', .22, .3], wave: ['wave', .11, .25, 1.25],
+  click: ['click', .21, .06], deny: ['error', .27, .15], error: ['error', .27, .2],
+  open: ['open', .32, .1], build: ['build', .44, .5], buy: ['buy', .43, .3],
+  gift: ['gift', .4, .35], decor: ['decor', .4, .2], unlock: ['unlock', .39, .6],
+  win: ['unlock', .39, 1],
 };
 
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
@@ -102,29 +120,47 @@ class AudioEngine {
     this.setSfxVol(on === true ? this.sfxVol || 0.9 : on === false ? 0 : on);
   }
 
-  // ---------- Музыка: несколько треков, переключение по настроению ----------
   startMusic() {
     this.wantMusic = true;
     if (!this.ctx) return;
-    if (this.musicPack === 'island' && this.recordings.island) {
-      if (this.recordedMusic) return;
-      this.mus.stop();
-      const source = this.ctx.createBufferSource();
-      source.buffer = this.recordings.island;
-      source.loop = true;
-      const gain = this.ctx.createGain();
-      gain.gain.value = .27;
-      source.connect(gain).connect(this.music);
-      source.start();
-      this.recordedMusic = source;
-    } else {
-      if (this.recordedMusic) {
-        this.recordedMusic.stop();
-        this.recordedMusic.disconnect();
-        this.recordedMusic = null;
-      }
-      this.mus.start();
+    if (this.musicPack === 'island') {
+      if (this.recordedMusic || this.playNextRecording()) return;
     }
+    if (this.recordedMusic) {
+      this.recordedMusic.stop();
+      this.recordedMusic = null;
+      this.recordedTrack = null;
+    }
+    this.mus.start();
+  }
+
+  playNextRecording() {
+    const tracks = PLAYLIST.filter(name => this.recordings[name]);
+    if (!tracks.length) return false;
+    const track = tracks[(tracks.indexOf(this.recordedTrack) + 1) % tracks.length];
+    const source = this.ctx.createBufferSource();
+    const gain = this.ctx.createGain();
+    source.buffer = this.recordings[track];
+    const start = this.ctx.currentTime;
+    const end = start + source.buffer.duration;
+    const fade = Math.min(.3, source.buffer.duration / 4);
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(.4, start + fade);
+    gain.gain.setValueAtTime(.4, end - fade);
+    gain.gain.linearRampToValueAtTime(0, end);
+    source.connect(gain).connect(this.music);
+    source.onended = () => {
+      source.disconnect();
+      gain.disconnect();
+      if (this.recordedMusic !== source) return;
+      this.recordedMusic = null;
+      this.startMusic();
+    };
+    this.mus.stop();
+    this.recordedMusic = source;
+    this.recordedTrack = track;
+    source.start(start);
+    return true;
   }
   setPacks(music, sound) {
     this.musicPack = music === 'classic' ? 'classic' : 'island';
@@ -134,13 +170,14 @@ class AudioEngine {
   }
   loadRecordings() {
     for (const [name, url] of Object.entries(RECORDINGS)) {
-      if ((name === 'island' ? this.musicPack : this.soundPack) !== 'island' ||
+      const music = PLAYLIST.includes(name);
+      if ((music ? this.musicPack : this.soundPack) !== 'island' ||
           Object.hasOwn(this.recordings, name)) continue;
       this.recordings[name] = null;
       fetch(url).then(response => response.arrayBuffer()).then(bytes => this.ctx.decodeAudioData(bytes))
         .then(buffer => {
           this.recordings[name] = buffer;
-          if (name === 'island' && this.wantMusic) this.startMusic();
+          if (music && this.wantMusic) this.startMusic();
         }).catch(() => { /* The corresponding synthesized sound stays available. */ });
     }
   }
@@ -207,6 +244,7 @@ class AudioEngine {
       const source = this.ctx.createBufferSource();
       const gain = this.ctx.createGain();
       source.buffer = buffer;
+      if (name === 'deal' || name === 'place') source.playbackRate.value = .95 + Math.random() * .12;
       source.connect(gain).connect(this.sfx);
       const now = this.ctx.currentTime;
       const duration = Math.min(buffer.duration, limit ?? Infinity);
@@ -236,6 +274,8 @@ class AudioEngine {
           o('sine', 260, 180, 0.06, 0.06);
         }
         break;
+      case 'decor':
+        return this.play('place');
       case 'draw':
         if (this._ok(name, 0.05)) n(0.12, 0.08, 'bandpass', 1500, 3200);
         break;
@@ -329,7 +369,7 @@ class AudioEngine {
     const c = this.ctx;
     const t = c.currentTime;
     const S = this.sea;
-    const lvl = this.seaLevel ?? 1;
+    const lvl = (this.seaLevel ?? 1) * (this.soundPack === 'island' ? .58 : 1);
     const dur = 3 + Math.random() * 2.5;
     // накат: громкость и фильтр поднимаются и спадают
     S.g.gain.cancelScheduledValues(t);

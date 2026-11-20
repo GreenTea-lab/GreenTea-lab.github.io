@@ -11,7 +11,7 @@ for(const vk of [false,true]){
   const out=vk?'dist-vk':'dist',single=vk?'dist-vk-single':'dist-single';
   for(const dir of [out,single]){fs.rmSync(dir,{recursive:true,force:true});fs.mkdirSync(dir,{recursive:true});}
   await build({entryPoints:['src/main.js'],bundle:true,minify:true,format:'iife',target:['es2019'],outfile:out+'/game.js',legalComments:'none',
-    loader:{'.ogg':'dataurl','.wav':'dataurl','.flac':'dataurl'},
+    loader:{'.ogg':'dataurl','.mp3':'dataurl','.wav':'dataurl','.flac':'dataurl'},
     ...(vk?{plugins:[{name:'vk-sdk',setup(b){b.onResolve({filter:/\/sdk\.js$/},a=>a.importer.startsWith(path.resolve('src')+path.sep)?{path:path.resolve('src/sdk_vk.js')}:null);}}]}:{})});
   fs.mkdirSync(out+'/backgrounds',{recursive:true});
   for(const f of [...fonts,...images])fs.copyFileSync('static/'+f,out+'/'+f);

@@ -170,11 +170,11 @@ export class UI {
         <div class="tl">${this.coinsChip()}${this.starsChip()}</div>
       </div>
       <div class="rcol"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Журнал острова':'Island journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button><button class="btn round hit" data-a="lb" aria-label="records">${IC.trophy}</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
-      <div class="rcol-decor"><button class="btn round hit" data-a="decor" aria-label="${LANG==='ru'?'Декор острова':'Island decor'}" title="${LANG==='ru'?'Декор острова':'Island decor'}">${IC.palm}</button></div>
       <div class="logo"><b>${esc(t('title'))}</b><i>${esc(t('subtitle'))}</i></div>
-      <div class="voyage-strip"><div><small>${LANG==='ru'?'Глава':'Chapter'} ${chapterOf(lvl)+1} / 20</small><b>${esc(CHAPTERS[chapterOf(lvl)][LANG==='ru'?0:1])}</b><span>${chapterProgress(chapterOf(lvl)).count} / 50 · ${LANG==='ru'?'Берег':'Coast'} ${save.data.expansion||0}/5</span></div><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Расширить':'Expand'}</button></div>
-      <div class="bottom">
-        <div class="side"><button class="btn round hit" data-a="build" style="position:relative">${IC.hammer}<span class="badge" id="buildBadge" style="display:none"></span></button><span>${esc(t('build'))}</span></div>
+      <div class="bottom island-nav">
+        <div class="side"><button class="btn round hit" data-a="world" aria-label="${LANG==='ru'?'Расширить остров':'Expand island'}">${IC.palm}</button><span>${LANG==='ru'?'Расширить':'Expand'}</span></div>
+        <div class="side"><button class="btn round hit" data-a="build" aria-label="${esc(t('build'))}" style="position:relative">${IC.hammer}<span class="badge" id="buildBadge" style="display:none"></span></button><span>${esc(t('build'))}</span></div>
+        <div class="side"><button class="btn round hit" data-a="decor" aria-label="${LANG==='ru'?'Декор острова':'Island decor'}">${IC.bag}</button><span>${LANG==='ru'?'Декор':'Decor'}</span></div>
         <button class="btn big hit pulse" data-a="play" style="flex-direction:column;gap:0;height:76px;line-height:1.05">${esc(t('play'))}<small>${esc(t('levelN', { n: lvl }))}</small></button>
         <div class="side"><button class="btn round hit" data-a="levels">${IC.cards}</button><span>${esc(t('levels'))}</span></div>
       </div>`);
@@ -206,7 +206,7 @@ export class UI {
   }
   // метки над постройками (вызывается каждый кадр на острове)
   updateBubble() {
-    if (this.screen !== 'home' || this.modalOpen) {
+    if (this.screen !== 'home' || this.modalOpen || this.g.decorSelection) {
       if (this.bub.innerHTML) this.bub.innerHTML = '';
       this._bubKey = '';
       return;
@@ -239,17 +239,23 @@ export class UI {
   }
 
   // ---------- стройка ----------
-  placingDecor(def, blocked = false) {
+  placingDecor(def, status = 'select') {
     this.scr.querySelector('.decor-placement')?.remove();
     if (!def) return;
     const ru = LANG === 'ru';
     const bar = document.createElement('div');
     bar.className = 'decor-placement';
-    const help = blocked
+    const help = status === 'blocked'
       ? (ru ? 'Здесь не поместится. Попробуйте свободный участок суши.' : 'It won’t fit here. Try an open spot on land.')
-      : (ru ? 'Нажмите на свободный участок суши.' : 'Tap an open spot on land.');
-    bar.innerHTML = `<div><b>${esc(def[ru ? 'ru' : 'en'])}</b><small>${esc(help)}</small></div><button class="btn mid sand" type="button">${ru ? 'Отмена' : 'Cancel'}</button>`;
-    bar.querySelector('button').onclick = () => this.g.cancelDecor();
+      : status === 'ready' ? (ru ? 'Можно поставить здесь или выбрать другую клетку.' : 'Place here or choose another tile.')
+        : (ru ? 'Выберите зелёную клетку.' : 'Choose a green tile.');
+    bar.innerHTML = `<div><b>${esc(def[ru ? 'ru' : 'en'])}</b><small role="status">${esc(help)}</small></div>
+      <div class="decor-placement-actions">
+        <button class="btn mid green" type="button" data-decor-confirm ${status === 'ready' ? '' : 'disabled'}>${ru ? 'Поставить' : 'Place'}</button>
+        <button class="btn mid sand" type="button" data-decor-cancel>${ru ? 'Отмена' : 'Cancel'}</button>
+      </div>`;
+    bar.querySelector('[data-decor-confirm]').onclick = () => this.g.placeSelectedDecor(this.g.decorPoint);
+    bar.querySelector('[data-decor-cancel]').onclick = () => this.g.cancelDecor();
     this.scr.append(bar);
   }
   decor() {
@@ -284,7 +290,7 @@ export class UI {
   buildPanel() {
     const body = () => {
       const s = save.stars();
-      return `<div class="row"><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Новые берега':'New shores'}</button><button class="btn mid sand" data-a="decor">${LANG==='ru'?'Декор':'Decor'}</button></div><p class="center" style="margin-top:12px">${esc(t('starsHint'))}</p><div class="plist">${this.projects().map((p) => {
+      return `<div class="row"><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Новые берега':'New shores'}</button><button class="btn mid sand" data-a="decor">${LANG==='ru'?'Декор':'Decor'}</button></div><p class="center" style="margin-top:12px">${esc(t('starBalance', {n:fmt(s)}))}</p><p class="center">${esc(t('starsHint'))}</p><div class="plist">${this.projects().map((p) => {
         const st = save.data.stages[p.id];
         const done = st >= 3;
         const cost = done ? 0 : p.cost[st];
@@ -318,7 +324,7 @@ export class UI {
       title: t('p_' + id),
       body: `<div class="col" style="align-items:center"><img src="${projThumb(id, st + 1)}" style="width:150px;height:150px" alt="">
         <p class="center" style="margin:0">${esc(t('stage', { a: st + 1, b: 3 }))}: <b>${esc(t('p_' + id + '_' + (st + 1)))}</b></p>
-        ${can ? '' : `<p class="center" style="margin:0">${esc(t('needStars', { n: cost }))} · ${IC.star.replace('<svg', '<svg style="display:inline-block;width:22px;height:22px;vertical-align:-4px"')} ${s}</p>`}
+        <p class="center" style="margin:0">${esc(t('needStars', { n: cost }))} · ${esc(t('starBalance', {n:fmt(s)}))}</p>
         <div class="row">${can ? `<button class="btn big green" data-a="go">${IC.hammer}${esc(t('buildBtn'))} <span class="cost">${IC.star}${cost}</span></button>` : `<button class="btn big" data-a="play">${esc(t('play'))}</button>`}</div></div>`,
     });
     this.bind(m, {
@@ -646,9 +652,11 @@ export class UI {
     const m = this.modal({
       title: t('settings'),
       body: `<div class="col">${slidersHTML(st, { music: t('music'), sound: t('sound') }, { music: IC.music, sound: IC.sound })}
-        ${audioSelect('musicPack', ru ? 'Мелодия' : 'Music pack')}
-        ${audioSelect('soundPack', ru ? 'Озвучка карт' : 'Sound effects')}
-        <small class="audio-attribution">${ru ? 'Островная запись' : 'Island recordings'} · Brandon Morris, AntumDeluge, Brian MacIntosh, jasinski (CC0)</small>
+        ${audioSelect('musicPack', ru ? 'Музыкальный набор' : 'Music pack')}
+        ${audioSelect('soundPack', ru ? 'Звуки игры' : 'Sound effects')}
+        <details class="audio-attribution"><summary>${ru ? 'Музыка и звуки' : 'Music and sound credits'}</summary>
+          <small>Feel Good Island Loop — Brandon Morris, AntumDeluge (CC0)<br>Bossa Nova — Joth (CC0)<br>Bassa Island Game Loop — Kevin MacLeod, incompetech.com (CC BY 4.0)<br>Playing Card Sounds — Brian MacIntosh (CC0)<br>Beach Ocean Waves — jasinski, qubodup (CC0)<br>Cozy Farm SFX — Bramble &amp; Byte, aquumgifts.itch.io (CC BY 4.0)</small>
+        </details>
         <div class="setrow"><span>${esc(t('hints'))}</span><div class="seg"><button data-h="1" class="${st.hints ? 'on' : ''}">${esc(t('on'))}</button><button data-h="0" class="${st.hints ? '' : 'on'}">${esc(t('off'))}</button></div></div>
         <div class="setrow"><span>${esc(t('quality'))}</span><div class="seg"><button data-q="high" class="${this.g.quality !== 'low' ? 'on' : ''}">${esc(t('qHigh'))}</button><button data-q="low" class="${this.g.quality === 'low' ? 'on' : ''}">${esc(t('qLow'))}</button></div></div></div>`,
     });
@@ -674,7 +682,8 @@ export class UI {
   }
   world() {
     const ru=LANG==='ru',tier=save.data.expansion||0,next=nextExpansion();
-    const body='<p class="center">'+(ru?'Открывайте новые участки суши и развивайте свой остров. Каждое расширение добавляет три постройки.':'Open new stretches of land. Each coast adds three new buildings.')+'</p><div class="districts">'+EXPANSIONS.map(e=>{
+    const chapter=chapterOf(save.data.level), progress=chapterProgress(chapter);
+    const body='<p class="center">'+(ru?'Глава ':'Chapter ')+(chapter+1)+' / '+CHAPTERS.length+' · '+esc(CHAPTERS[chapter][ru?0:1])+' · '+progress.count+' / 50</p><p class="center">'+(ru?'Открывайте новые участки суши и развивайте свой остров. Каждое расширение добавляет три постройки.':'Open new stretches of land. Each coast adds three new buildings.')+'</p><div class="districts">'+EXPANSIONS.map(e=>{
       const owned=e.id<=tier,current=e.id===tier+1,ready=current&&canExpand();
       const projects=PROJECTS.filter(p=>p.tier===e.id);
       const progress=projects.reduce((sum,p)=>sum+(save.data.stages[p.id]||0),0);

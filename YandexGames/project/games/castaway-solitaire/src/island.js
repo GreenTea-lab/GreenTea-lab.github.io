@@ -1,5 +1,5 @@
 import {WILDLIFE,wildlifeUnlocked} from './wildlife.js';
-import {planSites,contains,intersects} from './spatial.js';
+import {planSites,contains,intersects,movedBox} from './spatial.js';
 import {worldScale,WORLD_PROJECTS} from './world-data.js';
 // 3D-остров в море: рельеф, вода, небо, пальмы, постройки, жители, звери, птицы, камера
 import * as THREE from 'three';
@@ -96,6 +96,7 @@ export class Island {
       if (item.x !== null && !this.installDecor(item, true)) item.x = item.z = null;
     }
     this.makeDecor();
+    this.makeGrass();
     this.makeClouds();
     this.makeBirds();
     this.makeCritters();
@@ -434,42 +435,53 @@ export class Island {
     return v.build(M.VS, 0, 0);
   }
   addStatic(list,v,x,z,rot=0,scale=1,y=null,tree=false,blocks=true) {
-    const bounds=footBox(v,x,z,rot,scale),water=y!==null;
-    if(Object.values(this.spots).some(p=>intersects(bounds,p.box,.22)))return false;
     // A tree needs dry, level ground under its trunk, not under its whole crown.
-    // Keep the complete crown bounds for building/decor collision checks.
+    const bounds=footBox(v,x,z,rot,scale);
     const support=tree?footBox(v,x,z,rot,scale,v.minY+8):bounds;
+    const placement = this.staticPlacement(v, bounds, support, x, z, scale, y, tree, blocks);
+    if (!placement) return false;
+    placement.nav = footBox(v,x,z,rot,scale,Math.min(v.maxY,v.minY+8));
+    this.staticEntries.push(placement);
+    const g=this.geomOf(v),matrix=new THREE.Matrix4().compose(new THREE.Vector3(x,placement.base,z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),rot),new THREE.Vector3(scale,scale,scale));
+    if(g.geo)list.solid.push(g.geo.applyMatrix4(matrix));if(g.glow)list.glow.push(g.glow.applyMatrix4(matrix));return true;
+  }
+  staticPlacement(v, bounds, support, x, z, scale, y, tree, blocks, player=false) {
+    const water = y !== null;
+    if(Object.values(this.spots).some(p=>intersects(bounds,p.box,player ? .055 : .22)))return null;
     const samples=[[support.minX,support.minZ],[support.maxX,support.minZ],[support.minX,support.maxZ],[support.maxX,support.maxZ],[x,z]];
     const heights=samples.map(([xx,zz])=>this.ground(xx,zz));
-    if(!water && (Math.min(...heights)<.4||Math.max(...heights)-Math.min(...heights)>.1))return false;
+    if(!water && (Math.min(...heights)<.4||Math.max(...heights)-Math.min(...heights)>.1))return null;
     const base=y??(Math.max(...heights)-v.minY*M.VS*scale),minY=base+v.minY*M.VS*scale,maxY=base+(v.maxY+1)*M.VS*scale;
-    if(this.staticEntries.some(b=>intersects(bounds,b,.14)&&minY<b.maxY+.12&&maxY>b.minY-.12))return false;
-    const entry={...bounds,minY,maxY,x,z,water,tree,blocks,nav:footBox(v,x,z,rot,scale,Math.min(v.maxY,v.minY+8))};this.staticEntries.push(entry);
-    const g=this.geomOf(v),matrix=new THREE.Matrix4().compose(new THREE.Vector3(x,base,z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),rot),new THREE.Vector3(scale,scale,scale));
-    if(g.geo)list.solid.push(g.geo.applyMatrix4(matrix));if(g.glow)list.glow.push(g.glow.applyMatrix4(matrix));return true;
+    if(this.staticEntries.some(b=>intersects(bounds,b,player ? .055 : .14)&&minY<b.maxY+.10&&maxY>b.minY-.10))return null;
+    return {...bounds,base,minY,maxY,x,z,water,tree,blocks,player};
+  }
+  decorShape(def) {
+    const model = def.model();
+    return {model, def, bounds:footBox(model,0,0), support:footBox(model,0,0,0,1,def.tree ? model.minY+8 : null),
+      nav:footBox(model,0,0,0,1,Math.min(model.maxY,model.minY+8))};
+  }
+  decorPlacement(shape, x, z) {
+    if (!this.isLand(x, z, .012) || this.onPath(x, z)) return null;
+    const bounds = movedBox(shape.bounds,x,z);
+    const support = movedBox(shape.support,x,z);
+    return this.staticPlacement(shape.model,bounds,support,x,z,1,null,!!shape.def.tree,true,true);
   }
   installDecor(item, relocate = false) {
     const def = DECOR_BY_ID[item.type];
     if (!def || this.playerDecor.has(item.id)) return false;
-    const model = def.model();
-    const list = { solid: [], glow: [] };
+    const shape = this.decorPicker?.shape.def === def ? this.decorPicker.shape : this.decorShape(def);
     const place = (x, z) => {
-      if (!this.isLand(x, z, .02) || this.onPath(x, z)) return false;
-      if (!relocate && this.allActors().some(actor => Math.hypot(actor.x - x, actor.z - z) < 1.3)) return false;
-      if (!this.addStatic(list, model, x, z, 0, 1, null, !!def.tree)) return false;
-      const entry = this.staticEntries.at(-1);
-      const group = new THREE.Group();
-      for (const [parts, material] of [[list.solid, this.mat], [list.glow, this.glowMat]]) {
-        for (const geometry of parts) {
-          const mesh = new THREE.Mesh(geometry, material);
-          mesh.castShadow = mesh.receiveShadow = true;
-          group.add(mesh);
-        }
-      }
+      const entry = this.decorPlacement(shape,x,z);
+      if (!entry) return false;
+      entry.nav = movedBox(shape.nav,x,z);
+      this.staticEntries.push(entry);
+      const group = this.meshOf(shape.model);
+      group.position.set(x,entry.base,z);
       this.scene.add(group);
       this.playerDecor.set(item.id, {group, entry});
       Object.assign(item, {x, z});
       this.refreshPaths();
+      this.maskGrass();
       return true;
     };
     if (place(item.x, item.z)) return true;
@@ -492,6 +504,7 @@ export class Island {
     this.staticEntries.splice(this.staticEntries.indexOf(placed.entry), 1);
     this.playerDecor.delete(id);
     this.refreshPaths();
+    this.maskGrass();
     return true;
   }
   refreshPaths() {
@@ -500,6 +513,106 @@ export class Island {
       actor.route = [];
       this.relocateWalker(actor);
     }
+  }
+  makeGrass() {
+    const vertices = [], colors = [];
+    const shades = [0x478c35, 0x61a842, 0x83b449, 0x6aaf45];
+    for (let i = 0; i < 5; i++) {
+      const x = (hash(i,11)-.5)*.38, z = (hash(i,12)-.5)*.35;
+      const lean = (hash(i,13)-.5)*.24, height = .15 + hash(i,14)*.28;
+      const color = new THREE.Color(shades[i%shades.length]);
+      for (const [dx,dz] of [[.045,0],[0,.045]]) {
+        vertices.push(x-dx,0,z-dz,x+dx,0,z+dz,x+lean,height,z+lean);
+        colors.push(color.r*.78,color.g*.78,color.b*.78,color.r,color.g,color.b,color.r,color.g,color.b);
+      }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+    geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+    const material = new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide});
+    const spots = [];
+    for (let i=-NX+1; i<NX; i++) for (let j=-NZ+1; j<NZ; j++) {
+      const x=(i+.5)*TS,z=(j+.5)*TS;
+      if (hash(i,j,553) > .16 + .15*vnoise(x,z,2) || this.ground(x,z) < .9 ||
+          !this.isLand(x,z,.11) || this.onPath(x,z) || this.nearSpot(x,z,.25) ||
+          this.staticEntries.some(entry => !entry.player && !entry.water && contains(entry,x,z,.12))) continue;
+      spots.push({x,z});
+    }
+    const mesh = new THREE.InstancedMesh(geometry,material,spots.length);
+    mesh.frustumCulled = false;
+    this.grass = {mesh, spots};
+    this.scene.add(mesh);
+    this.maskGrass();
+  }
+  maskGrass() {
+    if (!this.grass) return;
+    const {mesh, spots} = this.grass;
+    const placed = [...this.playerDecor.values()].map(value => value.entry);
+    const transform = new THREE.Object3D();
+    spots.forEach(({x,z}, index) => {
+      const hidden = placed.some(entry => contains(entry,x,z,.14));
+      transform.position.set(x,this.ground(x,z),z);
+      transform.rotation.y = hash(index,17) * Math.PI * 2;
+      transform.scale.setScalar(hidden ? 0 : .65 + hash(index,18)*.75);
+      transform.updateMatrix();
+      mesh.setMatrixAt(index, transform.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+  }
+  showDecorGrid(def) {
+    this.hideDecorGrid();
+    const shape = this.decorShape(def);
+    const group = new THREE.Group();
+    const lines = [];
+    const half = TS*.43;
+    for (let i=-NX; i<NX; i++) for (let j=-NZ; j<NZ; j++) {
+      const x=(i+.5)*TS,z=(j+.5)*TS;
+      if (!this.decorPlacement(shape,x,z)) continue;
+      const y=this.ground(x,z)+.035;
+      lines.push(x-half,y,z-half,x+half,y,z-half, x+half,y,z-half,x+half,y,z+half,
+        x+half,y,z+half,x-half,y,z+half, x-half,y,z+half,x-half,y,z-half);
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(lines,3));
+    const grid = new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0xb7ff90,transparent:true,opacity:.74,depthWrite:false}));
+    group.add(grid);
+    const ghost = this.meshOf(shape.model,false);
+    for (const part of ghost.children) {
+      part.material = new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.68,depthWrite:false});
+      part.renderOrder = 2;
+    }
+    const marker = new THREE.Box3Helper(new THREE.Box3(),0xc3ff99);
+    ghost.visible = marker.visible = false;
+    group.add(ghost,marker);
+    this.scene.add(group);
+    this.decorPicker = {group,shape,ghost,marker,available:lines.length/24};
+  }
+  previewDecor(point) {
+    const picker = this.decorPicker;
+    if (!picker) return false;
+    const {ghost,marker,shape} = picker;
+    ghost.visible = marker.visible = !!point;
+    if (!point) return false;
+    const {x,z} = point;
+    const place = this.decorPlacement(shape,x,z);
+    const y = place?.base ?? Math.max(WL,this.ground(x,z))-shape.model.minY*M.VS;
+    const bounds = movedBox(shape.bounds,x,z);
+    ghost.position.set(x,y,z);
+    for (const part of ghost.children) part.material.color.setHex(place ? 0xcaffbb : 0xff6559);
+    marker.material.color.setHex(place ? 0x9bff5c : 0xff5752);
+    marker.box.min.set(bounds.minX,y+.045,bounds.minZ);
+    marker.box.max.set(bounds.maxX,y+.065,bounds.maxZ);
+    return !!place;
+  }
+  hideDecorGrid() {
+    if (!this.decorPicker) return;
+    const {group} = this.decorPicker;
+    this.scene.remove(group);
+    group.traverse(object => {
+      object.geometry?.dispose();
+      object.material?.dispose();
+    });
+    this.decorPicker = null;
   }
   nearSpot(x,z,pad=1.2){return Object.values(this.spots).some(p=>contains(p.box,x,z,pad));}
   makeDecor() {
@@ -534,24 +647,33 @@ export class Island {
     this.naturalPlants = 0;
     this.hillPlants = 0;
     // Use the centres of individual terraces so plants sit flat on the stepped hill.
-    for (let i = 0; i < 144 && this.hillPlants < 16; i++) {
+    const hillPlants = [];
+    for (let i = 0; i < 144 && this.hillPlants < 12; i++) {
       const angle = i * 2.39996;
       const radius = 2.2 + R(i + 2700) * 2.6;
       const x = Math.floor((HILL.x + Math.cos(angle) * radius) / TS) * TS + TS / 2;
       const z = Math.floor((HILL.z + Math.sin(angle) * radius) / TS) * TS + TS / 2;
-      if (!this.isLand(x, z, .065) || this.onPath(x, z)) continue;
+      if (!this.isLand(x, z, .065) || this.onPath(x, z) || hillPlants.some(p => Math.hypot(x-p.x,z-p.z) < 1.35)) continue;
       const model = this.hillPlants < 2 ? DECOR_BY_ID.lantern.model() : meadowFlower(i);
-      if (this.addStatic(list, model, x, z, 0, .59, null, false, false)) this.hillPlants++;
+      if (this.addStatic(list, model, x, z, 0, .59, null, false, false)) {
+        hillPlants.push({x,z});
+        this.hillPlants++;
+      }
     }
-    for (let i = 0; i < 680 && this.naturalPlants < 42 + this.expansion * 10; i++) {
+    const flowers = [];
+    for (let i = 0; i < 680 && this.naturalPlants < 29 + this.expansion * 5; i++) {
       const x = (R(i * 3 + 19) - .5) * this.rx * 1.9;
       const z = (R(i * 3 + 20) - .5) * this.rz * 1.9;
       const hill = Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - .3;
       if (hill) continue;
       if (!this.isLand(x, z, .075) || this.onPath(x, z) || this.nearSpot(x, z, .24)) continue;
       const shrub = R(i * 3 + 21) < .21;
+      if (!shrub && flowers.some(p => Math.hypot(x-p.x,z-p.z) < 2)) continue;
       const plant = shrub ? M.bush(i, true) : meadowFlower(i);
-      if (this.addStatic(list, plant, x, z, 0, shrub ? .82 : .68, null, false, shrub)) this.naturalPlants++;
+      if (this.addStatic(list, plant, x, z, 0, shrub ? .82 : .65, null, false, shrub)) {
+        if (!shrub) flowers.push({x,z});
+        this.naturalPlants++;
+      }
     }
     // ракушки, звёзды, коряги на песке
     for (let i = 0; i < 60; i++) {
@@ -987,7 +1109,7 @@ export class Island {
     if (mode === 'island' && this.mode === 'table') {
       this.applyCam();
       const {x, y, z} = this.camera.position;
-      const ty = this.camera.aspect < 1 ? 3.5 : 2.6;
+      const ty = .6;
       this.cam = {tx: 0, ty, tz: 0, yaw: Math.atan2(x, z),
         pitch: Math.atan2(y - ty, Math.hypot(x, z)), dist: Math.hypot(x, y - ty, z)};
     }
@@ -1010,12 +1132,12 @@ export class Island {
   applyCam() {
     const c = this.cam;
     if(this.mode==='table'){
-      // Begin at the original sea view, then slowly orbit outside every coast.
+      // Frame the full coast from a 45-degree downward angle.
       const moving=document.documentElement.dataset.motion!=='off';
-      const t=moving?this.time:0,a=this.camera.aspect,d=a<1?40:30,scale=worldScale(this.expansion);
-      const angle=Math.atan2(7,d)+this.tableOrbit,radius=Math.hypot(7,d)*scale;
-      this.camera.position.set(Math.sin(angle)*radius,(5.5+Math.sin(t*.5)*.12)*scale,Math.cos(angle)*radius);
-      this.camera.lookAt(0,a<1?3.5:2.6,0);return;
+      const angle = .25 + (moving ? this.tableOrbit : 0);
+      const radius = this.baseDist() * (this.camera.aspect < 1 ? 1.03 : .83);
+      this.camera.position.set(Math.sin(angle)*radius,.6 + radius,Math.cos(angle)*radius);
+      this.camera.lookAt(0,.6,0);return;
     }
     const cp = Math.cos(c.pitch);
     this.camera.position.set(c.tx + Math.sin(c.yaw) * cp * c.dist, c.ty + Math.sin(c.pitch) * c.dist, c.tz + Math.cos(c.yaw) * cp * c.dist);
@@ -1072,7 +1194,8 @@ export class Island {
     ray.setFromCamera(new THREE.Vector2(px / this.w * 2 - 1, 1 - py / this.h * 2), this.camera);
     const {point} = ray.intersectObject(this.terrain)[0] || {};
     if (!point) return null;
-    return {x: Math.round(point.x * 4) / 4, z: Math.round(point.z * 4) / 4};
+    const snap = value => (Math.floor(value / TS) + .5) * TS;
+    return {x:snap(point.x), z:snap(point.z)};
   }
 
   // ---------- кадр ----------

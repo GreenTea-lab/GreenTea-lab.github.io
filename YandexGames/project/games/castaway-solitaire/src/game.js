@@ -182,7 +182,7 @@ export class Game {
       if (pts.size < 2) pinch = null;
       if (e.type === 'pointerup' && this.state === 'island' && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen && !this.ui.transitioning) {
         if (this.decorSelection) {
-          this.placeSelectedDecor(this.island.pickGround(e.clientX, e.clientY));
+          this.previewSelectedDecor(this.island.pickGround(e.clientX, e.clientY));
           return;
         }
         const id = this.island.pickAt(e.clientX, e.clientY);
@@ -213,12 +213,23 @@ export class Game {
     if (!inventory.some(item => item.type === type && item.x === null) &&
       (inventory.length >= DECOR_LIMIT || save.data.coins < def.coins)) return false;
     this.decorSelection = type;
+    this.decorPoint = null;
+    this.island.showDecorGrid(def);
     this.ui.placingDecor(def);
     return true;
   }
   cancelDecor() {
     this.decorSelection = null;
+    this.decorPoint = null;
+    this.island.hideDecorGrid();
     this.ui.placingDecor(null);
+  }
+  previewSelectedDecor(point) {
+    const def = DECOR_BY_ID[this.decorSelection];
+    if (!def) return;
+    const valid = this.island.previewDecor(point);
+    this.decorPoint = valid ? point : null;
+    this.ui.placingDecor(def, valid ? 'ready' : 'blocked');
   }
   placeSelectedDecor(point) {
     const def = DECOR_BY_ID[this.decorSelection];
@@ -232,7 +243,7 @@ export class Game {
     }
     const item = point && {id, type:def.id, ...point};
     if (!item || !this.island.installDecor(item)) {
-      this.ui.placingDecor(def, true);
+      this.previewSelectedDecor(point);
       return false;
     }
     if (owned) Object.assign(owned, item);
@@ -243,7 +254,7 @@ export class Game {
     save.write();
     this.cancelDecor();
     this.ui.refreshTop();
-    audio.play('build');
+    audio.play('decor');
     return true;
   }
   storeDecor(id) {
