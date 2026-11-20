@@ -473,8 +473,10 @@ export class Island {
   decorShape(def,turn=0) {
     const model = def.model();
     const rot=angleFor(turn);
-    return {model, def, turn, rot, bounds:footBox(model,0,0,rot), support:footBox(model,0,0,rot,1,def.tree ? model.minY+8 : null),
-      nav:footBox(model,0,0,rot,1,Math.min(model.maxY,model.minY+8))};
+    const support=footBox(model,0,0,rot,1,def.tree ? model.minY+8 : null);
+    const ox=-(support.minX+support.maxX)/2,oz=-(support.minZ+support.maxZ)/2;
+    return {model,def,turn,rot,ox,oz,bounds:movedBox(footBox(model,0,0,rot),ox,oz),
+      support:movedBox(support,ox,oz),nav:movedBox(footBox(model,0,0,rot,1,Math.min(model.maxY,model.minY+8)),ox,oz)};
   }
   decorPlacement(shape, x, z) {
     if (!this.isLand(x,z,0)) return null;
@@ -497,7 +499,7 @@ export class Island {
       entry.groundCover=!!def.groundCover;
       this.staticEntries.push(entry);
       const group = this.meshOf(shape.model);
-      group.position.set(x,entry.base,z);
+      group.position.set(x+shape.ox,entry.base,z+shape.oz);
       group.rotation.y=shape.rot;
       this.scene.add(group);
       this.playerDecor.set(item.id, {group, entry, item});
@@ -661,8 +663,8 @@ export class Island {
     const {x,z} = point;
     const place = removing ? this.hasGrass(x,z) : this.decorPlacement(shape,x,z);
     const y = place?.base ?? Math.max(WL,this.ground(x,z))-shape.model.minY*M.VS;
-    const bounds = movedBox(shape.bounds,x,z);
-    ghost.position.set(x,y,z);
+    const bounds = shape.def.groundCover ? {minX:x-TS/2,maxX:x+TS/2,minZ:z-TS/2,maxZ:z+TS/2} : movedBox(shape.bounds,x,z);
+    ghost.position.set(x+shape.ox,y,z+shape.oz);
     for (const part of ghost.children) part.material.color.setHex(place ? 0xcaffbb : 0xff6559);
     marker.material.color.setHex(place && !removing ? 0x9bff5c : 0xff735e);
     const positions=[];
@@ -1024,7 +1026,9 @@ export class Island {
     const o = { grp, glows: [], s };
     if (s === 0) {
       // разметка: колышки с верёвкой и табличка
-      o.model=this.meshOf(this.markerVox(p));
+      const marker=this.markerVox(p);
+      o.lot=footBox(marker,sp.x,sp.z,sp.rot);
+      o.model=this.meshOf(marker);
       grp.add(o.model);
     } else {
       const m = this.meshOf(M.BUILD[p.id](s));
@@ -1343,10 +1347,24 @@ export class Island {
     for(const m of this.gulls) targets.set(m,{actor:m.userData});
     const ground=ray.intersectObject(this.terrain)[0];
     const [nearest]=ray.intersectObjects([...targets.keys()]);
-    if(!nearest || nearest.distance>(ground?.distance??Infinity)+.01)return null;
-    let object=nearest.object;
-    while(object&&!targets.has(object))object=object.parent;
-    return targets.get(object)??null;
+    if(nearest&&nearest.distance<=(ground?.distance??Infinity)+.01){
+      let object=nearest.object;
+      while(object&&!targets.has(object))object=object.parent;
+      return targets.get(object)??null;
+    }
+    let best=null, radius=11;
+    for(const [mesh,target] of targets){
+      const actor=target.actor;
+      if(!actor)continue;
+      const head=mesh.position.clone().add(new THREE.Vector3(0,actor.species ? .26 : actor.child ? .42 : .68,0));
+      if(head.distanceTo(this.camera.position)>(ground?.distance??Infinity)+.4)continue;
+      const p=this.project(head.x,head.y,head.z),d=Math.hypot(px-p.x,py-p.y);
+      if(p.vis&&d<radius){best=target;radius=d;}
+    }
+    if(best||!ground)return best;
+    const {x,y,z}=ground.point;
+    const empty=Object.entries(this.projObjs).find(([id,p])=>p.lot&&Math.abs(this.spots[id].y-y)<.6&&contains(p.lot,x,z));
+    return empty?{id:empty[0]}:null;
   }
   pickAt(px,py) {
     return this.pickIsland(px,py)?.id??null;

@@ -282,12 +282,12 @@ export class UI {
       ? (ru ? 'Здесь не поместится. Попробуйте свободный участок суши.' : 'It won’t fit here. Try an open spot on land.')
       : locked ? (ru ? 'Место зафиксировано.' : 'Position locked.')
         : (ru ? 'Наведите на клетку или проведите пальцем. Нажмите, чтобы зафиксировать.' : 'Point or drag a finger to preview. Tap a tile to lock it.');
-    const count=footprint&&!removing?` · ${footprint} ${ru?'кл.':'tiles'}`:'';
+    const count=footprint&&!def.groundCover?` · ${footprint} ${ru?'кл.':'tiles'}`:'';
     bar.innerHTML = `<div><b>${removing?(ru?'Убрать траву':'Remove grass'):esc(def[ru ? 'ru' : 'en'])}${count}</b><small>${esc(help)}</small></div>
       <div class="decor-placement-actions">
         ${locked?`<button class="btn mid green" type="button" data-decor-confirm ${status === 'ready' ? '' : 'disabled'}>${removing?(ru?'Убрать':'Remove'):(ru?'Поставить':'Place')}</button>
         ${removing?'':`<button class="btn mid sea" type="button" data-decor-rotate aria-label="${ru?'Повернуть на 90°':'Rotate 90°'}" title="${ru?'Повернуть':'Rotate'}">↻</button>`}
-        <button class="btn mid sand" type="button" data-decor-unlock>${ru?'Сменить место':'Move'}</button>`:''}
+        <button class="btn mid sand" type="button" data-decor-unlock aria-label="${ru?'Сменить место':'Move to another tile'}">${ru?'Сменить':'Move'}</button>`:''}
         <button class="btn mid sand" type="button" data-decor-cancel>${ru ? 'Отмена' : 'Cancel'}</button>
       </div>`;
     const confirm=bar.querySelector('[data-decor-confirm]');

@@ -79,7 +79,7 @@ html[data-theme=island] #shade{background-color:transparent;background-image:rad
  .island-nav [data-a=play] small{font-size:10px;white-space:nowrap}
  .decor-grid{grid-template-columns:repeat(2,1fr)}
  .decor-placement{flex-direction:column;text-align:center;bottom:calc(88px + var(--safe-bottom,0px))}
- .decor-placement .btn{height:38px;padding:0 10px;font-size:14px}
+ .decor-placement .btn{height:38px;padding:0 8px;font-size:13px}
 }
 #mod{position:absolute;inset:0;z-index:2;pointer-events:none}#tst{position:absolute;inset:0;z-index:3;pointer-events:none}
 #ui-fx{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}

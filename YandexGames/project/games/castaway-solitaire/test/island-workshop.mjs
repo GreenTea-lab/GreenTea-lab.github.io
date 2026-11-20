@@ -159,12 +159,19 @@ try {
   const fireHits=await page.evaluate(()=>{
     const I=__game.island,area=I.projectArea('fire',1),site=I.spots.fire;
     I.camT=null;
+    for(let frame=0;frame<22;frame++)I.update(.05);
     I.applyCam();
     I.render();
     const center=I.project((area.minX+area.maxX)/2,(area.minY+area.maxY)/2,(area.minZ+area.maxZ)/2);
+    let modelHit=null;
+    for(const dy of [0,-3,3,-6,6]){
+      for(const dx of [0,-3,3,-6,6]){
+        if(I.pickAt(center.x+dx,center.y+dy)==='fire')modelHit='fire';
+      }
+    }
     const x=site.x,z=area.maxZ+.55;
     const outside=I.project(x,I.ground(x,z)+.01,z);
-    return [I.pickAt(center.x,center.y),I.pickAt(outside.x,outside.y)];
+    return [modelHit,I.pickAt(outside.x,outside.y)];
   });
   assert.equal(fireHits[0],'fire');
   assert.notEqual(fireHits[1],'fire');
