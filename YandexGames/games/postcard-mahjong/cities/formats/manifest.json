@@ -1,0 +1,978 @@
+{
+  "formats": {
+    "landscape": [
+      1920,
+      1080
+    ],
+    "wide": [
+      1920,
+      960
+    ],
+    "portrait": [
+      1080,
+      2160
+    ]
+  },
+  "images": [
+    {
+      "id": "amsterdam",
+      "format": "landscape",
+      "file": "cities/formats/landscape/amsterdam.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 665060,
+      "sha256": "f445c5d01c4ae955781d7f239ad06636ec809a50876ebbbdf0492bdaad1e0f68",
+      "source": "art/city-backgrounds/generated/amsterdam.png",
+      "crop": {
+        "x": 0,
+        "y": 115,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "amsterdam",
+      "format": "wide",
+      "file": "cities/formats/wide/amsterdam.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 600038,
+      "sha256": "084de9b348573905275d56d4de5dc6eadf2a17054d209df9747c7f0bb178d9a0",
+      "source": "art/city-backgrounds/generated/amsterdam.png",
+      "crop": {
+        "x": 0,
+        "y": 132,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "amsterdam",
+      "format": "portrait",
+      "file": "cities/formats/portrait/amsterdam.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 573838,
+      "sha256": "ee813005be82fe02abc5973dbb4c0104ccabb633f443312e9b4ab35f7851b0b1",
+      "source": "art/city-backgrounds/generated/amsterdam.png",
+      "crop": {
+        "x": 282,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "barcelona",
+      "format": "landscape",
+      "file": "cities/formats/landscape/barcelona.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 638494,
+      "sha256": "a1fbb719fe9b0eec4a66171377d806b1e4297172d86114f7865809b79c97579a",
+      "source": "art/city-backgrounds/generated/barcelona.png",
+      "crop": {
+        "x": 0,
+        "y": 66,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "barcelona",
+      "format": "wide",
+      "file": "cities/formats/wide/barcelona.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 549652,
+      "sha256": "4f34e9092b37f04f66ea5e48ae3168b20fdb6d7044700994f23d3bec6c958f4b",
+      "source": "art/city-backgrounds/generated/barcelona.png",
+      "crop": {
+        "x": 0,
+        "y": 75,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "barcelona",
+      "format": "portrait",
+      "file": "cities/formats/portrait/barcelona.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 595668,
+      "sha256": "d5365cf16fead12c458e745d537708eb97159da9aa77e156c03e623ad5ccb28e",
+      "source": "art/city-backgrounds/generated/barcelona.png",
+      "crop": {
+        "x": 351,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "cairo",
+      "format": "landscape",
+      "file": "cities/formats/landscape/cairo.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 503080,
+      "sha256": "842b500d4572377a9c9875836f477719f1a7199dc83a4dccbc143af3c0641ba3",
+      "source": "art/city-backgrounds/generated/cairo.png",
+      "crop": {
+        "x": 0,
+        "y": 121,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "cairo",
+      "format": "wide",
+      "file": "cities/formats/wide/cairo.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 441708,
+      "sha256": "bf20e599865bc4932f0762de95aef50790e04133c47501ce0cc3aa809c7c4a31",
+      "source": "art/city-backgrounds/generated/cairo.png",
+      "crop": {
+        "x": 0,
+        "y": 138,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "cairo",
+      "format": "portrait",
+      "file": "cities/formats/portrait/cairo.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 478260,
+      "sha256": "8b221ce315572dee18a9a72969243ff5305889ecb42c3f9f7785615446d6971a",
+      "source": "art/city-backgrounds/generated/cairo.png",
+      "crop": {
+        "x": 339,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "istanbul",
+      "format": "landscape",
+      "file": "cities/formats/landscape/istanbul.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 611208,
+      "sha256": "0a59f92f6ca2f97b62f126073b7ecc5638111cc150ab4824c3acdc9829b6a442",
+      "source": "art/city-backgrounds/generated/istanbul.png",
+      "crop": {
+        "x": 0,
+        "y": 93,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "istanbul",
+      "format": "wide",
+      "file": "cities/formats/wide/istanbul.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 537202,
+      "sha256": "3feed54dd0ff6702c829e1f07fb61247d1f1b2d5f3a7ff737a81797924e7ada0",
+      "source": "art/city-backgrounds/generated/istanbul.png",
+      "crop": {
+        "x": 0,
+        "y": 107,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "istanbul",
+      "format": "portrait",
+      "file": "cities/formats/portrait/istanbul.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 547468,
+      "sha256": "90910c0f480588d3a2162ffda72bc343ae6a13c020c1917dca861cad55498be6",
+      "source": "art/city-backgrounds/generated/istanbul.png",
+      "crop": {
+        "x": 339,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "kyoto",
+      "format": "landscape",
+      "file": "cities/formats/landscape/kyoto.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 653170,
+      "sha256": "ed6c20df413db686b82afd4bb3ffef434133f671cc1247d40733dfc15e224279",
+      "source": "art/city-backgrounds/generated/kyoto.png",
+      "crop": {
+        "x": 0,
+        "y": 77,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "kyoto",
+      "format": "wide",
+      "file": "cities/formats/wide/kyoto.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 574562,
+      "sha256": "1a2475d9410ecb9419df2423f26972ada80355bee02a03f3bf553c5ec8095835",
+      "source": "art/city-backgrounds/generated/kyoto.png",
+      "crop": {
+        "x": 0,
+        "y": 88,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "kyoto",
+      "format": "portrait",
+      "file": "cities/formats/portrait/kyoto.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 701216,
+      "sha256": "46ae1fd226cefbec8ecc247695c3f408514364ac4219ade6847f90eda5e65cbf",
+      "source": "art/city-backgrounds/generated/kyoto.png",
+      "crop": {
+        "x": 345,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "lisbon",
+      "format": "landscape",
+      "file": "cities/formats/landscape/lisbon.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 673556,
+      "sha256": "b118f25f83ba7f2e75b37fc6ce4aaf8fd57e41850185a345a691f0d23f22bd68",
+      "source": "art/city-backgrounds/generated/lisbon.png",
+      "crop": {
+        "x": 0,
+        "y": 121,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "lisbon",
+      "format": "wide",
+      "file": "cities/formats/wide/lisbon.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 601148,
+      "sha256": "caf9f24b723806bce149f68881f24883c53bf3d383a6f02e6c5736fc2a47f4f7",
+      "source": "art/city-backgrounds/generated/lisbon.png",
+      "crop": {
+        "x": 0,
+        "y": 138,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "lisbon",
+      "format": "portrait",
+      "file": "cities/formats/portrait/lisbon.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 713028,
+      "sha256": "f8992fb517b79815ff40798f3517933a9da8869c429ca352d9df1003ec4fd668",
+      "source": "art/city-backgrounds/generated/lisbon.png",
+      "crop": {
+        "x": 345,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "london",
+      "format": "landscape",
+      "file": "cities/formats/landscape/london.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 600360,
+      "sha256": "d68da33383062772de09a413996c1dd2ecda47c7b7dac9d1f3da56035132c0ea",
+      "source": "art/city-backgrounds/generated/london.png",
+      "crop": {
+        "x": 0,
+        "y": 66,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "london",
+      "format": "wide",
+      "file": "cities/formats/wide/london.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 517342,
+      "sha256": "c6e7921ee26ab3aabc1c45fe35cf5fe96dc6145bfb5a0f39edbae50c5240dfcd",
+      "source": "art/city-backgrounds/generated/london.png",
+      "crop": {
+        "x": 0,
+        "y": 75,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "london",
+      "format": "portrait",
+      "file": "cities/formats/portrait/london.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 607346,
+      "sha256": "68e4006128cc09f75f8445fef0466bc08d8e1c72d4f98b1cbdc6743d0e3286ad",
+      "source": "art/city-backgrounds/generated/london.png",
+      "crop": {
+        "x": 364,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "marrakesh",
+      "format": "landscape",
+      "file": "cities/formats/landscape/marrakesh.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 532832,
+      "sha256": "7d1eee51d89235d5324511683d21c02adb0a58cae4342b99438248bbf53093d5",
+      "source": "art/city-backgrounds/generated/marrakesh.png",
+      "crop": {
+        "x": 0,
+        "y": 77,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "marrakesh",
+      "format": "wide",
+      "file": "cities/formats/wide/marrakesh.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 482648,
+      "sha256": "135dc8116c9fa854f14796560ecbab69cd14614b334c1f738ae7534fb62e59b1",
+      "source": "art/city-backgrounds/generated/marrakesh.png",
+      "crop": {
+        "x": 0,
+        "y": 88,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "marrakesh",
+      "format": "portrait",
+      "file": "cities/formats/portrait/marrakesh.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 494026,
+      "sha256": "8d4256c436c94bd7e0209d10c1ff8472c4961c358c6b6d6b885434f5538db6aa",
+      "source": "art/city-backgrounds/generated/marrakesh.png",
+      "crop": {
+        "x": 332,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "moscow",
+      "format": "landscape",
+      "file": "cities/formats/landscape/moscow.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 404050,
+      "sha256": "4e2beb1dfcc017adbd967065831d89595ce79925e954e1b0c7bba7b67bcfe8f4",
+      "source": "art/city-backgrounds/generated/moscow.png",
+      "crop": {
+        "x": 0,
+        "y": 44,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "moscow",
+      "format": "wide",
+      "file": "cities/formats/wide/moscow.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 358450,
+      "sha256": "5d25a35d0d3b17ce9a2e3a2d03ab21308977f1790f62079c3b3de1f21c44c0cf",
+      "source": "art/city-backgrounds/generated/moscow.png",
+      "crop": {
+        "x": 0,
+        "y": 50,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "moscow",
+      "format": "portrait",
+      "file": "cities/formats/portrait/moscow.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 406432,
+      "sha256": "1eb44946863ecf61563b2fae0d533aed9eeb1e434b75b608b1304dddc1a98cfc",
+      "source": "art/city-backgrounds/generated/moscow.png",
+      "crop": {
+        "x": 314,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "newyork",
+      "format": "landscape",
+      "file": "cities/formats/landscape/newyork.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 589702,
+      "sha256": "6c18b6ff3944943ee6dc8ca3a77c6103103f7c07f4a0c97dc4ed7cd1061aa04c",
+      "source": "art/city-backgrounds/generated/newyork.png",
+      "crop": {
+        "x": 0,
+        "y": 77,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "newyork",
+      "format": "wide",
+      "file": "cities/formats/wide/newyork.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 553320,
+      "sha256": "221c89d5af3990b9516e64259e44e1f7e2265dcbeaecd62bf5be7566bce53e5f",
+      "source": "art/city-backgrounds/generated/newyork.png",
+      "crop": {
+        "x": 0,
+        "y": 88,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "newyork",
+      "format": "portrait",
+      "file": "cities/formats/portrait/newyork.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 519960,
+      "sha256": "d7e5ee356a23e02622b209dd409879a58372cb0d5823449492b58e3b9e93ae4f",
+      "source": "art/city-backgrounds/generated/newyork.png",
+      "crop": {
+        "x": 357,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "paris",
+      "format": "landscape",
+      "file": "cities/formats/landscape/paris.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 600900,
+      "sha256": "7ef70afd177fdc061ad9f92f32c25780b626cc0f89be3ec2dad6f530b38535d8",
+      "source": "art/city-backgrounds/generated/paris.png",
+      "crop": {
+        "x": 0,
+        "y": 66,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "paris",
+      "format": "wide",
+      "file": "cities/formats/wide/paris.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 504088,
+      "sha256": "0fd68691aaf0d125db7fcd27cb91ca60d696316a149b45222c16baad18554b24",
+      "source": "art/city-backgrounds/generated/paris.png",
+      "crop": {
+        "x": 0,
+        "y": 75,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "paris",
+      "format": "portrait",
+      "file": "cities/formats/portrait/paris.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 590768,
+      "sha256": "c1e791830f2a566201ee3c38f85aa6652c9db4cbfa063fd4b0ad585267dc9cd8",
+      "source": "art/city-backgrounds/generated/paris.png",
+      "crop": {
+        "x": 314,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "prague",
+      "format": "landscape",
+      "file": "cities/formats/landscape/prague.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 548528,
+      "sha256": "c9b094afdd461b1c95908d3ca486a2c769744efde0308ab8810588f3e7fa741e",
+      "source": "art/city-backgrounds/generated/prague.png",
+      "crop": {
+        "x": 0,
+        "y": 121,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "prague",
+      "format": "wide",
+      "file": "cities/formats/wide/prague.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 486068,
+      "sha256": "26b8a5d82c1cc41d44b8d2823b23a3654f31a8add5791caba620780bb7757987",
+      "source": "art/city-backgrounds/generated/prague.png",
+      "crop": {
+        "x": 0,
+        "y": 138,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "prague",
+      "format": "portrait",
+      "file": "cities/formats/portrait/prague.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 548748,
+      "sha256": "033b1fbc288a989fbc809b1ffe3879621938ef9d8d17082b72b2d84b1d8847ab",
+      "source": "art/city-backgrounds/generated/prague.png",
+      "crop": {
+        "x": 370,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "rio",
+      "format": "landscape",
+      "file": "cities/formats/landscape/rio.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 595852,
+      "sha256": "f76722d71adf70785c82f3db4bb14d2b456ef7d8d053322f3330c0e4136a3486",
+      "source": "art/city-backgrounds/generated/rio.png",
+      "crop": {
+        "x": 0,
+        "y": 126,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "rio",
+      "format": "wide",
+      "file": "cities/formats/wide/rio.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 499006,
+      "sha256": "44ae5f269b2d8b707a06756afc21223e8f687680238d24600d94de7d50075156",
+      "source": "art/city-backgrounds/generated/rio.png",
+      "crop": {
+        "x": 0,
+        "y": 144,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "rio",
+      "format": "portrait",
+      "file": "cities/formats/portrait/rio.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 582358,
+      "sha256": "13320b2f9ba406aa4cd3ccc883b3317f1003c8de3f0a0cff31692548cfa82bec",
+      "source": "art/city-backgrounds/generated/rio.png",
+      "crop": {
+        "x": 395,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "rome",
+      "format": "landscape",
+      "file": "cities/formats/landscape/rome.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 622354,
+      "sha256": "4fa419967ce9db9e240f9e19f85f94d678326f15b4ba96b541a000d77292d3ab",
+      "source": "art/city-backgrounds/generated/rome.png",
+      "crop": {
+        "x": 0,
+        "y": 126,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "rome",
+      "format": "wide",
+      "file": "cities/formats/wide/rome.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 556118,
+      "sha256": "c0b1cdaf63b7f81110ef49319ed9a7dc3521465c33fc375c0dc4c8c9599dfcfd",
+      "source": "art/city-backgrounds/generated/rome.png",
+      "crop": {
+        "x": 0,
+        "y": 144,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "rome",
+      "format": "portrait",
+      "file": "cities/formats/portrait/rome.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 601976,
+      "sha256": "043c3356078b82597763ff3cdbc67f1056ef01dedbc69ff66ee56ce56ac1cd55",
+      "source": "art/city-backgrounds/generated/rome.png",
+      "crop": {
+        "x": 345,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "santorini",
+      "format": "landscape",
+      "file": "cities/formats/landscape/santorini.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 529920,
+      "sha256": "fa67f671cf7fe7234d56d3d677f38b53687d514b8e677cb92be872bede7f04d3",
+      "source": "art/city-backgrounds/generated/santorini.png",
+      "crop": {
+        "x": 0,
+        "y": 132,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "santorini",
+      "format": "wide",
+      "file": "cities/formats/wide/santorini.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 459600,
+      "sha256": "d8a9587e6a30ef6d3c6dc1c621ff6f8af74ce9b17ea6e1b74decea2e516dfcf3",
+      "source": "art/city-backgrounds/generated/santorini.png",
+      "crop": {
+        "x": 0,
+        "y": 150,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "santorini",
+      "format": "portrait",
+      "file": "cities/formats/portrait/santorini.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 519000,
+      "sha256": "ea21cae26ebb12fdcd0160b006f5a01db5f53865aaccdb5b76cc134f4dd42020",
+      "source": "art/city-backgrounds/generated/santorini.png",
+      "crop": {
+        "x": 414,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "singapore",
+      "format": "landscape",
+      "file": "cities/formats/landscape/singapore.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 672746,
+      "sha256": "0e43486a71f221fd2d32a0a0386fbb6ef56fbaf9fdf396146a44384ee3261a1d",
+      "source": "art/city-backgrounds/generated/singapore.png",
+      "crop": {
+        "x": 0,
+        "y": 126,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "singapore",
+      "format": "wide",
+      "file": "cities/formats/wide/singapore.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 607526,
+      "sha256": "2c339099261120ab56bb7ded43d8ae25113b351fef25d28902f55fc3e5164c3c",
+      "source": "art/city-backgrounds/generated/singapore.png",
+      "crop": {
+        "x": 0,
+        "y": 144,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "singapore",
+      "format": "portrait",
+      "file": "cities/formats/portrait/singapore.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 652360,
+      "sha256": "56b4c1f95aa2de5fedc845046d2d03953ff9644a15c8001c569eafd6885ab1e4",
+      "source": "art/city-backgrounds/generated/singapore.png",
+      "crop": {
+        "x": 314,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "spb",
+      "format": "landscape",
+      "file": "cities/formats/landscape/spb.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 538592,
+      "sha256": "3c2ee0ffa54ad6e1cc30c6e95294f165a36733e81a41329aec4675cc331cb809",
+      "source": "art/city-backgrounds/generated/spb.png",
+      "crop": {
+        "x": 0,
+        "y": 88,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "spb",
+      "format": "wide",
+      "file": "cities/formats/wide/spb.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 479510,
+      "sha256": "d24778841cc1c2b209b4c253769279147ad4571f899f2898306bef9c9e08cc4f",
+      "source": "art/city-backgrounds/generated/spb.png",
+      "crop": {
+        "x": 0,
+        "y": 100,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "spb",
+      "format": "portrait",
+      "file": "cities/formats/portrait/spb.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 540684,
+      "sha256": "150009134fe7d02a61d66ffc1ef1d43674cc96369bcd00ba9a8edbcda769b175",
+      "source": "art/city-backgrounds/generated/spb.png",
+      "crop": {
+        "x": 339,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "sydney",
+      "format": "landscape",
+      "file": "cities/formats/landscape/sydney.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 670504,
+      "sha256": "d34a12353c6424835b3dcb2ee4da502ec2a6ec29923a1d6cfa605453e336b73e",
+      "source": "art/city-backgrounds/generated/sydney.png",
+      "crop": {
+        "x": 0,
+        "y": 137,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "sydney",
+      "format": "wide",
+      "file": "cities/formats/wide/sydney.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 581778,
+      "sha256": "d02b6de6b8a9dea28661f6a1c700715d8563be15bc0ca33d2ab5bb96792fe748",
+      "source": "art/city-backgrounds/generated/sydney.png",
+      "crop": {
+        "x": 0,
+        "y": 157,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "sydney",
+      "format": "portrait",
+      "file": "cities/formats/portrait/sydney.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 631144,
+      "sha256": "c46f036b329906747ba0a5c8a6d56b741833654c2c94b1b5e8cb3125d4f65e4e",
+      "source": "art/city-backgrounds/generated/sydney.png",
+      "crop": {
+        "x": 288,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "venice",
+      "format": "landscape",
+      "file": "cities/formats/landscape/venice.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 556312,
+      "sha256": "fb1daab74c604008047a5b15a7dec2dcfffaa79623d286e3abb5947cb447611e",
+      "source": "art/city-backgrounds/generated/venice.png",
+      "crop": {
+        "x": 0,
+        "y": 104,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "venice",
+      "format": "wide",
+      "file": "cities/formats/wide/venice.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 498770,
+      "sha256": "d4a89742ffd38f13705d5804cb3a0d166bbe3b817b01c63b8e3ae9f47bc242b1",
+      "source": "art/city-backgrounds/generated/venice.png",
+      "crop": {
+        "x": 0,
+        "y": 119,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "venice",
+      "format": "portrait",
+      "file": "cities/formats/portrait/venice.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 480572,
+      "sha256": "49585d2acb95b4b33422d7c12cb28b9a0ee930920dbe37f1b2f87b659841c50e",
+      "source": "art/city-backgrounds/generated/venice.png",
+      "crop": {
+        "x": 339,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    },
+    {
+      "id": "vienna",
+      "format": "landscape",
+      "file": "cities/formats/landscape/vienna.webp",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 680472,
+      "sha256": "4d2b4aea01a3a1e1f7cb21c02936fe7d111edd9b20969d7e750a109450c547aa",
+      "source": "art/city-backgrounds/generated/vienna.png",
+      "crop": {
+        "x": 0,
+        "y": 137,
+        "width": 1254,
+        "height": 705
+      }
+    },
+    {
+      "id": "vienna",
+      "format": "wide",
+      "file": "cities/formats/wide/vienna.webp",
+      "width": 1920,
+      "height": 960,
+      "bytes": 600140,
+      "sha256": "effc432452043902f2a4e46a48c69efae34d8f4a73d0e9b215153ec04786faf4",
+      "source": "art/city-backgrounds/generated/vienna.png",
+      "crop": {
+        "x": 0,
+        "y": 157,
+        "width": 1254,
+        "height": 627
+      }
+    },
+    {
+      "id": "vienna",
+      "format": "portrait",
+      "file": "cities/formats/portrait/vienna.webp",
+      "width": 1080,
+      "height": 2160,
+      "bytes": 642656,
+      "sha256": "0096c3429a8c721bd5075343193d39c2943cf34d6d7ba6df5b02a887c0bd708d",
+      "source": "art/city-backgrounds/generated/vienna.png",
+      "crop": {
+        "x": 364,
+        "y": 0,
+        "width": 627,
+        "height": 1254
+      }
+    }
+  ]
+}
