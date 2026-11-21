@@ -2,7 +2,7 @@ import {WILDLIFE,wildlifeUnlocked} from './wildlife.js';
 import {enter,leave,motionEnabled} from './transitions.js';
 import {CHAPTERS,chapterOf} from './campaign.js';
 import {EXPANSIONS} from './world-data.js';
-import {worldState,nextExpansion,canExpand,chapterProgress,TASKS,claimTask,claimChapter,harvestReady,harvest} from './progression.js';
+import {worldState,nextExpansion,canExpand,chapterProgress,TASKS,claimTask,claimChapter,harvestReady,harvestReward,harvest} from './progression.js';
 // DOM-интерфейс: остров (главный экран), стройка, уровни, HUD партии, окна итогов, магазин, настройки
 import { CardArt } from './cards.js';
 import { IC } from './icons.js';
@@ -15,11 +15,20 @@ import { slidersHTML, bindSliders, volumeCss } from './volume.js';
 import { PROJECTS, TOTAL_STEPS, COST, AD_COINS, AD_COOLDOWN, DAILY } from './data.js';
 import { MAIN_LEVELS } from './logic.js';
 import { THEMES, BACKS, cosmeticState, selectCosmetic, applyCosmetics } from './cosmetics.js';
-import { projThumb } from './thumbs.js';
+import { projThumb, modelThumb } from './thumbs.js';
+import { DECOR, DECOR_BY_ID, DECOR_FILTERS, DECOR_LIMIT, GRASS_LIMIT } from './decor.js';
+import { PEOPLE } from './models.js';
+import { GUIDES } from './guides.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const starsHTML = (n) => [0, 1, 2].map((i) => (i < n ? IC.star : IC.starE)).join('');
 const today = () => new Date().toISOString().slice(0, 10);
+function coinAmount(amount){
+  if(LANG!=='ru')return fmt(amount)+(amount===1?' coin':' coins');
+  const last=amount%10,teen=amount%100>=11&&amount%100<=14;
+  return fmt(amount)+' '+(!teen&&last===1?'монета':!teen&&last>=2&&last<=4?'монеты':'монет');
+}
+const coinReward=amount=>'+'+coinAmount(amount);
 
 export class UI {
   constructor(game, root) {
@@ -65,6 +74,7 @@ export class UI {
     return `<button class="chip hit" data-a="build">${IC.star}<b id="starsN">${fmt(save.stars())}</b></button>`;
   }
   refreshTop() {
+    this.buildMarkers=null;
     const c = this.root.querySelector('#coinsN');
     if (c) c.textContent = fmt(save.data.coins);
     const s = this.root.querySelector('#starsN');
@@ -78,6 +88,7 @@ export class UI {
     const jb=this.root.querySelector('#journalBadge');
     if(jb){const j=worldState(),q=j.daily;const ready=TASKS.some(x=>q[x.id]>=x.goal&&!q.claimed.includes(x.id))||CHAPTERS.some((_,ch)=>!j.chapters.includes(ch)&&chapterProgress(ch).count===50)||harvestReady();jb.style.display=ready?'':'none';}
     this.refreshBoost && this.refreshBoost();
+    this.refreshGuideNotice();
   }
   bind(el, handlers) {
     el.querySelectorAll('[data-a]').forEach((b) => {
@@ -91,12 +102,18 @@ export class UI {
       build: () => this.buildPanel(),
     };
   }
-  toast(text, ms = 2600) {
+  toast(text, ms = 2600, icon = '') {
     const d = document.createElement('div');
     d.className = 'toast';
-    d.textContent = text;
+    if(icon){
+      const badge=document.createElement('span');
+      badge.innerHTML=icon;
+      badge.setAttribute('aria-hidden','true');
+      d.classList.add('toast-with-icon');
+      d.append(badge,text);
+    }else d.textContent = text;
     // на главном экране — под названием игры, чтобы не закрывать его
-    const logo = this.root.querySelector('.logo');
+    const logo = this.root.querySelector('.logo:not(.logo-hidden)');
     if (logo && logo.offsetHeight) d.style.top = Math.round(logo.getBoundingClientRect().bottom + 10) + 'px';
     this.tst.innerHTML = '';
     this.tst.appendChild(d);
@@ -164,33 +181,95 @@ export class UI {
     const d = save.data;
     const daily = d.daily.day !== today();
     const lvl = d.level;
+    const remaining=(this.titleUntil ||= performance.now()+4500)-performance.now();
+    clearTimeout(this.titleTimer);
     this.changeScreen(`
       <div class="top">
         <div class="tl">${this.coinsChip()}${this.starsChip()}</div>
       </div>
-      <div class="rcol"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Журнал острова':'Island journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button><button class="btn round hit" data-a="lb" aria-label="records">${IC.trophy}</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
-      <div class="logo"><b>${esc(t('title'))}</b><i>${esc(t('subtitle'))}</i></div>
-      <div class="voyage-strip"><div><small>${LANG==='ru'?'Глава':'Chapter'} ${chapterOf(lvl)+1} / 20</small><b>${esc(CHAPTERS[chapterOf(lvl)][LANG==='ru'?0:1])}</b><span>${chapterProgress(chapterOf(lvl)).count} / 50 · ${LANG==='ru'?'Берег':'Coast'} ${save.data.expansion||0}/5</span></div><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Расширить':'Expand'}</button></div>
-      <div class="bottom">
-        <div class="side"><button class="btn round hit" data-a="build" style="position:relative">${IC.hammer}<span class="badge" id="buildBadge" style="display:none"></span></button><span>${esc(t('build'))}</span></div>
+      <div class="rcol"><button class="btn round hit" data-a="cosmetics" aria-label="${LANG==='ru'?'Оформление':'Appearance'}">${IC.appearance}</button><button class="btn round hit" data-a="settings" aria-label="settings">${IC.gear}</button><button class="btn round hit island-help" data-a="guide" aria-label="${LANG==='ru'?'Управление островом':'Island controls'}">?</button>${daily ? `<button class="btn round hit pulse" data-a="daily" aria-label="gift">${IC.gift}</button>` : ''}</div>
+      <div class="logo${remaining<=0?' logo-hidden':''}"><b>${esc(t('title'))}</b><i>${esc(t('subtitle'))}</i></div>
+      <div class="bottom island-nav">
+        <div class="side"><button class="btn round hit" data-a="world" aria-label="${LANG==='ru'?'Расширить остров':'Expand island'}">${IC.palm}</button><span>${LANG==='ru'?'Расширить':'Expand'}</span></div>
+        <div class="side"><button class="btn round hit" data-a="build" aria-label="${esc(t('build'))}" style="position:relative">${IC.hammer}<span class="badge" id="buildBadge" style="display:none"></span></button><span>${esc(t('build'))}</span></div>
+        <div class="side"><button class="btn round hit" data-a="decor" aria-label="${LANG==='ru'?'Декор острова':'Island decor'}">${IC.bag}</button><span>${LANG==='ru'?'Декор':'Decor'}</span></div>
         <button class="btn big hit pulse" data-a="play" style="flex-direction:column;gap:0;height:76px;line-height:1.05">${esc(t('play'))}<small>${esc(t('levelN', { n: lvl }))}</small></button>
         <div class="side"><button class="btn round hit" data-a="levels">${IC.cards}</button><span>${esc(t('levels'))}</span></div>
-      </div>`);
+        <div class="side"><button class="btn round hit" data-a="lb" aria-label="${LANG==='ru'?'Рейтинг':'Ranking'}">${IC.trophy}</button><span>${LANG==='ru'?'Рейтинг':'Ranking'}</span></div>
+        <div class="side"><button class="btn round hit" data-a="journal" aria-label="${LANG==='ru'?'Дневник Робинзона':'Robinson’s journal'}">${IC.journal}<span class="badge" id="journalBadge" style="display:none">!</span></button><span>${LANG==='ru'?'Дневник':'Journal'}</span></div>
+      </div><div class="guide-notice" data-guide-notice></div>`);
+    if(remaining>0)this.titleTimer=setTimeout(()=>this.scr.querySelector('.logo')?.classList.add('logo-hidden'),remaining);
     this.bind(this.scr, {
       ...this.common(),
       play: () => this.g.playLevel(save.data.level),
       levels: () => this.levels(),
       world: () => this.world(),
       journal: () => this.journal(),
+      guide: () => this.guide('controls'),
       cosmetics: () => this.cosmetics(),
+      decor: () => this.decor(),
       settings: () => this.settings(),
       lb: () => this.leaderboard(),
       daily: () => this.daily(),
     });
     this.refreshTop();
     this.bub.innerHTML = '';
-    this._bubKey = '';
-    if(!save.data.seen.tableTools){save.data.seen.tableTools=1;save.write(false);this.toast(LANG==='ru'?'Фон партии — ваш остров. Масштаб и кнопка «Фон» находятся над картами.':'Your island is the game scene. Card size and Scene are above the cards.',5000);}
+    this.buildMarkers=null;
+  }
+  acknowledgeGuide(kind) {
+    const key=kind+'Guide';
+    if(!save.data.seen[key]){
+      save.data.seen[key]=1;
+      save.write();
+    }
+    this.refreshGuideNotice();
+  }
+  refreshGuideNotice() {
+    const notice=this.scr.querySelector('[data-guide-notice]');
+    if(!notice)return;
+    const {seen}=save.data,ru=LANG==='ru';
+    const kind=this.g.decorSelection ? '' : seen.earnedCoins&&!seen.decorGuide ? 'decor' : seen.controlsGuide ? '' : 'controls';
+    if(notice.dataset.kind===kind)return;
+    notice.dataset.kind=kind;
+    notice.innerHTML='';
+    if(!kind)return;
+    const decor=kind==='decor';
+    notice.innerHTML=`<div>${decor?IC.bag:IC.scene}<span><b>${decor?(ru?'Первые монеты получены':'You received your first coins'):(ru?'Осмотр острова':'Explore the island')}</b>
+      <small>${decor?(ru?'На монеты можно купить декор для острова.':'Use coins to decorate the island.'):(ru?'Поворот камеры, жители и управление картами.':'Camera controls, islanders and playing cards.')}</small></span></div>
+      <button class="btn mid sand" data-guide-open>${ru?'Обучение':'Guide'}</button>
+      <button class="guide-dismiss" aria-label="${ru?'Скрыть подсказку':'Dismiss tip'}">×</button>`;
+    notice.querySelector('[data-guide-open]').onclick=()=>this.guide(kind);
+    notice.querySelector('.guide-dismiss').onclick=()=>this.acknowledgeGuide(kind);
+  }
+  guide(kind) {
+    const ru=LANG==='ru', isDecor=kind==='decor';
+    const steps=GUIDES[kind][ru?'ru':'en'];
+    this.acknowledgeGuide(kind);
+    let step=0;
+    const m=this.modal({title:isDecor?(ru?'Как расставить декор':'How to decorate'):(ru?'Управление островом':'Island controls'),body:''});
+    const body=m.querySelector('.pb');
+    const render=()=>{
+      const {title,icon,rows}=steps[step],last=step===steps.length-1;
+      body.innerHTML=`<div class="guide-step"><div class="guide-title">${IC[icon]}<h3 tabindex="-1">${esc(title)}</h3><small>${step+1} / ${steps.length}</small></div>
+        <dl>${rows.map(([name,text])=>`<div><dt>${esc(name)}</dt><dd>${esc(text)}</dd></div>`).join('')}</dl>
+        <div class="guide-actions">
+          ${step?`<button class="btn mid sand" data-guide-back>${ru?'Назад':'Back'}</button>`:
+            !isDecor?`<button class="btn mid sand" data-guide-recenter>${ru?'Общий вид':'Reset view'}</button>`:''}
+          <button class="btn mid ${last?'green':'sea'}" data-guide-next>${last?(isDecor?(ru?'К декору':'Open Decor'):(ru?'На остров':'Back to island')):(ru?'Дальше':'Next')}</button>
+        </div></div>`;
+      const back=body.querySelector('[data-guide-back]');
+      if(back)back.onclick=()=>{step--;render();};
+      const recenter=body.querySelector('[data-guide-recenter]');
+      if(recenter)recenter.onclick=()=>{m.close();this.g.island.setMode('island');};
+      body.querySelector('[data-guide-next]').onclick=()=>{
+        if(!last){step++;render();return;}
+        m.close();
+        if(isDecor)this.decor();
+      };
+      body.querySelector('h3').focus({preventScroll:true});
+      body.scrollTop=0;
+    };
+    render();
   }
   // постройки для меток над островом: все, на которые хватает звёзд (до 4), иначе самая дешёвая
   bubbleList() {
@@ -203,43 +282,180 @@ export class UI {
   }
   // метки над постройками (вызывается каждый кадр на острове)
   updateBubble() {
-    if (this.screen !== 'home' || this.modalOpen) {
-      if (this.bub.innerHTML) this.bub.innerHTML = '';
-      this._bubKey = '';
+    this.updateActorSpeech();
+    if (this.screen !== 'home' || this.modalOpen || this.g.decorSelection) {
+      if(this.bub.firstChild)this.bub.replaceChildren();
+      this.buildMarkers=null;
       return;
     }
-    const list = this.bubbleList();
-    const key = list.map((n) => n.p.id + n.cost + n.ok).join();
-    if (key !== this._bubKey) {
-      this._bubKey = key;
+    const island=this.g.island, {yaw,pitch,dist,tx,ty,tz}=island.cam;
+    const view=[island,island.w,island.h,yaw,pitch,dist,tx,ty,tz];
+    if(!this.buildMarkers){
+      const list=this.bubbleList().filter(({p})=>!p.beach);
       this.bub.innerHTML = list
         .map((n) => `<button class="bubble hit ${n.ok ? 'ok' : ''}" data-id="${n.p.id}">${n.ok ? IC.hammer : ''}<span>${esc(t('p_' + n.p.id))}</span><span class="cost">${IC.star}${n.cost}</span></button>`)
         .join('');
-      this.bub.querySelectorAll('.bubble').forEach((b) => (b.onclick = () => this.project(b.dataset.id)));
+      const entries=Array.from(this.bub.children,(button,i)=>{
+        const id=list[i].p.id,stage=save.data.stages[id];
+        button.onclick=()=>this.project(id);
+        const spot=island.spots[id];
+        let lift=stage?1.8:1.3;
+        if(id==='lookout')lift=stage?4.6:1.4;
+        if(id==='beacon'&&stage)lift=island.projectArea(id,stage).maxY-spot.y+.4;
+        return {button,spot,lift};
+      });
+      this.buildMarkers={entries,view:[]};
     }
-    const bs = this.bub.children;
-    list.forEach((n, i) => {
-      const b = bs[i];
-      if (!b) return;
-      const sp = this.g.island.spots[n.p.id];
-      const stg = save.data.stages[n.p.id];
-      const h = n.p.id === 'lookout' || n.p.id === 'beacon' ? (stg ? 4.6 : 1.4) : stg ? 1.8 : 1.3;
-      const pt = this.g.island.project(sp.x, sp.y + h, sp.z);
-      // не даём метке уйти за край экрана, а стрелка всё равно смотрит на площадку
-      const hw = b.offsetWidth / 2 + 8;
-      const x = Math.max(hw, Math.min(window.innerWidth - hw, pt.x));
-      b.style.left = x + 'px';
-      b.style.top = pt.y + 'px';
-      b.style.setProperty('--ax', Math.max(-hw + 22, Math.min(hw - 22, pt.x - x)) + 'px');
-      b.style.display = pt.vis ? '' : 'none';
-    });
+    const markers=this.buildMarkers;
+    if(view.every((value,i)=>value===markers.view[i]))return;
+    if(island.w!==markers.view[1]||island.h!==markers.view[2]){
+      for(const entry of markers.entries)entry.halfWidth=entry.button.offsetWidth/2+8;
+    }
+    markers.view=view;
+    for(const {button,spot,lift,halfWidth} of markers.entries){
+      const pt=island.project(spot.x,spot.y+lift,spot.z);
+      const x=Math.max(halfWidth,Math.min(island.w-halfWidth,pt.x));
+      button.style.left=x+'px';
+      button.style.top=pt.y+'px';
+      button.style.setProperty('--ax',Math.max(-halfWidth+22,Math.min(halfWidth-22,pt.x-x))+'px');
+      button.style.visibility=pt.vis ? '' : 'hidden';
+    }
+  }
+
+  actorSpeech(mesh,text) {
+    this.speech?.node.remove();
+    const node=document.createElement('div');
+    node.className='actor-speech';
+    node.textContent=text;
+    node.setAttribute('role','status');
+    this.scr.append(node);
+    this.speech={mesh,node,until:performance.now()+2250};
+    this.updateActorSpeech();
+  }
+  updateActorSpeech() {
+    const speech=this.speech;
+    if(!speech)return;
+    if(this.screen!=='home'||this.modalOpen||this.g.decorSelection||!speech.node.isConnected||performance.now()>speech.until){
+      speech.node.remove();
+      this.speech=null;
+      return;
+    }
+    const {x,y,z}=speech.mesh.position;
+    const p=this.g.island.project(x,y+1.15,z);
+    speech.node.hidden=!p.vis;
+    speech.node.style.left=Math.max(52,Math.min(innerWidth-52,p.x))+'px';
+    speech.node.style.top=p.y+'px';
   }
 
   // ---------- стройка ----------
+  placingDecor(def, status = 'select') {
+    this.scr.querySelector('.decor-placement')?.remove();
+    this.refreshGuideNotice();
+    if (!def) return;
+    const ru = LANG === 'ru';
+    const bar = document.createElement('div');
+    bar.className = 'decor-placement hit';
+    const locked=!!this.g.decorPoint, removing=this.g.decorRemoving;
+    const footprint=this.g.island.decorPicker?.footprint||0;
+    const help = status === 'blocked'
+      ? (ru ? 'Здесь не поместится. Попробуйте свободный участок суши.' : 'It won’t fit here. Try an open spot on land.')
+      : locked ? (ru ? 'Место зафиксировано.' : 'Position locked.')
+        : (ru ? 'Наведите на клетку или проведите пальцем. Нажмите, чтобы зафиксировать.' : 'Point or drag a finger to preview. Tap a tile to lock it.');
+    const count=footprint&&!def.groundCover?` · ${footprint} ${ru?'кл.':'tiles'}`:'';
+    bar.innerHTML = `<div><b>${removing?(ru?'Убрать траву':'Remove grass'):esc(def[ru ? 'ru' : 'en'])}${count}</b><small>${esc(help)}</small></div>
+      <div class="decor-placement-actions">
+        ${locked?`<button class="btn mid green" type="button" data-decor-confirm ${status === 'ready' ? '' : 'disabled'}>${removing?(ru?'Убрать':'Remove'):(ru?'Поставить':'Place')}</button>
+        ${removing?'':`<button class="btn mid sea" type="button" data-decor-rotate aria-label="${ru?'Повернуть на 90°':'Rotate 90°'}" title="${ru?'Повернуть':'Rotate'}">↻</button>`}
+        <button class="btn mid sand" type="button" data-decor-unlock aria-label="${ru?'Сменить место':'Move to another tile'}">${ru?'Сменить':'Move'}</button>`:''}
+        <button class="btn mid sand" type="button" data-decor-cancel>${ru ? 'Отмена' : 'Cancel'}</button>
+      </div>`;
+    const confirm=bar.querySelector('[data-decor-confirm]');
+    if(confirm)confirm.onclick=()=>this.g.placeSelectedDecor(this.g.decorPoint);
+    const rotate=bar.querySelector('[data-decor-rotate]');
+    if(rotate)rotate.onclick=()=>this.g.rotateSelectedDecor();
+    const unlock=bar.querySelector('[data-decor-unlock]');
+    if(unlock)unlock.onclick=()=>this.g.unlockDecorPoint();
+    bar.querySelector('[data-decor-cancel]').onclick = () => this.g.cancelDecor();
+    this.scr.append(bar);
+  }
+  decor() {
+    this.g.cancelDecor();
+    const ru = LANG === 'ru', data = save.data, lang = ru ? 'ru' : 'en';
+    const items = DECOR.map(def => {
+      const stored = data.decor.filter(item => item.type === def.id && item.x === null).length;
+      const disabled = !this.g.canPlaceItem(def);
+      return `<button class="decor-item" type="button" data-decor="${def.id}" data-section="${def.section}" ${disabled ? 'disabled' : ''}>
+        <img data-thumb="${def.id}" alt=""><b>${esc(def[lang])}</b>
+        <small>${stored ? (ru ? 'На складе: ' : 'In storage: ') + stored : def.coins ? coinAmount(def.coins) : (ru?'Бесплатно':'Free')}</small>
+      </button>`;
+    }).join('');
+    const placed = data.decor.filter(item => item.x !== null).map(item =>
+      `<div class="decor-stored"><span>${esc(DECOR_BY_ID[item.type][lang])}</span><button class="btn mid sand" data-store-decor="${item.id}">${ru ? 'Убрать' : 'Store'}</button></div>`).join('');
+    const filters=DECOR_FILTERS.map(([id,labelRU,labelEN])=>
+      `<button class="decor-filter" type="button" data-decor-filter="${id}" aria-pressed="${id==='all'}">${ru?labelRU:labelEN}</button>`).join('');
+    let observer,frame=0;
+    const pending=new Set();
+    const m = this.modal({
+      title: ru ? 'Декор острова' : 'Island decor', wide: true,
+      onClose:()=>{observer?.disconnect();cancelAnimationFrame(frame);pending.clear();},
+      body: `<p>${ru ? 'Выберите предмет и место на острове. Монеты спишутся после установки. Убранный декор можно поставить снова бесплатно.' : 'Choose an item and a spot on the island. Coins are charged after placement. Store items and place them again for free.'}</p>
+        <p>${ru ? 'Монеты' : 'Coins'} ${fmt(data.coins)} · ${ru ? 'Предметы' : 'Items'} ${data.decor.filter(item=>item.type!=='grass').length}/${DECOR_LIMIT} · ${ru?'Трава':'Grass'} ${data.decor.filter(item=>item.type==='grass').length}/${GRASS_LIMIT}</p>
+        <div class="decor-catalog-tools"><button class="btn mid sand" type="button" data-remove-grass>${ru?'Убрать траву':'Remove grass'}</button>
+        <button class="btn mid sand" type="button" data-decor-guide>${ru?'Как расставлять':'How to place items'}</button></div>
+        <div class="decor-filters" role="group" aria-label="${ru?'Категории декора':'Decor categories'}">${filters}</div>
+        <div class="decor-grid">${items}</div>${placed ? `<h3>${ru ? 'На острове' : 'On the island'}</h3>${placed}` : ''}`,
+    });
+    const tiles=m.querySelectorAll('[data-decor]');
+    const filterButtons=m.querySelectorAll('[data-decor-filter]');
+    const setFilter=section=>{
+      for(const button of filterButtons)button.setAttribute('aria-pressed',String(button.dataset.decorFilter===section));
+      for(const tile of tiles)tile.hidden=section!=='all'&&tile.dataset.section!==section;
+      this.decorCategory=section;
+    };
+    setFilter(this.decorCategory||'all');
+    for(const button of filterButtons)button.onclick=()=>setFilter(button.dataset.decorFilter);
+    const showNext=()=>{
+      frame=0;
+      if(!m.isConnected){observer?.disconnect();return;}
+      const image=pending.values().next().value;
+      if(!image)return;
+      pending.delete(image);
+      observer?.unobserve(image);
+      const id=image.dataset.thumb;
+      image.src=modelThumb('decor-'+id,DECOR_BY_ID[id].model);
+      if(pending.size)frame=requestAnimationFrame(showNext);
+    };
+    const images=m.querySelectorAll('[data-thumb]');
+    if(typeof IntersectionObserver!=='undefined'){
+      observer=new IntersectionObserver(entries=>{
+        if(!m.isConnected){observer.disconnect();return;}
+        for(const entry of entries){
+          if(entry.isIntersecting)pending.add(entry.target);
+          else pending.delete(entry.target);
+        }
+        if(pending.size&&!frame)frame=requestAnimationFrame(showNext);
+      },{root:m.querySelector('.pb'),rootMargin:'100px 0px'});
+      for(const image of images)observer.observe(image);
+    }else{
+      for(const image of images)pending.add(image);
+      frame=requestAnimationFrame(showNext);
+    }
+    m.querySelector('[data-decor-guide]').onclick=()=>{m.close();this.guide('decor');};
+    m.querySelector('[data-remove-grass]').onclick=()=>{if(this.g.chooseDecor('grass',true))m.close();};
+    tiles.forEach(b => b.onclick = () => {
+      if (this.g.chooseDecor(b.dataset.decor)) m.close();
+    });
+    m.querySelectorAll('[data-store-decor]').forEach(b => b.onclick = () => {
+      if (this.g.storeDecor(Number(b.dataset.storeDecor))) {
+        m.close();
+        this.decor();
+      }
+    });
+  }
   buildPanel() {
     const body = () => {
       const s = save.stars();
-      return `<div class="row"><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Новые берега':'New shores'}</button></div><p class="center" style="margin-top:12px">${esc(t('starsHint'))}</p><div class="plist">${this.projects().map((p) => {
+      return `<div class="row"><button class="btn mid sea" data-a="world">${IC.palm}${LANG==='ru'?'Новые берега':'New shores'}</button><button class="btn mid sand" data-a="decor">${LANG==='ru'?'Декор':'Decor'}</button>${save.data.stages.beach<3?`<button class="btn mid sand" data-a="beach">${esc(t('p_beach'))}</button>`:''}</div><p class="center" style="margin-top:12px">${esc(t('starBalance', {n:fmt(s)}))}</p><p class="center">${esc(t('starsHint'))}</p><div class="plist">${this.projects().map((p) => {
         const st = save.data.stages[p.id];
         const done = st >= 3;
         const cost = done ? 0 : p.cost[st];
@@ -250,7 +466,7 @@ export class UI {
       }).join('')}</div>`;
     };
     const m = this.modal({ title: t('buildT'), body: body(), wide: true });
-    this.bind(m,{world:()=>{m.close();this.world();}});
+    this.bind(m,{world:()=>{m.close();this.world();},decor:()=>{m.close();this.decor();},beach:()=>{m.close();this.project('beach');}});
     m.querySelectorAll('[data-b]').forEach((b) => {
       b.onclick = () => {
         m.close();
@@ -273,7 +489,8 @@ export class UI {
       title: t('p_' + id),
       body: `<div class="col" style="align-items:center"><img src="${projThumb(id, st + 1)}" style="width:150px;height:150px" alt="">
         <p class="center" style="margin:0">${esc(t('stage', { a: st + 1, b: 3 }))}: <b>${esc(t('p_' + id + '_' + (st + 1)))}</b></p>
-        ${can ? '' : `<p class="center" style="margin:0">${esc(t('needStars', { n: cost }))} · ${IC.star.replace('<svg', '<svg style="display:inline-block;width:22px;height:22px;vertical-align:-4px"')} ${s}</p>`}
+        ${p.beach?`<p class="center" style="margin:0">${esc(t('beachHint'))}</p>`:''}
+        <p class="center" style="margin:0">${esc(t('needStars', { n: cost }))} · ${esc(t('starBalance', {n:fmt(s)}))}</p>
         <div class="row">${can ? `<button class="btn big green" data-a="go">${IC.hammer}${esc(t('buildBtn'))} <span class="cost">${IC.star}${cost}</span></button>` : `<button class="btn big" data-a="play">${esc(t('play'))}</button>`}</div></div>`,
     });
     this.bind(m, {
@@ -359,7 +576,7 @@ export class UI {
     if (!el) return;
     if (el.dataset.t === (text || '')) return;
     el.dataset.t = text || '';
-    el.innerHTML = text ? `<div class="tip">${esc(text)}</div>` : '';
+    el.innerHTML = text ? `<div class="tip">${esc(text)}${text === t('tut1') ? `<strong>${esc(t('tutExample'))}</strong>` : ''}</div>` : '';
   }
   tipBottom(texts) {
     let b = 0;
@@ -443,19 +660,28 @@ export class UI {
     });
   }
   win(r) {
-    const { n, stars, score, best, coins, canBuild } = r;
+    const { n, stars, score, best, coins, canBuild, firstProject, firstCoins } = r;
+    const projectName = firstProject && t('p_' + firstProject);
     const m = this.modal({
       ribbon: t('win'),
       ribbonCls: 'green',
       body: `<div class="stars3">${[0, 1, 2].map((i) => `<i style="animation-delay:${0.25 + i * 0.3}s">${i < stars ? IC.star : IC.starE}</i>`).join('')}</div>
         <p class="center" style="margin:0 0 6px">${esc(t('winSub', { n: r.left }))}</p>
         <div class="res"><div>${esc(t('score'))}: <b>${fmt(score)}</b>${best ? `<small>${esc(t('best'))} ${fmt(best)}</small>` : ''}</div><div>${IC.coin}<b id="wc">+${fmt(coins)}</b></div></div>
+        ${firstCoins?`<p class="center first-build-note" data-first-decor>${LANG==='ru'?'На острове появится обучение декору.':'A decor guide is now available on your island.'}</p>`:''}
         <div class="col">${sdk.canReward()?`<button class="btn mid sea" data-a="x2">${IC.film}${esc(t('x2'))}</button>`:''}
-        <div class="row"><button class="btn big sand ${canBuild ? 'pulse' : ''}" data-a="island" style="position:relative">${IC.palm}${esc(t('toIsland'))}${canBuild ? '<span class="badge">!</span>' : ''}</button><button class="btn big green" data-a="next">${esc(t('next'))}</button></div></div>`,
+        ${firstProject ? `<p class="center first-build-note">${esc(t('firstBuildHint', {name: projectName}))}</p>
+          <button class="btn big green first-build-button" data-a="first-build">${IC.hammer}${esc(t('firstBuild', {name: projectName}))}</button>
+          <button class="btn mid sand" data-a="next">${esc(t('next'))}</button>`
+          : `<div class="row"><button class="btn big sand ${canBuild ? 'pulse' : ''}" data-a="island" style="position:relative">${IC.palm}${esc(t('toIsland'))}${canBuild ? '<span class="badge">!</span>' : ''}</button><button class="btn big green" data-a="next">${esc(t('next'))}</button></div>`}</div>`,
       close: false,
     });
     [0, 1, 2].forEach((i) => i < stars && setTimeout(() => audio.play('star', i), 250 + i * 300));
     this.bind(m, {
+      'first-build': () => {
+        m.close();
+        this.g.toIsland(false, firstProject);
+      },
       x2: (b) => {
         b.disabled = true;
         this.g.doubleReward(coins, () => {
@@ -571,7 +797,7 @@ export class UI {
     this.bind(m, {
       take: () => {
         if(d.day===today())return;
-        save.data.coins += DAILY[streak];
+        save.creditCoins(DAILY[streak]);
         d.day = today();
         d.streak = streak + 1;
         save.write();
@@ -586,14 +812,56 @@ export class UI {
   // ---------- настройки и рекорды ----------
   settings() {
     const st = save.data.settings;
+    const ru = LANG === 'ru';
+    const audioSelect = (key, label) => `<label class="setrow audio-pack"><span>${label}</span>
+      <select data-audio-pack="${key}"><option value="island" ${st[key] !== 'classic' ? 'selected' : ''}>${ru ? 'Островная' : 'Island'}</option>
+      <option value="classic" ${st[key] === 'classic' ? 'selected' : ''}>${ru ? 'Классическая' : 'Classic'}</option></select></label>`;
     const m = this.modal({
       title: t('settings'),
       body: `<div class="col">${slidersHTML(st, { music: t('music'), sound: t('sound') }, { music: IC.music, sound: IC.sound })}
+        ${audioSelect('musicPack', ru ? 'Музыкальный набор' : 'Music pack')}
+        ${audioSelect('soundPack', ru ? 'Звуки игры' : 'Sound effects')}
+        <details class="audio-attribution"><summary>${ru ? 'Музыка и звуки' : 'Music and sound credits'}</summary>
+          <small>Feel Good Island Loop — Brandon Morris, AntumDeluge (CC0)<br>Bossa Nova — Joth (CC0)<br>Bassa Island Game Loop — Kevin MacLeod, incompetech.com (CC BY 4.0)<br>Playing Card Sounds — Brian MacIntosh (CC0)<br>Beach Ocean Waves — jasinski, qubodup (CC0)<br>Cozy Farm SFX — Bramble &amp; Byte, aquumgifts.itch.io (CC BY 4.0)</small>
+        </details>
         <div class="setrow"><span>${esc(t('hints'))}</span><div class="seg"><button data-h="1" class="${st.hints ? 'on' : ''}">${esc(t('on'))}</button><button data-h="0" class="${st.hints ? '' : 'on'}">${esc(t('off'))}</button></div></div>
         <div class="setrow"><span>${esc(t('quality'))}</span><div class="seg"><button data-q="high" class="${this.g.quality !== 'low' ? 'on' : ''}">${esc(t('qHigh'))}</button><button data-q="low" class="${this.g.quality === 'low' ? 'on' : ''}">${esc(t('qLow'))}</button></div></div></div>`,
     });
     const appearance=document.createElement('button');appearance.className='btn mid sea';appearance.dataset.appearance='1';appearance.innerHTML=IC.scene+(LANG==='ru'?'Фон партии и оформление':'Game scene and appearance');m.querySelector('.pb').appendChild(appearance);appearance.onclick=()=>{m.close();this.cosmetics();};
+    if(location.protocol==='file:'){
+      const reset=document.createElement('button');
+      reset.className='btn mid sand preview-reset';
+      reset.type='button';
+      reset.textContent=ru?'Сбросить прогресс превью':'Reset preview progress';
+      m.querySelector('.pb').appendChild(reset);
+      reset.onclick=()=>{
+        m.close();
+        const prompt=this.modal({
+          title:ru?'Сбросить прогресс?':'Reset progress?',
+          body:`<p>${ru?'Заново начнутся уровни, стройка и расстановка декора в этом превью.':'Levels, construction and decorations in this preview will start over.'}</p><button class="btn mid sand" type="button" data-reset-preview>${ru?'Сбросить прогресс':'Reset progress'}</button>`,
+        });
+        prompt.querySelector('[data-reset-preview]').onclick=()=>{
+          if(!save.resetPreview())this.toast(ru?'Превью не смогло записать сохранение.':'Could not write the preview save.');
+        };
+      };
+      if(save.hasPreviewBackup()){
+        const restore=document.createElement('button');
+        restore.className='btn mid sand preview-reset';
+        restore.type='button';
+        restore.textContent=ru?'Вернуть прежний прогресс':'Restore previous progress';
+        restore.onclick=()=>{
+          if(!save.resetPreview(true))this.toast(ru?'Не удалось открыть копию сохранения.':'Could not open the saved backup.');
+        };
+        m.querySelector('.pb').append(restore);
+      }
+    }
     bindSliders(m, st, () => save.write(false));
+    m.querySelectorAll('[data-audio-pack]').forEach(select => select.onchange = () => {
+      st[select.dataset.audioPack] = select.value;
+      audio.setPacks(st.musicPack, st.soundPack);
+      save.write();
+      audio.play('flip');
+    });
     m.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => {
       st.hints = b.dataset.h === '1';
       save.write(false);
@@ -608,7 +876,8 @@ export class UI {
   }
   world() {
     const ru=LANG==='ru',tier=save.data.expansion||0,next=nextExpansion();
-    const body='<p class="center">'+(ru?'Открывайте новые участки суши и развивайте свой остров. Каждое расширение добавляет три постройки.':'Open new stretches of land. Each coast adds three new buildings.')+'</p><div class="districts">'+EXPANSIONS.map(e=>{
+    const chapter=chapterOf(save.data.level), progress=chapterProgress(chapter);
+    const body='<p class="center">'+(ru?'Глава ':'Chapter ')+(chapter+1)+' / '+CHAPTERS.length+' · '+esc(CHAPTERS[chapter][ru?0:1])+' · '+progress.count+' / 50</p><p class="center">'+(ru?'Открывайте новые участки суши и развивайте свой остров. Каждое расширение добавляет три постройки.':'Open new stretches of land. Each coast adds three new buildings.')+'</p><div class="districts">'+EXPANSIONS.map(e=>{
       const owned=e.id<=tier,current=e.id===tier+1,ready=current&&canExpand();
       const projects=PROJECTS.filter(p=>p.tier===e.id);
       const progress=projects.reduce((sum,p)=>sum+(save.data.stages[p.id]||0),0);
@@ -624,9 +893,20 @@ export class UI {
       return '<div class="task-card"><div><b>'+esc(ru?task.ru:task.en)+'</b><small>'+Math.min(task.goal,q[task.id])+'/'+task.goal+' · '+task.coins+' '+(ru?'монет':'coins')+'</small></div><button class="btn mid '+(ready&&!claimed?'green':'sand')+'" data-task="'+task.id+'" '+(ready&&!claimed?'':'disabled')+'>'+(claimed?(ru?'Получено':'Claimed'):(ru?'Забрать':'Claim'))+'</button></div>';
     }).join('');
     const ready=harvestReady();
+    const reward=harvestReward();
+    const harvestCard=`<div class="task-card"><div><b>${ru?'Корзина фруктов':'Fruit basket'}</b>
+      <small>${reward?(ru?'Собирайте урожай после каждых трёх побед.':'Collect fruit after every three wins.'):(ru?'Постройте сад, чтобы собирать урожай.':'Build the garden to collect fruit.')}</small>
+      ${reward?`<span class="journal-coin">${IC.coin}${coinReward(reward)}</span>`:''}
+      </div><button class="btn mid ${ready?'green':'sand'}" data-harvest ${ready?'':'disabled'}>${ru?'Собрать':'Harvest'}</button></div>`;
     const finds=CHAPTERS.map((names,ch)=>{const done=j.chapters.includes(ch),p=chapterProgress(ch),ready=p.count===50;return '<button class="find-card '+(done?'collected':'')+'" data-find="'+ch+'" '+(ready&&!done?'':'disabled')+'><span>'+(['✦','⚓','❖','✿','☼'][ch%5])+'</span><b>'+esc(names[ru?0:1])+'</b><small>'+(done?(ru?'В коллекции':'Collected'):ready?(ru?'Забрать находку':'Claim discovery'):p.count+'/50')+'</small></button>';}).join('');
-    const m=this.modal({title:ru?'Дневник Робинзона':'Robinson’s journal',wide:true,body:'<div class="population-summary"><b>'+(ru?'Обитатели острова':'Island neighbours')+'</b><span>'+(ru?'Жители: ':'Residents: ')+this.g.island.walkers.length+' / 12 · '+(ru?'Животные: ':'Animals: ')+this.g.island.population.animals+'</span><small>'+(ru?'Новые жители и животные приходят после улучшений.':'Upgrades bring new neighbours and animals.')+'</small></div><div class="wildlife-list">'+WILDLIFE.map(d=>'<div class="'+(wildlifeUnlocked(d,save.data.stages)?'arrived':'')+'"><b>'+esc(ru?d.ru:d.en)+'</b><small>'+(wildlifeUnlocked(d,save.data.stages)?(ru?'На острове':'On the island'):esc(t('p_'+d.requires[0]))+' · '+(ru?'этап ':'stage ')+d.requires[1])+'</small></div>').join('')+'</div><h3>'+(ru?'Поручения на сегодня':'Today’s requests')+'</h3><div class="task-list">'+tasks+'</div><h3>'+(ru?'Урожай сада':'Garden harvest')+'</h3><div class="task-card"><div><b>'+(ru?'Корзина фруктов':'Fruit basket')+'</b><small>'+(ru?'Постройте сад. Новый урожай после трёх побед.':'Build the garden. New fruit after three wins.')+'</small></div><button class="btn mid '+(ready?'green':'sand')+'" data-harvest '+(ready?'':'disabled')+'>'+(ru?'Собрать':'Harvest')+'</button></div><h3>'+(ru?'Находки путешествия · ':'Voyage discoveries · ')+j.chapters.length+'/20</h3><p class="center">'+(ru?'Завершите 50 уровней главы, чтобы получить находку и монеты.':'Complete all 50 levels of a chapter for a discovery and coins.')+'</p><div class="find-grid">'+finds+'</div>'});
-    const refresh=coins=>{if(coins)this.toast('+'+coins);m.close();this.refreshTop();this.journal();};
+    const m=this.modal({title:ru?'Дневник Робинзона':'Robinson’s journal',wide:true,body:'<div class="population-summary"><b>'+(ru?'Обитатели острова':'Island neighbours')+'</b><span>'+(ru?'Жители: ':'Residents: ')+this.g.island.walkers.length+' / '+PEOPLE.length+' · '+(ru?'Животные: ':'Animals: ')+this.g.island.population.animals+'</span><small>'+(ru?'Новые жители и животные приходят после улучшений.':'Upgrades bring new neighbours and animals.')+'</small></div><div class="wildlife-list">'+WILDLIFE.map(d=>'<div class="'+(wildlifeUnlocked(d,save.data.stages)?'arrived':'')+'"><b>'+esc(ru?d.ru:d.en)+'</b><small>'+(wildlifeUnlocked(d,save.data.stages)?(ru?'На острове':'On the island'):esc(t('p_'+d.requires[0]))+' · '+(ru?'этап ':'stage ')+d.requires[1])+'</small></div>').join('')+'</div><h3>'+(ru?'Поручения на сегодня':'Today’s requests')+'</h3><div class="task-list">'+tasks+'</div><h3>'+(ru?'Урожай сада':'Garden harvest')+'</h3>'+harvestCard+'<h3>'+(ru?'Находки путешествия · ':'Voyage discoveries · ')+j.chapters.length+'/20</h3><p class="center">'+(ru?'Завершите 50 уровней главы, чтобы получить находку и монеты.':'Complete all 50 levels of a chapter for a discovery and coins.')+'</p><div class="find-grid">'+finds+'</div>'});
+    const refresh=coins=>{
+      if(coins){
+        this.toast(coinReward(coins),2800,IC.coin);
+        audio.play('coin');
+      }
+      m.close();this.refreshTop();this.journal();
+    };
     m.querySelectorAll('[data-task]').forEach(b=>b.onclick=()=>refresh(claimTask(b.dataset.task)));
     m.querySelectorAll('[data-find]').forEach(b=>b.onclick=()=>refresh(claimChapter(+b.dataset.find)));
     m.querySelector('[data-harvest]').onclick=()=>refresh(harvest());

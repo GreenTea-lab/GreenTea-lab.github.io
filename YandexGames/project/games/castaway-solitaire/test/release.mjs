@@ -71,12 +71,24 @@ try{
   for(const i of actions){if(i<0)g.table.draw();else g.table.play(i);for(let k=0;k<35;k++)g.table.update(.05);}
  },winningActions(1));
  await f.waitForSelector('.ribbon',{timeout:12000});
+ assert.ok(await f.locator('[data-first-decor]').isVisible());
  assert.ok(await f.evaluate(()=>__save.data.levels[1]?.stars>=2));
  assert.ok(await f.evaluate(()=>__game.ui.affordable()>0));
  assert.equal(await page.evaluate(()=>log.some(x=>x.handler==='VKWebAppShowNativeAds')),false);
  await page.screenshot({path:`${out}/first-win.png`});
- await f.locator('[data-a=island]').click();await f.evaluate(()=>{__game.build('hut');});await f.waitForTimeout(800);
+ await f.locator('[data-a=first-build]').click();
+ assert.equal(await f.evaluate(()=>__save.data.stages.hut),0);
+ assert.ok(await f.locator('#mod .panel h2').filter({hasText:'Хижина'}).isVisible());
+ await f.locator('[data-a=go]').click();await f.waitForTimeout(800);
  assert.equal(await f.evaluate(()=>__save.data.stages.hut),1);
+ assert.equal(await f.locator('[data-guide-notice]').getAttribute('data-kind'),'decor');
+ await f.locator('[data-guide-open]').click();
+ assert.match(await f.locator('.guide-step').innerText(),/зафиксировать/);
+ await f.locator('[data-guide-next]').click();
+ assert.match(await f.locator('.guide-step').innerText(),/повернуть предмет на 90°/);
+ await f.locator('[data-guide-next]').click();
+ assert.ok(await f.locator('[data-decor=grass]').isVisible());
+ await f.locator('[data-x]').click();
  // Long ad: one request, mute, input blocked beyond the availability timeout.
  await f.evaluate(()=>{window.__CS_DEBUG.manual=false;__game.playLevel(2);});await f.waitForFunction(()=>__game.table.busy===0);
  await page.evaluate(()=>holdAds=true);const before=await f.evaluate(()=>__save.data.coins);
@@ -116,13 +128,18 @@ try{
  // Resident simulation after every building is complete: no water/building penetration or jumps.
  const movement=await f2.evaluate(()=>{
   const I=__game.island;I.setStages(Object.fromEntries(Object.keys(I.spots).map(k=>[k,3])));
-  const stats=I.walkers.map(w=>({id:w.id,distance:0,invalid:0,maxStep:0}));
+  const stats=I.walkers.map(w=>({id:w.id,distance:0,invalid:0,maxStep:0,unexpectedSteps:0}));
   for(let k=0;k<4800;k++){
    const old=I.walkers.map(w=>({x:w.x,z:w.z}));I.update(.05);
-   I.walkers.forEach((w,i)=>{const d=Math.hypot(w.x-old[i].x,w.z-old[i].z);stats[i].distance+=d;stats[i].maxStep=Math.max(stats[i].maxStep,d);if(!I.walkable(w.x,w.z)||!Number.isFinite(w.m.position.y))stats[i].invalid++;});
+   I.walkers.forEach((w,i)=>{
+    const d=Math.hypot(w.x-old[i].x,w.z-old[i].z),stat=stats[i];
+    stat.distance+=d;stat.maxStep=Math.max(stat.maxStep,d);
+    if(d>w.speed*.05+.003)stat.unexpectedSteps++;
+    if(!I.walkable(w.x,w.z)||!Number.isFinite(w.m.position.y))stat.invalid++;
+   });
   }return stats;
  });
- assert.ok(movement.every(x=>x.distance>5&&x.invalid===0&&x.maxStep<.06),JSON.stringify(movement));
+ assert.ok(movement.every(x=>x.distance>5&&x.invalid===0&&x.unexpectedSteps===0),JSON.stringify(movement));
  fs.writeFileSync(`${out}/residents.json`,JSON.stringify(movement,null,2));await ctx.close();
  report.push({name:'first-win-build-ads-cosmetics-cloud-stories-residents',passed:true});
  for(const ads of ['false','error','timeout']){

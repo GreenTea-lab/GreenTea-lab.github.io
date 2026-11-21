@@ -106,6 +106,12 @@ export class Music {
     this._switch(true);
     this.timer = setInterval(() => this._schedule(), 30);
   }
+  stop() {
+    clearInterval(this.timer);
+    this.timer = null;
+    this.bus?.disconnect();
+    this.bus = null;
+  }
 
   setMood(m) {
     if (!this.lists[m] || m === this.mood) return;

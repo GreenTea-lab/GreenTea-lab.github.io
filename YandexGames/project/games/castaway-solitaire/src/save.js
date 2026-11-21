@@ -1,8 +1,11 @@
 // Сохранения: localStorage + облако Яндекса (берётся более свежая версия)
 import { sdk } from './sdk.js';
 import { PROJECTS, START_COINS } from './data.js';
+import { restoreDecor } from './decor.js';
 
 const KEY = 'castaway_solitaire_v1';
+const PREVIEW_BACKUP = KEY + '_preview_backup';
+const PREVIEW_RESET = KEY + '_preview_reset';
 
 const DEFAULT = () => ({
   v: 2,
@@ -22,6 +25,8 @@ const DEFAULT = () => ({
   seen: {}, // показанные объяснения механик
   plays: 0,
   wins: 0,
+  decor: [],
+  trimmedGrass: [],
 });
 
 export const save = {
@@ -44,6 +49,8 @@ export const save = {
     d.v=2;
     d.settings = Object.assign(def.settings, d.settings || {});
     d.stages = Object.assign(def.stages, d.stages || {});
+    d.decor = restoreDecor(d.decor);
+    d.trimmedGrass = Array.isArray(d.trimmedGrass) ? [...new Set(d.trimmedGrass.filter(key=>typeof key==='string'&&/^-?\d{1,2},-?\d{1,2}$/.test(key)))].slice(0,7000) : [];
     d.levels = d.levels && typeof d.levels === 'object' ? d.levels : {};
     d.daily = Object.assign(def.daily, d.daily || {});
     d.seen = d.seen || {};
@@ -55,7 +62,17 @@ export const save = {
     d.levels=Object.fromEntries(Object.entries(d.levels).filter(([n,l])=>/^\d+$/.test(n)&&+n>0&&l&&typeof l==='object').map(([n,l])=>[n,{stars:Math.min(3,count(l.stars)),best:count(l.best)}]));
     d.starsSpent=Math.min(count(d.starsSpent),Object.values(d.levels).reduce((s,l)=>s+l.stars,0));
     if(typeof d.seen!=='object'||Array.isArray(d.seen))d.seen={};
+    if(d.wins>0||Object.keys(d.levels).length||d.daily.streak>0)d.seen.earnedCoins=1;
     this.data = d;
+    const reset=location.protocol==='file:'&&document.querySelector('meta[name="castaway-preview-reset"]')?.content;
+    if(reset){
+      try {
+        if(localStorage.getItem(PREVIEW_RESET)!==reset){
+          this.resetPreviewData();
+          localStorage.setItem(PREVIEW_RESET,reset);
+        }
+      } catch {}
+    }
   },
 
   write(cloud = true) {
@@ -66,12 +83,45 @@ export const save = {
     if (cloud) sdk.saveData(this.data);
   },
 
+  creditCoins(amount) {
+    if(amount<=0)return;
+    this.data.coins+=amount;
+    this.data.seen.earnedCoins=1;
+  },
+
   async flush() {
     this.data.ts = Date.now();
     try {
       localStorage.setItem(KEY, JSON.stringify(this.data));
     } catch (e) {}
     await sdk.saveData(this.data, true);
+  },
+
+  resetPreviewData() {
+    const {settings,noAds}=this.data;
+    const old=localStorage.getItem(KEY);
+    if(old)localStorage.setItem(PREVIEW_BACKUP,old);
+    const fresh={...DEFAULT(),settings,noAds,ts:Date.now()};
+    localStorage.setItem(KEY,JSON.stringify(fresh));
+    this.data=fresh;
+  },
+  hasPreviewBackup() {
+    try {return location.protocol==='file:'&&!!localStorage.getItem(PREVIEW_BACKUP);}
+    catch {return false;}
+  },
+  resetPreview(restore=false) {
+    if(location.protocol!=='file:')return false;
+    try {
+      if(restore){
+        const data=localStorage.getItem(PREVIEW_BACKUP);
+        if(!data)return false;
+        const current=localStorage.getItem(KEY);
+        localStorage.setItem(KEY,data);
+        if(current)localStorage.setItem(PREVIEW_BACKUP,current);
+      }else this.resetPreviewData();
+      location.reload();
+      return true;
+    } catch {return false;}
   },
 
   starsEarned() {

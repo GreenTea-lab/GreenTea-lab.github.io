@@ -1,6 +1,52 @@
-// Синтезированные звуки, шум прибоя и музыка (WebAudio, без файлов)
+// Audio recordings and the original WebAudio score share volume and pause controls.
 import { Music } from './music.js';
 import { SONGS } from './songs.js';
+import islandLoop from '../static/audio/island.ogg';
+import bassaLoop from '../static/audio/bassa.mp3';
+import bossaLoop from '../static/audio/bossa.mp3';
+import drawRecording from '../static/audio/draw.wav';
+import placeRecording from '../static/audio/place.wav';
+import flipRecording from '../static/audio/flip.wav';
+import shuffleRecording from '../static/audio/deal.wav';
+import waveRecording from '../static/audio/wave.flac';
+import clickRecording from '../static/audio/ui-click.wav';
+import errorRecording from '../static/audio/ui-error.wav';
+import openRecording from '../static/audio/menu-open.wav';
+import buildRecording from '../static/audio/craft.wav';
+import buyRecording from '../static/audio/buy.wav';
+import giftRecording from '../static/audio/chest-open.wav';
+import decorRecording from '../static/audio/place-item.wav';
+import unlockRecording from '../static/audio/jingle-quest-complete.wav';
+
+const RECORDINGS = {
+  island: islandLoop, bassa: bassaLoop, bossa: bossaLoop,
+  draw: drawRecording, place: placeRecording, flip: flipRecording,
+  shuffle: shuffleRecording, wave: waveRecording,
+  click: clickRecording, error: errorRecording, open: openRecording, build: buildRecording,
+  buy: buyRecording, gift: giftRecording, decor: decorRecording, unlock: unlockRecording,
+};
+const PLAYLIST = ['island', 'bassa', 'bossa'];
+const ACTOR_CALLS = {
+  parrot: ['sawtooth',820,1260,.105],
+  gull: ['triangle',450,710,.19],
+  monkey: ['triangle',360,640,.15],
+  dog: ['square',180,79,.09],
+  rabbit: ['sine',690,890,.055],
+  goat: ['triangle',270,220,.18],
+  chicken: ['triangle',440,270,.065],
+  duck: ['square',380,160,.135],
+  hedgehog: ['triangle',540,330,.065],
+  deer: ['sine',175,105,.20],
+  squirrel: ['square',860,610,.075],
+};
+const SFX_RECORDINGS = {
+  draw: ['draw', .4, .09], deal: ['draw', .2, .085], place: ['place', .39, .05],
+  flip: ['flip', .25, .07], shuffle: ['shuffle', .22, .3], wave: ['wave', .11, .25, 1.25],
+  click: ['click', .21, .06], deny: ['error', .27, .15], error: ['error', .27, .2],
+  open: ['open', .32, .1], build: ['build', .44, .5], buy: ['buy', .43, .3],
+  gift: ['gift', .4, .35], decor: ['decor', .4, .2], unlock: ['unlock', .39, .6],
+  win: ['unlock', .39, 1],
+};
 
 const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 
@@ -20,6 +66,8 @@ class AudioEngine {
     this.step = 0;
     this.nextTime = 0;
     this.timer = null;
+    this.musicPack = this.soundPack = 'island';
+    this.recordings = {};
   }
 
   // Вызывается по первому жесту пользователя
@@ -47,6 +95,7 @@ class AudioEngine {
       for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
       if (this.wantMusic) this.startMusic();
       this.seaStart();
+      this.loadRecordings();
     }
     if (this.ctx.state === 'suspended' && this.suspendReasons.size === 0) this._resumeSafe();
   }
@@ -84,11 +133,66 @@ class AudioEngine {
     this.setSfxVol(on === true ? this.sfxVol || 0.9 : on === false ? 0 : on);
   }
 
-  // ---------- Музыка: несколько треков, переключение по настроению ----------
   startMusic() {
     this.wantMusic = true;
     if (!this.ctx) return;
+    if (this.musicPack === 'island') {
+      if (this.recordedMusic || this.playNextRecording()) return;
+    }
+    if (this.recordedMusic) {
+      this.recordedMusic.stop();
+      this.recordedMusic = null;
+      this.recordedTrack = null;
+    }
     this.mus.start();
+  }
+
+  playNextRecording() {
+    const tracks = PLAYLIST.filter(name => this.recordings[name]);
+    if (!tracks.length) return false;
+    const track = tracks[(tracks.indexOf(this.recordedTrack) + 1) % tracks.length];
+    const source = this.ctx.createBufferSource();
+    const gain = this.ctx.createGain();
+    source.buffer = this.recordings[track];
+    const start = this.ctx.currentTime;
+    const end = start + source.buffer.duration;
+    const fade = Math.min(.3, source.buffer.duration / 4);
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(.4, start + fade);
+    gain.gain.setValueAtTime(.4, end - fade);
+    gain.gain.linearRampToValueAtTime(0, end);
+    source.connect(gain).connect(this.music);
+    source.onended = () => {
+      source.disconnect();
+      gain.disconnect();
+      if (this.recordedMusic !== source) return;
+      this.recordedMusic = null;
+      this.startMusic();
+    };
+    this.mus.stop();
+    this.recordedMusic = source;
+    this.recordedTrack = track;
+    source.start(start);
+    return true;
+  }
+  setPacks(music, sound) {
+    this.musicPack = music === 'classic' ? 'classic' : 'island';
+    this.soundPack = sound === 'classic' ? 'classic' : 'island';
+    if (this.ctx) this.loadRecordings();
+    if (this.wantMusic) this.startMusic();
+  }
+  loadRecordings() {
+    for (const [name, url] of Object.entries(RECORDINGS)) {
+      const music = PLAYLIST.includes(name);
+      if ((music ? this.musicPack : this.soundPack) !== 'island' ||
+          Object.hasOwn(this.recordings, name)) continue;
+      this.recordings[name] = null;
+      fetch(url).then(response => response.arrayBuffer()).then(bytes => this.ctx.decodeAudioData(bytes))
+        .then(buffer => {
+          this.recordings[name] = buffer;
+          if (music && this.wantMusic) this.startMusic();
+        }).catch(() => { /* The corresponding synthesized sound stays available. */ });
+    }
   }
   // 0 — меню, 1 — игра
   setIntensity(v) {
@@ -144,7 +248,39 @@ class AudioEngine {
     s.stop(t + dur + 0.02);
   }
 
+  actorSound(species) {
+    if(!this._ok('actor',.18))return;
+    if(species==='turtle'){
+      this._noise(.32,.12,'bandpass',1350,440);
+      this._osc('sine',370,145,.2,.065);
+    }else if(species==='crab'){
+      this._noise(.065,.12,'bandpass',2750,1380);
+      this._noise(.065,.1,'bandpass',2150,1060,undefined,.1);
+    }else{
+      const [voice,high,low,time]=ACTOR_CALLS[species]??['sine',495,690,.14];
+      this._osc(voice,high,low,time,.06);
+      this._osc(voice,high*1.16,low*.87,time*.72,.042,undefined,time+.04);
+    }
+  }
+
   play(name, p = 0) {
+    const preset = this.soundPack === 'island' && SFX_RECORDINGS[name];
+    const buffer = preset && this.recordings[preset[0]];
+    if (buffer) {
+      const [, volume, gap, limit] = preset;
+      if (!this._ok(name, gap)) return;
+      const source = this.ctx.createBufferSource();
+      const gain = this.ctx.createGain();
+      source.buffer = buffer;
+      if (name === 'deal' || name === 'place') source.playbackRate.value = .95 + Math.random() * .12;
+      source.connect(gain).connect(this.sfx);
+      const now = this.ctx.currentTime;
+      const duration = Math.min(buffer.duration, limit ?? Infinity);
+      gain.gain.setValueAtTime(volume, now);
+      gain.gain.linearRampToValueAtTime(0, now + duration);
+      source.start(now, 0, duration);
+      return;
+    }
     const o = (...a) => this._osc(...a);
     const n = (...a) => this._noise(...a);
     switch (name) {
@@ -166,6 +302,8 @@ class AudioEngine {
           o('sine', 260, 180, 0.06, 0.06);
         }
         break;
+      case 'decor':
+        return this.play('place');
       case 'draw':
         if (this._ok(name, 0.05)) n(0.12, 0.08, 'bandpass', 1500, 3200);
         break;
@@ -259,7 +397,7 @@ class AudioEngine {
     const c = this.ctx;
     const t = c.currentTime;
     const S = this.sea;
-    const lvl = this.seaLevel ?? 1;
+    const lvl = (this.seaLevel ?? 1) * (this.soundPack === 'island' ? .58 : 1);
     const dur = 3 + Math.random() * 2.5;
     // накат: громкость и фильтр поднимаются и спадают
     S.g.gain.cancelScheduledValues(t);

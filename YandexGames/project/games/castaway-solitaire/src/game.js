@@ -13,21 +13,26 @@ import { buildLevel, rng, MAIN_LEVELS } from './logic.js';
 import { PROJECTS, COST, FREE_UNDO, WIN_COINS, AD_COINS } from './data.js';
 import { initThumbs } from './thumbs.js';
 import { applyCosmetics } from './cosmetics.js';
+import { DECOR_BY_ID, DECOR_LIMIT, GRASS_LIMIT } from './decor.js';
 
 const MIN_AD_GAP = 150 * 1000;
 
 export class Game {
-  async start(c3, cT, uiRoot) {
+  async start(c3, cT, uiRoot, loading) {
     await save.load();
+    await loading?.('island');
     const d = save.data;
+    audio.setPacks(d.settings.musicPack, d.settings.soundPack);
     worldState();
     sdk.noAds = !!d.noAds;
-    const mobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && innerWidth < 900);
+    const mobile = /Android|iPhone|iPad|Mobile/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 0 && matchMedia('(pointer: coarse)').matches);
     this.quality = d.settings.quality === 'low' ? 'low' : d.settings.quality === 'high' ? 'high' : mobile ? 'mid' : 'high';
     this.c3 = c3;
-    this.island = new Island(c3, this.quality,d.expansion);
+    this.island = new Island(c3, this.quality,d.expansion,d.decor,d.trimmedGrass);
     initThumbs(this.island.renderer);
-    this.island.setStages(d.stages);
+    if(this.island.setStages(d.stages)) save.write();
+    loading?.('table');
     this.shade = document.getElementById('shade');
     this.cT = cT;
     this.table = new Table(cT, {
@@ -70,6 +75,10 @@ export class Game {
     window.addEventListener('resize', () => this.resize());
     this.islandInput();
     window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.decorSelection && !this.ui.modalOpen) {
+        this.cancelDecor();
+        return;
+      }
       if(e.target.closest?.('button,input,textarea,select'))return;
       if(this.paused || sdk.adActive)return;
       if (e.key === 'Escape' && this.state === 'level' && !this.ui.modalOpen && !this.paused && !sdk.adActive) this.ui.pause();
@@ -91,7 +100,7 @@ export class Game {
   }
 
   addCoins(n) {
-    save.data.coins += n;
+    save.creditCoins(n);
     save.write();
     this.ui && this.ui.refreshTop();
   }
@@ -119,10 +128,8 @@ export class Game {
   }
   setQuality(q) {
     this.quality = q === 'low' ? 'low' : 'high';
-    const r = this.island.renderer;
-    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, this.quality === 'low' ? 1 : 2));
-    r.shadowMap.enabled = this.quality !== 'low';
-    this.island.scene.traverse((o) => o.material && (o.material.needsUpdate = true));
+    this.island.quality = this.quality;
+    this.island.applyRenderQuality();
     this.resize();
   }
   setPaused(p) {
@@ -138,13 +145,18 @@ export class Game {
     let moved = 0;
     let downT = 0;
     let pinch = null;
+    let multiTouch = false;
     c.addEventListener('pointerdown', (e) => {
       audio.unlock();
-      if (this.state !== 'island' || this.ui.modalOpen || sdk.adActive) return;
+      if (this.state !== 'island' || this.ui.modalOpen || this.ui.transitioning || sdk.adActive) return;
       c.setPointerCapture(e.pointerId);
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
       moved = 0;
       downT = performance.now();
+      multiTouch = pts.size > 1;
+      if (pts.size === 1 && e.button === 0 && this.decorSelection && !this.decorPoint) {
+        this.previewSelectedDecor(this.island.pickGround(e.clientX,e.clientY),false);
+      }
       if (pts.size === 2) {
         const [a, b] = [...pts.values()];
         pinch = { d: Math.hypot(a.x - b.x, a.y - b.y), cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
@@ -152,15 +164,23 @@ export class Game {
     });
     c.addEventListener('pointermove', (e) => {
       const p = pts.get(e.pointerId);
-      if (!p || this.state !== 'island') return;
+      if (this.state !== 'island' || this.ui.modalOpen || this.ui.transitioning) return;
+      const orbit=e.pointerType==='touch'||(e.buttons&2)!==0;
+      const aiming=this.decorSelection&&pts.size<2&&(e.buttons&2)===0&&!e.shiftKey;
+      if(aiming && !this.decorPoint){
+        this.previewSelectedDecor(this.island.pickGround(e.clientX,e.clientY),false);
+      }
+      if(!p)return;
       const dx = e.clientX - p.x;
       const dy = e.clientY - p.y;
       p.x = e.clientX;
       p.y = e.clientY;
       moved += Math.abs(dx) + Math.abs(dy);
       if (pts.size === 1) {
-        if (e.buttons === 2 || e.shiftKey) this.island.pan(dx, dy);
-        else this.island.drag(dx, dy);
+        if(!aiming){
+          if(orbit&&!e.shiftKey)this.island.drag(dx,dy);
+          else this.island.pan(dx,dy);
+        }
       } else if (pts.size === 2 && pinch) {
         const [a, b] = [...pts.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
@@ -175,15 +195,24 @@ export class Game {
       if (!pts.has(e.pointerId)) return;
       pts.delete(e.pointerId);
       if (pts.size < 2) pinch = null;
-      if (this.state === 'island' && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen) {
-        const id = this.island.pickAt(e.clientX, e.clientY);
-        if (id) this.ui.project(id);
+      if (e.type === 'pointerup' && this.state === 'island' && !multiTouch && moved < 10 && performance.now() - downT < 450 && pts.size === 0 && !this.ui.modalOpen && !this.ui.transitioning) {
+        if (this.decorSelection && e.button === 0) {
+          this.previewSelectedDecor(this.island.pickGround(e.clientX, e.clientY));
+          return;
+        }
+        if(e.button!==0)return;
+        const target=this.island.pickIsland(e.clientX,e.clientY);
+        if(target?.actor)this.interactActor(target.actor);
+        else if(target?.id)this.ui.project(target.id);
       }
     };
     c.addEventListener('pointerup', up);
     c.addEventListener('pointercancel', up);
+    c.addEventListener('pointerleave', () => {
+      if(this.decorSelection && !this.decorPoint && !pts.size)this.previewSelectedDecor(null,false);
+    });
     c.addEventListener('wheel', (e) => {
-      if (this.state !== 'island') return;
+      if (this.state !== 'island' || this.ui.modalOpen || this.ui.transitioning) return;
       e.preventDefault();
       this.island.zoom(e.deltaY > 0 ? 1.1 : 0.9);
     }, { passive: false });
@@ -191,9 +220,120 @@ export class Game {
 
   expandIsland() {
     if(this.state!=='island'||!expandWorld())return false;
+    this.cancelDecor();
     clearTimeout(this.camBack);this.island.dispose();
-    this.island=new Island(this.c3,this.quality,save.data.expansion);initThumbs(this.island.renderer);this.island.setStages(save.data.stages);this.resize();this.island.setMode('island');
+    this.island=new Island(this.c3,this.quality,save.data.expansion,save.data.decor,save.data.trimmedGrass);initThumbs(this.island.renderer);const stored=this.island.setStages(save.data.stages);this.resize();this.island.setMode('island');
+    save.write();
+    if(stored)this.decorStoredNotice(stored);
     audio.play('build');this.ui.home();return true;
+  }
+  canPlaceItem(def) {
+    const inventory=save.data.decor;
+    const grass=!!def.groundCover;
+    return inventory.some(item=>item.type===def.id&&item.x===null) ||
+      (save.data.coins>=def.coins && inventory.filter(item=>!!DECOR_BY_ID[item.type].groundCover===grass).length<(grass?GRASS_LIMIT:DECOR_LIMIT));
+  }
+  chooseDecor(type,removing=false) {
+    const def = DECOR_BY_ID[type];
+    if (!def || this.state !== 'island') return false;
+    if(!removing&&!this.canPlaceItem(def))return false;
+    this.decorSelection = type;
+    this.decorPoint = null;
+    this.decorAim = null;
+    this.decorTurn = save.data.decor.find(item=>item.type===type&&item.x===null)?.turn || 0;
+    this.decorRemoving=removing;
+    this.island.showDecorGrid(def,this.decorTurn,removing);
+    this.ui.placingDecor(def);
+    return true;
+  }
+  cancelDecor() {
+    this.decorSelection = null;
+    this.decorPoint = null;
+    this.decorAim = null;
+    this.island.hideDecorGrid();
+    this.ui.placingDecor(null);
+  }
+  previewSelectedDecor(point,lock=true) {
+    const def = DECOR_BY_ID[this.decorSelection];
+    if (!def) return;
+    const previous=this.decorAim;
+    if(!lock&&previous?.x===point?.x&&previous?.z===point?.z)return;
+    this.decorAim=point;
+    if(lock)this.decorPoint=point;
+    const valid = this.island.previewDecor(point);
+    this.ui.placingDecor(def, point ? valid ? 'ready' : 'blocked' : 'select');
+  }
+  unlockDecorPoint() {
+    this.decorPoint=null;
+    const def=DECOR_BY_ID[this.decorSelection];
+    if(def)this.ui.placingDecor(def,this.decorAim?'aim':'select');
+  }
+  rotateSelectedDecor() {
+    const def=DECOR_BY_ID[this.decorSelection];
+    if(!def||!this.decorPoint||this.decorRemoving)return;
+    this.decorTurn=(this.decorTurn+1)%4;
+    this.island.showDecorGrid(def,this.decorTurn);
+    this.previewSelectedDecor(this.decorPoint);
+  }
+  placeSelectedDecor(point) {
+    const def = DECOR_BY_ID[this.decorSelection];
+    if (!def || this.state !== 'island' || !point || point!==this.decorPoint) return false;
+    if(this.decorRemoving){
+      if(!this.island.removeGrass(point.x,point.z))return false;
+      save.data.trimmedGrass=[...this.island.trimmedGrass];
+      save.write();
+      this.chooseDecor('grass',true);
+      audio.play('decor');
+      return true;
+    }
+    const inventory = save.data.decor;
+    const owned = inventory.find(item => item.type === def.id && item.x === null);
+    const id = owned?.id ?? Math.max(0, ...inventory.map(item => item.id)) + 1;
+    if (!this.canPlaceItem(def)) {
+      this.cancelDecor();
+      return false;
+    }
+    const item = {id,type:def.id,...point,turn:this.decorTurn};
+    if (!item || !this.island.installDecor(item)) {
+      this.previewSelectedDecor(point);
+      return false;
+    }
+    if (owned) inventory[inventory.indexOf(owned)]=item;
+    else {
+      inventory.push(item);
+      save.data.coins -= def.coins;
+    }
+    save.write();
+    this.cancelDecor();
+    this.ui.refreshTop();
+    audio.play('decor');
+    return true;
+  }
+  storeDecor(id) {
+    const item = save.data.decor.find(piece => piece.id === id);
+    if (!item || !this.island.storeDecor(id)) return false;
+    item.x = item.z = null;
+    save.write();
+    return true;
+  }
+  decorStoredNotice(count) {
+    this.ui.toast(LANG==='ru'?`Декор убран на склад из-за стройки (${count})`:`Decor moved to storage for construction (${count})`,3800);
+  }
+  interactActor(actor) {
+    const lines=actor.lines?.[LANG] || (LANG==='ru'?['Привет!','Рад тебя видеть.','Здесь хорошо жить!']:['Hello!','Good to see you!','I like it here!']);
+    const reactions={
+      crab:['Клац!','Click-clack!'], parrot:['Кар-р!','Squawk!'], gull:['Кья-а!','Scree!'], turtle:['Плюх!','Splash!'],
+      monkey:['У-у-а!','Ooh-ah!'], hedgehog:['Фыр-фыр!','Snuffle!'], dog:['Гав!','Woof!'],
+      rabbit:['Фру-фру!','Sniff!'], goat:['Ме-е!','Baa!'], chicken:['Ко-ко!','Cluck!'],
+      deer:['Ф-фу!','Huff!'], squirrel:['Цок-цок!','Chit-chit!'], duck:['Кря!','Quack!'],
+    };
+    const language=LANG==='ru'?0:1;
+    const task=actor.activity?.started!=null ? actor.activity.job.lines[language] : null;
+    const text=actor.species ? reactions[actor.species]?.[language] : task||lines[(actor.said||0)%lines.length];
+    if(!task)actor.said=(actor.said||0)+1;
+    actor.tapped=this.island.time;
+    audio.actorSound(actor.species);
+    this.ui.actorSpeech(actor.m,text||'♪');
   }
   // ---------- стройка ----------
   build(id) {
@@ -207,26 +347,31 @@ export class Game {
       this.ui.toast(t('needStars', { n: cost }));
       return;
     }
+    this.cancelDecor();
     d.starsSpent += cost;
     d.stages[id] = st + 1;
+    const stored = this.island.storeDecorForProject(id,st+1);
     save.write();
     this.island.focus(id);
     setTimeout(() => {
-      this.island.setStages(d.stages, id);
+      const extra = this.island.setStages(d.stages,id);
+      if(extra)save.write();
       audio.play('build');
       this.ui.toast(t('p_' + id + '_' + (st + 1)) + ' — ' + t('done'));
       const arrivals=this.island.lastArrivals;
       if(arrivals.length)setTimeout(()=>this.ui.toast((LANG==='ru'?'На острове появились: ':'New island arrivals: ')+arrivals.map(p=>LANG==='ru'?p.ru:p.en).join(', '),4000),1800);
       if (id === 'ship' && st + 1 === 3) setTimeout(() => this.ui.toast(t('shipDone'), 4000), 1800);
+      if (stored+extra) setTimeout(()=>this.decorStoredNotice(stored+extra),arrivals.length?5700:2200);
       this.ui.refreshTop();
     }, 700);
     // через пару секунд камера возвращается к общему виду
     clearTimeout(this.camBack);
-    this.camBack = setTimeout(() => this.state === 'island' && this.island.setMode('island'), 4200);
+    this.camBack = setTimeout(() => this.state === 'island' && this.island.setMode('island'), 6000);
   }
 
   // ---------- партия ----------
   playLevel(n) {
+    this.cancelDecor();
     this.ui.closeModals();
     this.n = n;
     const def = buildLevel(n);
@@ -235,7 +380,7 @@ export class Game {
     this.setPaused(false);
     this.freeUndo = FREE_UNDO;
     this.adMore = true;
-    this.island.mode = 'table';
+    this.island.setMode('table');
     this.shade.classList.add('on');
     this.cT.classList.add('on');
     this.ui.hud(n);
@@ -363,16 +508,21 @@ export class Game {
     const n = this.n;
     const prev = d.levels[n] || { stars: 0, best: 0 };
     const reward = WIN_COINS(r.stars, n) + r.coins;
+    const firstCoins = reward>0 && !d.seen.earnedCoins;
     d.levels[n] = { stars: Math.max(prev.stars, r.stars), best: Math.max(prev.best, r.score) };
     d.level = Math.max(d.level, n + 1);
-    d.coins += reward;
+    save.creditCoins(reward);
     d.wins++;
     recordVoyageWin(this.table.g.cards.length,r.best);
     save.write();
     sdk.submitScore(save.total());
     this.ui.tip('');
     this.ui.refreshTop();
-    this.ui.win({ n, stars: r.stars, score: r.score, best: prev.best > r.score ? prev.best : 0, coins: reward, left: r.left, canBuild: this.ui.affordable() > 0 });
+    const available = this.ui.nextProject();
+    const firstProject = available?.ok && !Object.values(d.stages).some(stage => stage > 0)
+      ? available.p.id : null;
+    this.ui.win({ n, stars: r.stars, score: r.score, best: prev.best > r.score ? prev.best : 0,
+      coins: reward, left: r.left, canBuild: available?.ok, firstProject, firstCoins });
   }
   doubleReward(coins, done, finished) {
     sdk.showRewarded(() => {
@@ -406,17 +556,21 @@ export class Game {
     const go = () => this.playLevel(this.n);
     ad ? this.interstitial(go) : go();
   }
-  toIsland(ad) {
+  toIsland(ad, projectId = null) {
     const go = () => {
       this.table.stop();
       this.state = 'island';
       sdk.gameplay(false);
       this.shade.classList.remove('on');
       this.cT.classList.remove('on');
-      this.island.mode = 'island';
       this.island.setMode('island');
       audio.setIntensity(0);
       this.ui.home();
+      if (projectId) {
+        this.island.focus(projectId);
+        this.ui.project(projectId);
+        return;
+      }
       // подсказать, что можно строить
       if (this.ui.affordable() > 0) setTimeout(() => this.ui.toast(t('canBuild') + ': ' + this.ui.bubbleList().map((n) => t('p_' + n.p.id)).join(', '), 3600), 900);
     };
@@ -426,12 +580,16 @@ export class Game {
   // ---------- кадр ----------
   frame(dt) {
     const lvl = this.state === 'level';
-    // во время партии остров рендерится реже (экономия батареи)
-    this.skip = (this.skip || 0) + 1;
-    if ((!lvl || document.documentElement.dataset.theme==='island') && (!lvl || this.quality === 'high' || this.skip % 2 === 0)) {
-      this.island.update(lvl ? dt * (this.quality === 'high' ? 1 : 2) : dt);
-      this.island.render();
-    }
+    const visible = !lvl || document.documentElement.dataset.theme === 'island';
+    const limited = lvl && this.quality !== 'high';
+    if (visible) {
+      this.islandElapsed = (this.islandElapsed || 0) + dt;
+      if (!limited || this.islandElapsed >= 1 / 30 - 0.002) {
+        this.island.update(this.islandElapsed);
+        this.island.render();
+        this.islandElapsed = 0;
+      }
+    } else this.islandElapsed = 0;
     if (lvl && !this.paused && !this.ui.modalOpen && !sdk.adActive) this.table.update(dt);
     if (lvl) this.table.render();
     if (lvl && this.tutStep) this.updateTipThrottled(dt);

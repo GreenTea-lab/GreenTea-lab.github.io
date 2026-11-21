@@ -6,6 +6,21 @@ import { Game } from './game.js';
 import { initVolume } from './volume.js';
 import { save } from './save.js';
 
+const loadingPhases={
+  save:[30,'Открываем сохранение…','Opening your save…'],
+  island:[54,'Готовим остров…','Preparing the island…'],
+  table:[81,'Готовим карты…','Getting the cards ready…'],
+  done:[100,'Остров готов','Your island is ready'],
+};
+
+function loading(stage){
+  const [amount,ru,en]=loadingPhases[stage];
+  document.querySelector('.load-fill').style.width=amount+'%';
+  document.querySelector('.load-progress').setAttribute('aria-valuenow',amount);
+  document.getElementById('load-status').textContent=document.documentElement.lang==='en'?en:ru;
+  if(stage==='island'&&!document.hidden)return new Promise(resolve=>requestAnimationFrame(()=>setTimeout(resolve,0)));
+}
+
 async function fontsReady() {
   try {
     await Promise.race([
@@ -19,10 +34,14 @@ async function start() {
   if(!window.WebGLRenderingContext || !document.createElement('canvas').getContext('2d'))throw Error(navigator.language.startsWith('ru')?'Обновите браузер или приложение VK.':'Please update your browser or VK app.');
   await Promise.all([sdk.init(), fontsReady()]);
   setLang(sdk.lang);
+  const english=document.documentElement.lang==='en';
+  document.title=document.getElementById('lt').textContent=english?'Castaway Solitaire':'Пасьянс Робинзона';
+  document.getElementById('load-retry').textContent=english?'Try again':'Попробовать снова';
+  loading('save');
   const game = new Game();
   window.__game = game;
   if (window.__CS_DEBUG) {window.__audio = audio;window.__sdk=sdk;}
-  await game.start(document.getElementById('c'), document.getElementById('t'), document.getElementById('ui'));
+  await game.start(document.getElementById('c'), document.getElementById('t'), document.getElementById('ui'),loading);
   window.__save = save;
   initVolume(save.data.settings);
   const unlock = () => {
@@ -45,13 +64,23 @@ async function start() {
   sdk.on('pause', () => stop('sdk'));
   sdk.on('resume', () => go('sdk'));
   document.addEventListener('contextmenu', (e) => e.preventDefault());
-  document.getElementById('loader').remove();
+  game.island.render();
+  loading('done');
+  const loader=document.getElementById('loader');
+  loader.setAttribute('aria-busy','false');
+  loader.classList.add('loaded');
+  if(!matchMedia('(prefers-reduced-motion: reduce)').matches)await new Promise(resolve=>setTimeout(resolve,260));
+  loader.remove();
   sdk.ready();
-  document.documentElement.lang=sdk.lang==='en'?'en':'ru';
-  document.title=sdk.lang==='en'?'Castaway Solitaire':'Пасьянс Робинзона';
 }
 start().catch((e) => {
   console.error(e);
-  const l = document.getElementById('lt');
-  if (l) l.textContent = (document.documentElement.lang === 'en' ? 'Failed to start: ' : 'Не удалось запустить игру: ') + (e && e.message ? e.message : e);
+  const loader=document.getElementById('loader');
+  if(!loader)return;
+  loader.dataset.error='';
+  loader.setAttribute('aria-busy','false');
+  document.getElementById('load-status').textContent=document.documentElement.lang==='en'?
+    'Could not start the game. Try again or check that your browser supports WebGL.':
+    'Не удалось запустить игру. Попробуйте снова или проверьте поддержку WebGL в браузере.';
+  document.getElementById('load-retry').hidden=false;
 });

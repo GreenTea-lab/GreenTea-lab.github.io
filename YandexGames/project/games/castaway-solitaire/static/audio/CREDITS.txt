@@ -1,0 +1,29 @@
+Island audio
+
+Feel Good Island Loop — Brandon Morris (Brandon75689), loop edited by AntumDeluge.
+https://opengameart.org/content/feel-good-island-loop
+https://opengameart.org/node/4797
+
+Playing Card Sounds — Brian MacIntosh (BMacZero).
+https://opengameart.org/content/playing-card-sounds
+Included files from the original set: shuffle.wav, cut.wav, contact1.wav, contact2.wav.
+
+Beach Ocean Waves — jasinski, sample extracted by qubodup.
+https://lpc.opengameart.org/content/beach-ocean-waves
+
+Bossa Nova — Joth.
+https://opengameart.org/content/bossa-nova
+
+All recordings above are used under Creative Commons Zero 1.0 (CC0).
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Bassa Island Game Loop — Kevin MacLeod (incompetech.com).
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100840
+
+Cozy Farm SFX — Bramble & Byte (https://aquumgifts.itch.io).
+https://opengameart.org/content/cozy-farm-sfx-50-farming-game-sound-effects-tools-harvest-shop-ui-jingles
+Included sounds: ui-click, ui-error, menu-open, craft, buy, chest-open, place-item, jingle-quest-complete.
+
+The Bassa Island Game Loop and Cozy Farm SFX recordings are used under Creative Commons Attribution 4.0.
+https://creativecommons.org/licenses/by/4.0/
+Playback levels and fades are adjusted in-game. The source files are unchanged.

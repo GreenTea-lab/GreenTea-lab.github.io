@@ -1,13 +1,20 @@
-import {WILDLIFE,wildlifeUnlocked} from './wildlife.js';
-import {planSites,contains,intersects} from './spatial.js';
+import {TURTLE,WILDLIFE,wildlifeUnlocked} from './wildlife.js';
+import {planSites,contains,intersects,movedBox} from './spatial.js';
 import {worldScale,WORLD_PROJECTS} from './world-data.js';
 // 3D-остров в море: рельеф, вода, небо, пальмы, постройки, жители, звери, птицы, камера
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { hash, Vox } from './vox.js';
 import * as M from './models.js';
-import { findRoute } from './navigation.js';
+import { NavigationGrid } from './navigation.js';
+import { DECOR_BY_ID, meadowFlower } from './decor.js';
 import { PROJECTS } from './data.js';
+import { bindLimbGeometry, limbMaterial, moveActor } from './actor-motion.js';
+import { residentLines } from './resident-dialogue.js';
+import { animateBuilding } from './building-motion.js';
+import { beachAccent,beachFixtures } from './shore-model.js';
+import { wildlifeGeometry } from './wildlife-rig.js';
+import { endResidentActivity,planResidentActivity,updateResidentActivity } from './resident-activities.js';
 
 const TS = 0.5; // размер «блока» рельефа
 const RX = 15;
@@ -15,6 +22,10 @@ const RZ = 11;
 export const WL = 0.3; // уровень воды
 const NX = 46; // колонки от -NX до NX
 const NZ = 36;
+const NAV_SAMPLES_X = NX * 4 + 1;
+const OBSTACLE_BUCKET = 3;
+const OBSTACLE_PAD = 1.4;
+const distance2 = (a,b) => (a.x-b.x)**2 + (a.z-b.z)**2;
 
 function vnoise(x, z, s) {
   const xi = Math.floor(x / s);
@@ -58,10 +69,16 @@ export function shapeF(x, z, tier=0) {
   return f;
 }
 
-const HILL = { x: -2.5, z: -6.5, r: 5.2 };
+const HILL = { x: -2.5, z: -6.5, r: 5.2, summit: 3.28, height: 10 };
+const CLIMB=[[2.95,5.35,1],[1.95,4.73,1.75],[-1.9,4.32,3.65],[-2.05,3.65,4.25],[0,3.29,5]];
+const SHORE_WIDTH=[0,.14,.20,.255];
+const WALK_ANGLES=[0,.77,-.77,1.35,-1.35];
+const SEPARATION_ANGLES=[0,.75,-.75,1.55,-1.55,2.4,-2.4,Math.PI];
+const cellKey = (x,z) => Math.floor(x/TS) + ',' + Math.floor(z/TS);
+const angleFor = turn => turn * Math.PI/2;
 
 export class Island {
-  constructor(canvas, quality = 'high', expansion=0) {
+  constructor(canvas, quality = 'high', expansion=0, decor=[], trimmedGrass=[]) {
     this.expansion=expansion;this.rx=15*worldScale(expansion);this.rz=11*worldScale(expansion);
     this.canvas = canvas;
     this.quality = quality;
@@ -80,6 +97,11 @@ export class Island {
     this.anims = [];
     this.stages = {};
     this.projObjs = {};
+    this.builtAreas = [];
+    this.navCache = new Map();
+    this.navTerrain = new Uint8Array(NAV_SAMPLES_X * (NZ * 4 + 1));
+    this.projectAreas = new Map();
+    this.trimmedGrass = new Set(trimmedGrass);
     this.walkers = [];
     this.fx = [];
     this.makeSky();
@@ -90,10 +112,16 @@ export class Island {
     this.buildTerrain();
     this.makeOcean();
     this.placeSpots();
+    this.playerDecor = new Map();
+    for (const item of decor) {
+      if (item.x !== null && !this.installDecor(item, true)) item.x = item.z = null;
+    }
     this.makeDecor();
+    this.makeGrass();
     this.makeClouds();
     this.makeBirds();
     this.makeCritters();
+    this.makeActorShadows();
     // камера: сферические координаты вокруг центра
     this.cam = { yaw: 0.25, pitch: 0.82, dist: 36*worldScale(this.expansion), tx: 0, ty: 0.6, tz: 0.5 };
     this.camT = null; // цель плавного перелёта
@@ -128,6 +156,8 @@ export class Island {
     const s = (this.sun = new THREE.DirectionalLight(0xfff0d8, 2.4));
     s.position.set(14, 26, 10);
     s.castShadow = this.quality !== 'low';
+    s.shadow.autoUpdate = false;
+    s.shadow.needsUpdate = true;
     const ms = this.quality === 'high' ? 2048 : 1024;
     s.shadow.mapSize.set(ms, ms);
     const sc = s.shadow.camera;
@@ -172,6 +202,20 @@ export class Island {
   }
 
   // ---------- рельеф ----------
+  summitTrail(x,z){
+    const beacon=this.sitePlan.beacon;
+    x-=beacon.x;z-=beacon.z;
+    if(z<2.8||z>6||Math.abs(x)>3.65)return null;
+    let closest=.61,height=null;
+    for(let i=1;i<CLIMB.length;i++){
+      const [ax,az,ay]=CLIMB[i-1],[bx,bz,by]=CLIMB[i],dx=bx-ax,dz=bz-az;
+      const t=Math.max(0,Math.min(1,((x-ax)*dx+(z-az)*dz)/(dx*dx+dz*dz)));
+      const dist=Math.hypot(x-ax-t*dx,z-az-t*dz);
+      if(dist<closest){closest=dist;height=ay+t*(by-ay);}
+    }
+    return height;
+  }
+
   hvAt(i, k) {
     const x = i * TS + TS / 2;
     const z = k * TS + TS / 2;
@@ -179,30 +223,31 @@ export class Island {
     if (f < -0.16) return -99;
     if (f < 0) return f < -0.07 ? -1 : 0;
     let h = f < 0.1 ? 1 : 2;
-    const hd = Math.hypot(x - HILL.x, z - HILL.z);
-    if (hd < HILL.r) h += Math.round(4.6 * smooth(HILL.r, 1.2, hd) + (vnoise(x, z, 1.3) - 0.5) * 1.2);
-    // площадки под постройки ровные
+    const beacon=this.sitePlan.beacon;
+    const dx=x-beacon.x,dz=z-beacon.z,d=Math.hypot(dx,dz);
+    const ridge=(vnoise(x,z,1.45)-.5)*.62+.26*Math.cos(Math.atan2(dz,dx)*3+.55);
+    if(d<HILL.r+.55){
+      const slope=smooth(HILL.r+.25,HILL.summit,d+ridge*Math.min(1,Math.max(0,d-HILL.summit)*1.8));
+      h=Math.max(h,2+Math.round((HILL.height-2)*slope));
+    }
+    const trail=this.summitTrail(x,z);
+    if(trail!==null)h=Math.round(trail/TS);
+    if(d<HILL.summit)return HILL.height;
+    // Level ordinary building pads without reshaping the coast.
     for (const p of PROJECTS) {
       if((p.tier||0)>this.expansion)continue;
-      if (p.water) continue;
+      if (p.water||p.beach||p.id==='beacon') continue;
       const site=this.sitePlan[p.id];
-      if (site && contains(site.box,x,z,.5)) h = p.id === 'beacon' ? (this._beaconH || h) : 2;
+      if (site && contains(site.box,x,z,.5)) h = 2;
     }
     return h;
   }
   buildTerrain() {
-    // площадка маяка — по высоте вершины холма
-    this._beaconH = 0;
+    this.shoreTiles=[];
     const W = NX * 2;
     const D = NZ * 2;
     const hv = (this.hv = new Int8Array(W * D));
     const idx = (i, k) => (i + NX) * D + (k + NZ);
-    // сначала холм для площадки маяка
-    {
-      const p = PROJECTS.find((q) => q.id === 'beacon');
-      const hd = Math.hypot(p.pos[0] - HILL.x, p.pos[1] - HILL.z);
-      this._beaconH = 2 + Math.round(4.6 * smooth(HILL.r, 1.2, hd));
-    }
     for (let i = -NX; i < NX; i++) for (let k = -NZ; k < NZ; k++) hv[idx(i, k)] = this.hvAt(i, k);
     this.hvIdx = idx;
     const pos = [];
@@ -237,10 +282,14 @@ export class Island {
         let top;
         if (h <= 0) top = h < 0 ? 0xd9c48e : 0xe6d29b;
         else if (h === 1) top = f < 0.04 ? 0xf0d9a0 : 0xf3dca0;
-        else if (h >= 5) top = hash(i, k, 9) > 0.35 ? 0xb9b2a6 : 0x9fc96a;
+        else if (h >= 5) top = this.rockTile(xc, zc) ? 0xb9b2a6 : 0x92b66d;
         else top = f < 0.13 ? (hash(i, k) > 0.5 ? 0xb8d37a : 0xd9d690) : hash(i, k, 2) > 0.8 ? 0x96d468 : 0x86cf62;
-        if (h >= 1 && h <= 2 && this.onPath(xc, zc)) top = hash(i, k, 4) > 0.5 ? 0xe8d39a : 0xdcc489;
+        const trail=h>0&&this.summitTrail(xc,zc)!==null;
+        const path=h>=1&&h<=2&&this.onPath(xc,zc);
+        if (path) top = hash(i, k, 4) > 0.5 ? 0xe8d39a : 0xdcc489;
+        if (trail) top = hash(i,k,4)>.55 ? 0xdad0b9 : 0xc1b49e;
         top = new THREE.Color(top).offsetHSL(0, 0, j).getHex();
+        if(h>=1&&h<=2&&f<=.32)this.shoreTiles.push({x:xc,z:zc,f,j,top,path,vertex:pos.length/3});
         quad([x0, y, z1], [x1, y, z1], [x1, y, z0], [x0, y, z0], [0, 1, 0], top);
         const sides = [
           [1, 0, [x1, z1], [x1, z0]],
@@ -259,6 +308,8 @@ export class Island {
             if (h >= 2 && layer === h) sc = h >= 5 ? 0x9b9286 : 0x78b958;
             else if (layer >= 3) sc = 0xa89c8c;
             else sc = 0xe2c483;
+            if(trail&&layer===h)sc=0xa3947a;
+            else if(layer>=3&&layer===h&&hash(i,k,layer)>.75)sc=0x858978;
             if (layer <= 0) sc = 0xd2b678;
             sc = new THREE.Color(sc).offsetHSL(0, 0, (hash(i, k, layer) - 0.5) * 0.05).getHex();
             const lk = dx === 1 ? 0.88 : dx === -1 ? 0.8 : dz === 1 ? 0.95 : 0.74;
@@ -278,12 +329,74 @@ export class Island {
     this.scene.add(m);
     this.terrain = m;
   }
+
+  refreshShore(stage){
+    if(this.shoreGroup){
+      const entries=new Set(this.shoreEntries);
+      this.staticEntries=this.staticEntries.filter(entry=>!entries.has(entry));
+      this.scene.remove(this.shoreGroup);
+      this.shoreGroup.traverse(object=>object.geometry?.dispose());
+    }
+    this.shoreGroup=null;
+    this.shoreEntries=[];
+    const colors=this.terrain.geometry.getAttribute('color');
+    const sand=new THREE.Color(),original=new THREE.Color();
+    for(const tile of this.shoreTiles){
+      original.setHex(tile.top);
+      if(stage){
+        const brightness=tile.j+(tile.f<.06?-.028:0);
+        sand.setHex([0,0xefd497,0xf4d89f,0xf8e2af][stage]).offsetHSL(0,0,brightness);
+        const mix=(1-smooth(SHORE_WIDTH[stage]-.035,SHORE_WIDTH[stage]+.045,tile.f))*(tile.path ? .42 : 1);
+        original.lerp(sand,mix);
+      }
+      for(let i=0;i<4;i++)colors.setXYZ(tile.vertex+i,original.r,original.g,original.b);
+    }
+    colors.needsUpdate=true;
+    if(!stage){this.sun.shadow.needsUpdate=true;return;}
+
+    const parts=beachFixtures(stage,M.C),start=this.staticEntries.length;
+    const list={solid:[],glow:[]};
+    for(let sector=0;sector<4;sector++){
+      const angle=sector*Math.PI/2;
+      const candidates=this.shoreTiles.filter(tile=>tile.f>.06&&tile.f<.32)
+        .map(tile=>{
+          const yaw=Math.atan2(tile.x/this.rx,tile.z/this.rz);
+          const delta=Math.atan2(Math.sin(yaw-angle),Math.cos(yaw-angle));
+          return {tile,yaw,delta};
+        }).filter(item=>Math.abs(item.delta)<.77);
+      for(const [index,part] of parts.entries()){
+        const bias=[-.22,.22,-.45,.43][index],target=part.blocks ? .19 : .125;
+        const rank=item=>Math.abs(item.delta-bias)+Math.abs(item.tile.f-target)*3;
+        candidates.sort((a,b)=>rank(a)-rank(b));
+        const model=sector%2&&part.alternate?part.alternate:part.model;
+        const place=(v,scale,blocks,supports)=>candidates.some(({tile,yaw})=>
+          this.addStatic(list,v,tile.x,tile.z,yaw,scale,null,false,blocks,supports));
+        if(!place(model,1,part.blocks,part.supports)&&!place(model,.78,part.blocks,part.supports)){
+          place(beachAccent(part.id,M.C),1,false,null);
+        }
+      }
+    }
+    this.shoreEntries=this.staticEntries.slice(start);
+    const group=new THREE.Group();
+    for(const [geometries,material] of [[list.solid,this.mat],[list.glow,this.glowMat]]){
+      if(!geometries.length)continue;
+      const mesh=new THREE.Mesh(mergeGeometries(geometries),material);
+      for(const geometry of geometries)geometry.dispose();
+      mesh.castShadow=material===this.mat;
+      mesh.receiveShadow=mesh.castShadow;
+      group.add(mesh);
+    }
+    this.shoreGroup=group;
+    this.scene.add(group);
+    this.sun.shadow.needsUpdate=true;
+  }
   // тропинки от хижины к остальным постройкам
   onPath(x, z) {
     if (!this._paths) {
       const base=this.sitePlan.hut;const h=[base.x,base.z];
-      this._paths = PROJECTS.slice(1).filter((p) => (p.tier||0)<=this.expansion && p.id !== 'beacon' && p.id !== 'lookout').map((p) => [h[0], h[1] + 1.8, this.sitePlan[p.id].x, this.sitePlan[p.id].z]);
-      this._paths.push([h[0], h[1] + 1.8, -2.6, -4.6]);
+      this._paths = PROJECTS.slice(1).filter(p=>this.sitePlan[p.id]&&p.id!=='beacon'&&p.id!=='lookout').map(p=>[h[0],h[1]+1.8,this.sitePlan[p.id].x,this.sitePlan[p.id].z]);
+      const [x,z]=CLIMB[0],beacon=this.sitePlan.beacon;
+      this._paths.push([h[0], h[1] + 1.8, beacon.x+x, beacon.z+z]);
     }
     for (const [ax, az, bx, bz] of this._paths) {
       const vx = bx - ax;
@@ -309,6 +422,10 @@ export class Island {
   }
   isLand(x, z, minF = 0.03) {
     return this.shapeF(x, z) > minF && this.ground(x, z) > 0.4;
+  }
+  rockTile(x,z) {
+    const cx=(Math.floor(x/TS)+.5)*TS,cz=(Math.floor(z/TS)+.5)*TS;
+    return this.ground(cx,cz) >= 5*TS && vnoise(cx+1,cz-1,2.1) <= .49;
   }
 
   // ---------- вода ----------
@@ -428,20 +545,278 @@ export class Island {
   geomOf(v) {
     return v.build(M.VS, 0, 0);
   }
-  addStatic(list,v,x,z,rot=0,scale=1,y=null,tree=false) {
-    const bounds=footBox(v,x,z,rot,scale),water=y!==null;
-    if(Object.values(this.spots).some(p=>intersects(bounds,p.box,.22)))return false;
+  addStatic(list,v,x,z,rot=0,scale=1,y=null,tree=false,blocks=true,supports=null) {
     // A tree needs dry, level ground under its trunk, not under its whole crown.
-    // Keep the complete crown bounds for building/decor collision checks.
+    const bounds=footBox(v,x,z,rot,scale);
     const support=tree?footBox(v,x,z,rot,scale,v.minY+8):bounds;
-    const samples=[[support.minX,support.minZ],[support.maxX,support.minZ],[support.minX,support.maxZ],[support.maxX,support.maxZ],[x,z]];
-    const heights=samples.map(([xx,zz])=>this.ground(xx,zz));
-    if(!water && (Math.min(...heights)<.4||Math.max(...heights)-Math.min(...heights)>.1))return false;
-    const base=y??(Math.max(...heights)-v.minY*M.VS*scale),minY=base+v.minY*M.VS*scale,maxY=base+(v.maxY+1)*M.VS*scale;
-    if(this.staticEntries.some(b=>intersects(bounds,b,.14)&&minY<b.maxY+.12&&maxY>b.minY-.12))return false;
-    const entry={...bounds,minY,maxY,x,z,water,tree,nav:footBox(v,x,z,rot,scale,Math.min(v.maxY,v.minY+8))};this.staticEntries.push(entry);
-    const g=this.geomOf(v),matrix=new THREE.Matrix4().compose(new THREE.Vector3(x,base,z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),rot),new THREE.Vector3(scale,scale,scale));
+    const placement = this.staticPlacement(v, bounds, support, x, z, scale, y, tree, blocks,false,supports ? .5 : .1);
+    if (!placement) return false;
+    placement.nav = footBox(v,x,z,rot,scale,Math.min(v.maxY,v.minY+8));
+    this.staticEntries.push(placement);
+    if(supports){
+      // Posts extend to the local sand. The shore keeps its original steps and slopes.
+      const cos=Math.cos(rot),sin=Math.sin(rot),unit=M.VS*scale,wood=new Vox();
+      for(const [a,b] of supports){
+        const gx=x+(a*cos+b*sin)*unit,gz=z+(-a*sin+b*cos)*unit;
+        const depth=Math.ceil((placement.base-this.ground(gx,gz))/unit);
+        if(depth>0)wood.box(a,-depth,b,a+1,0,b,M.C.woodD);
+      }
+      if(wood.m.size)v=new Vox().merge(v).merge(wood);
+    }
+    const g=this.geomOf(v),matrix=new THREE.Matrix4().compose(new THREE.Vector3(x,placement.base,z),new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),rot),new THREE.Vector3(scale,scale,scale));
     if(g.geo)list.solid.push(g.geo.applyMatrix4(matrix));if(g.glow)list.glow.push(g.glow.applyMatrix4(matrix));return true;
+  }
+  staticPlacement(v, bounds, support, x, z, scale, y, tree, blocks, player=false,maxStep=.1) {
+    const water = y !== null;
+    const edge=.001;
+    const samples=[[support.minX+edge,support.minZ+edge],[support.maxX-edge,support.minZ+edge],[support.minX+edge,support.maxZ-edge],[support.maxX-edge,support.maxZ-edge],[x,z]];
+    const heights=samples.map(([xx,zz])=>this.ground(xx,zz));
+    const low=Math.min(...heights),high=Math.max(...heights);
+    if(!water&&(low<.4||high-low>maxStep))return null;
+    const base=y??(high-v.minY*M.VS*scale),minY=maxStep>.1?low:base+v.minY*M.VS*scale,maxY=base+(v.maxY+1)*M.VS*scale;
+    const area={...bounds,base,minY,maxY,x,z,water,tree,blocks,player};
+    if(player ? this.builtAreas.some(box=>this.overlaps(area,box)) :
+      Object.values(this.spots).some(p=>intersects(bounds,p.box,.22)))return null;
+    if(this.staticEntries.some(b=>!b.groundCover && this.overlaps(area,b,player ? .01 : .14)))return null;
+    return area;
+  }
+  overlaps(a,b,gap=0) {
+    return intersects(a,b,gap) && a.minY < b.maxY+.03 && a.maxY > b.minY-.03;
+  }
+  decorShape(def,turn=0) {
+    const model = def.model();
+    const rot=angleFor(turn);
+    const support=footBox(model,0,0,rot,1,def.tree ? model.minY+8 : null);
+    const ox=-(support.minX+support.maxX)/2,oz=-(support.minZ+support.maxZ)/2;
+    return {model,def,turn,rot,ox,oz,bounds:movedBox(footBox(model,0,0,rot),ox,oz),
+      support:movedBox(support,ox,oz),nav:movedBox(footBox(model,0,0,rot,1,Math.min(model.maxY,model.minY+8)),ox,oz)};
+  }
+  decorPlacement(shape, x, z) {
+    if (!this.isLand(x,z,0)) return null;
+    const cover=!!shape.def.groundCover;
+    if (cover && (this.rockTile(x,z) || this.staticEntries.some(b=>b.groundCover&&cellKey(b.x,b.z)===cellKey(x,z)))) return null;
+    const bounds = movedBox(shape.bounds,x,z);
+    const support = movedBox(shape.support,x,z);
+    return this.staticPlacement(shape.model,bounds,support,x,z,1,null,!!shape.def.tree,!cover&&!shape.def.walkable,true);
+  }
+  installDecor(item, relocate = false) {
+    const def = DECOR_BY_ID[item.type];
+    if (!def || this.playerDecor.has(item.id)) return false;
+    const turn=item.turn||0;
+    const selected=this.decorPicker?.shape;
+    const shape = selected?.def === def && selected.turn === turn ? selected : this.decorShape(def,turn);
+    const place = (x, z) => {
+      const entry = this.decorPlacement(shape,x,z);
+      if (!entry) return false;
+      entry.nav = movedBox(shape.nav,x,z);
+      entry.groundCover=!!def.groundCover;
+      this.staticEntries.push(entry);
+      const group = this.meshOf(shape.model,!entry.groundCover);
+      group.position.set(x+shape.ox,entry.base,z+shape.oz);
+      group.rotation.y=shape.rot;
+      this.scene.add(group);
+      this.playerDecor.set(item.id, {group, entry, item});
+      Object.assign(item, {x, z});
+      if(entry.blocks)this.refreshPaths();
+      if(!entry.groundCover)this.sun.shadow.needsUpdate=true;
+      this.maskGrass();
+      return true;
+    };
+    if (place(item.x, item.z)) return true;
+    if (!relocate) return false;
+    for (let radius = .5; radius <= 5; radius += .5) {
+      for (let i = 0; i < 16; i++) {
+        const angle = i * Math.PI / 8;
+        const x = Math.round((item.x + radius * Math.cos(angle)) * 4) / 4;
+        const z = Math.round((item.z + radius * Math.sin(angle)) * 4) / 4;
+        if (place(x, z)) return true;
+      }
+    }
+    return false;
+  }
+  storeDecor(id, refresh = true) {
+    const placed = this.playerDecor.get(id);
+    if (!placed) return false;
+    this.scene.remove(placed.group);
+    placed.group.traverse(object => object.geometry?.dispose());
+    this.staticEntries.splice(this.staticEntries.indexOf(placed.entry), 1);
+    this.playerDecor.delete(id);
+    if(placed.entry.blocks)this.invalidateNavigation();
+    if(!placed.entry.groundCover)this.sun.shadow.needsUpdate=true;
+    if(refresh){
+      if(placed.entry.blocks)this.refreshPaths();
+      this.maskGrass();
+    }
+    return true;
+  }
+  storeDecorForProject(id, stage) {
+    if (!stage || !this.spots[id]) return 0;
+    const area=this.projectArea(id,stage);
+    let stored=0;
+    for(const [key,{entry,item}] of this.playerDecor) {
+      if(!this.overlaps(entry,area)) continue;
+      this.storeDecor(key,false);
+      item.x=item.z=null;
+      stored++;
+    }
+    if(stored)this.maskGrass();
+    return stored;
+  }
+  refreshPaths() {
+    this.invalidateNavigation();
+    for (const actor of this.landAnimals ? this.allActors() : []) {
+      endResidentActivity(this,actor);
+      actor.route = [];
+      this.relocateWalker(actor);
+      actor.wait = .2 + Math.random() * .85;
+    }
+  }
+
+  invalidateNavigation() {
+    this.navCache.clear();
+    this.obstacleBuckets = null;
+  }
+  makeGrass() {
+    const vertices = [], colors = [];
+    const shades = [0x478c35, 0x61a842, 0x83b449, 0x6aaf45];
+    for (let i = 0; i < 5; i++) {
+      const x = (hash(i,11)-.5)*.38, z = (hash(i,12)-.5)*.35;
+      const lean = (hash(i,13)-.5)*.24, height = .15 + hash(i,14)*.28;
+      const color = new THREE.Color(shades[i%shades.length]);
+      for (const [dx,dz] of [[.045,0],[0,.045]]) {
+        vertices.push(x-dx,0,z-dz,x+dx,0,z+dz,x+lean,height,z+lean);
+        colors.push(color.r*.78,color.g*.78,color.b*.78,color.r,color.g,color.b,color.r,color.g,color.b);
+      }
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));
+    geometry.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));
+    const material = new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide});
+    const spots = [];
+    for (let i=-NX+1; i<NX; i++) for (let j=-NZ+1; j<NZ; j++) {
+      const x=(i+.5)*TS,z=(j+.5)*TS;
+      if (hash(i,j,553) > .20 + .18*vnoise(x,z,2) || this.ground(x,z) < .9 || this.rockTile(x,z) ||
+          !this.isLand(x,z,.11) || this.onPath(x,z) ||
+          this.staticEntries.some(entry => !entry.player && !entry.water && contains(entry,x,z,.12))) continue;
+      spots.push({x,z});
+    }
+    const mesh = new THREE.InstancedMesh(geometry,material,spots.length);
+    mesh.frustumCulled = false;
+    this.grass = {mesh, spots};
+    this.scene.add(mesh);
+    this.maskGrass();
+  }
+  maskGrass() {
+    if (!this.grass) return;
+    const {mesh, spots} = this.grass;
+    const placed = [...this.playerDecor.values()];
+    const obstacles = this.builtAreas;
+    for(const {group,entry} of placed) {
+      if (entry.groundCover) group.visible = !placed.some(p=>!p.entry.groundCover&&this.overlaps(entry,p.entry));
+    }
+    const transform = new THREE.Object3D();
+    this.grass.visible=new Set();
+    spots.forEach(({x,z}, index) => {
+      const hidden = this.trimmedGrass.has(cellKey(x,z)) || placed.some(({entry}) => contains(entry,x,z,.14)) ||
+        (this.stages.beach&&this.ground(x,z)<=1&&this.shapeF(x,z)<SHORE_WIDTH[this.stages.beach]-.025) ||
+        this.shoreEntries?.some(area=>contains(area,x,z,.07)) ||
+        obstacles.some(area=>contains(area,x,z,.05) && area.minY<this.ground(x,z)+.45);
+      if(!hidden)this.grass.visible.add(cellKey(x,z));
+      transform.position.set(x,this.ground(x,z),z);
+      transform.rotation.y = hash(index,17) * Math.PI * 2;
+      transform.scale.setScalar(hidden ? 0 : .65 + hash(index,18)*.75);
+      transform.updateMatrix();
+      mesh.setMatrixAt(index, transform.matrix);
+    });
+    mesh.instanceMatrix.needsUpdate = true;
+  }
+  manualGrassAt(x,z) {
+    return [...this.playerDecor.values()].find(({entry})=>entry.groundCover&&cellKey(x,z)===cellKey(entry.x,entry.z));
+  }
+  hasGrass(x,z) {
+    return !!this.manualGrassAt(x,z) || this.grass.visible.has(cellKey(x,z));
+  }
+  removeGrass(x,z) {
+    if(!this.hasGrass(x,z)) return false;
+    const manual=this.manualGrassAt(x,z);
+    if(manual){
+      this.storeDecor(manual.item.id,false);
+      manual.item.x=manual.item.z=null;
+    }
+    this.trimmedGrass.add(cellKey(x,z));
+    this.maskGrass();
+    return true;
+  }
+  showDecorGrid(def, turn=0, removing=false) {
+    this.hideDecorGrid();
+    const shape = this.decorShape(def,turn);
+    const group = new THREE.Group();
+    const lines = [];
+    const half = TS*.43;
+    for (let i=-NX; i<NX; i++) for (let j=-NZ; j<NZ; j++) {
+      const x=(i+.5)*TS,z=(j+.5)*TS;
+      if (removing ? !this.hasGrass(x,z) : !this.decorPlacement(shape,x,z)) continue;
+      const y=this.ground(x,z)+.035;
+      lines.push(x-half,y,z-half,x+half,y,z-half, x+half,y,z-half,x+half,y,z+half,
+        x+half,y,z+half,x-half,y,z+half, x-half,y,z+half,x-half,y,z-half);
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position',new THREE.Float32BufferAttribute(lines,3));
+    const grid = new THREE.LineSegments(geometry,new THREE.LineBasicMaterial({color:0xb7ff90,transparent:true,opacity:.74,depthWrite:false}));
+    group.add(grid);
+    const ghost = this.meshOf(shape.model,false);
+    ghost.rotation.y=shape.rot;
+    for (const part of ghost.children) {
+      part.material = new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:.68,depthWrite:false});
+      part.renderOrder = 2;
+    }
+    const geometryMarker=new THREE.BufferGeometry();
+    const marker=new THREE.Mesh(geometryMarker,new THREE.MeshBasicMaterial({
+      color:0xc3ff99,side:THREE.DoubleSide,transparent:true,opacity:.48,depthWrite:false,
+    }));
+    marker.frustumCulled=false;
+    marker.renderOrder=1;
+    ghost.visible = marker.visible = false;
+    group.add(ghost,marker);
+    this.scene.add(group);
+    this.decorPicker = {group,shape,ghost,marker,removing,available:lines.length/24};
+  }
+  previewDecor(point) {
+    const picker = this.decorPicker;
+    if (!picker) return false;
+    const {ghost,marker,shape,removing} = picker;
+    ghost.visible = !!point && !removing;
+    marker.visible = !!point;
+    if (!point) {picker.footprint=0;return false;}
+    const {x,z} = point;
+    const place = removing ? this.hasGrass(x,z) : this.decorPlacement(shape,x,z);
+    const y = place?.base ?? Math.max(WL,this.ground(x,z))-shape.model.minY*M.VS;
+    const bounds = shape.def.groundCover ? {minX:x-TS/2,maxX:x+TS/2,minZ:z-TS/2,maxZ:z+TS/2} : movedBox(shape.bounds,x,z);
+    ghost.position.set(x+shape.ox,y,z+shape.oz);
+    for (const part of ghost.children) part.material.color.setHex(place ? 0xcaffbb : 0xff6559);
+    marker.material.color.setHex(place && !removing ? 0x9bff5c : 0xff735e);
+    const positions=[];
+    const firstX=Math.floor((bounds.minX+.001)/TS),endX=Math.ceil((bounds.maxX-.001)/TS);
+    const firstZ=Math.floor((bounds.minZ+.001)/TS),endZ=Math.ceil((bounds.maxZ-.001)/TS);
+    for(let i=firstX;i<endX;i++)for(let j=firstZ;j<endZ;j++){
+      const cx=(i+.5)*TS,cz=(j+.5)*TS,cy=Math.max(WL,this.ground(cx,cz))+.045,h=TS*.43;
+      positions.push(cx-h,cy,cz-h,cx-h,cy,cz+h,cx+h,cy,cz+h,cx-h,cy,cz-h,cx+h,cy,cz+h,cx+h,cy,cz-h);
+    }
+    marker.geometry.dispose();
+    marker.geometry=new THREE.BufferGeometry();
+    marker.geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+    picker.footprint=positions.length/18;
+    return !!place;
+  }
+  hideDecorGrid() {
+    if (!this.decorPicker) return;
+    const {group} = this.decorPicker;
+    this.scene.remove(group);
+    group.traverse(object => {
+      object.geometry?.dispose();
+      object.material?.dispose();
+    });
+    this.decorPicker = null;
   }
   nearSpot(x,z,pad=1.2){return Object.values(this.spots).some(p=>contains(p.box,x,z,pad));}
   makeDecor() {
@@ -472,19 +847,37 @@ export class Island {
       if(this.palmPos.some(p=>Math.hypot(p[0]-x,p[1]-z)<2.1))continue;
       if(this.addStatic(list,M.palm(50+dx,26),x,z,dx,.9,null,true))this.palmPos.push([x,z]);
     }
-    // кусты, цветы, камни
-    for (let i = 0; i < 80; i++) {
-      const x = (R(i * 3 + 1) - 0.5) * this.rx * 1.8;
-      const z = (R(i * 3 + 2) - 0.5) * this.rz * 1.8;
-      const f = this.shapeF(x, z);
-      if (f < 0.12 || this.nearSpot(x, z, 0.9)) continue;
-      const g = this.ground(x, z);
-      if (g < 0.9) continue;
-      const t = R(i * 3 + 3);
-      if (Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - 1 && t < 0.5) this.addStatic(list, M.rock(i, 0.8 + t), x, z, t * 6);
-      else if (t < 0.45) this.addStatic(list, M.bush(i, t < 0.15), x, z, t * 9);
-      else if (t < 0.8) this.addStatic(list, M.flowers(i), x, z, 0);
-      else this.addStatic(list, M.rock(i, 0.6), x, z, t * 6);
+    // Ground cover and blooming shrubs appear on every new coast.
+    this.naturalPlants = 0;
+    this.hillPlants = 0;
+    // Use the centres of individual terraces so plants sit flat on the stepped hill.
+    const hillPlants = [];
+    for (let i = 0; i < 144 && this.hillPlants < 12; i++) {
+      const angle = i * 2.39996;
+      const radius = 2.2 + R(i + 2700) * 2.6;
+      const x = Math.floor((HILL.x + Math.cos(angle) * radius) / TS) * TS + TS / 2;
+      const z = Math.floor((HILL.z + Math.sin(angle) * radius) / TS) * TS + TS / 2;
+      if (!this.isLand(x, z, .065) || this.onPath(x, z) || hillPlants.some(p => Math.hypot(x-p.x,z-p.z) < 1.35)) continue;
+      const model = this.hillPlants < 2 ? DECOR_BY_ID.lantern.model() : meadowFlower(i);
+      if (this.addStatic(list, model, x, z, 0, .59, null, false, false)) {
+        hillPlants.push({x,z});
+        this.hillPlants++;
+      }
+    }
+    const flowers = [];
+    for (let i = 0; i < 680 && this.naturalPlants < 29 + this.expansion * 5; i++) {
+      const x = (R(i * 3 + 19) - .5) * this.rx * 1.9;
+      const z = (R(i * 3 + 20) - .5) * this.rz * 1.9;
+      const hill = Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - .3;
+      if (hill) continue;
+      if (!this.isLand(x, z, .075) || this.onPath(x, z) || this.nearSpot(x, z, .24)) continue;
+      const shrub = R(i * 3 + 21) < .21;
+      if (!shrub && flowers.some(p => Math.hypot(x-p.x,z-p.z) < 2)) continue;
+      const plant = shrub ? M.bush(i, true) : meadowFlower(i);
+      if (this.addStatic(list, plant, x, z, 0, shrub ? .82 : .65, null, false, shrub)) {
+        if (!shrub) flowers.push({x,z});
+        this.naturalPlants++;
+      }
     }
     // ракушки, звёзды, коряги на песке
     for (let i = 0; i < 60; i++) {
@@ -586,52 +979,101 @@ export class Island {
   }
 
   makeBirds() {
-    this.gulls = [];
     const body = this.geomOf(M.wingBird());
     const wl = this.geomOf(M.wing(-1));
     const wr = this.geomOf(M.wing(1));
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true });
-    // A single gull on the small starting island; a second on the larger coast.
-    for (let i = 0; i < 1 + Math.floor(this.expansion / 3); i++) {
-      const g = new THREE.Group();
-      g.add(new THREE.Mesh(body.geo, mat));
-      const l = new THREE.Mesh(wl.geo, mat);
-      const r = new THREE.Mesh(wr.geo, mat);
-      l.position.x = -0.1;
-      r.position.x = 0.1;
-      g.add(l, r);
-      g.userData = { l, r, a: hash(i, 9) * 6, rad: 12 + hash(i, 8) * 16, y: 9 + hash(i, 7) * 7, sp: 0.15 + hash(i, 6) * 0.12, cx: (hash(i, 5) - 0.5) * 10, cz: (hash(i, 4) - 0.5) * 8 };
-      g.scale.setScalar(1.6);
-      this.scene.add(g);
-      this.gulls.push(g);
-    }
-    // попугай кружит над лагерем
-    this.parrot = this.meshOf(M.parrot());
-    this.parrot.scale.setScalar(1.3);
-    this.scene.add(this.parrot);
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(body.geo,mat));
+    const l=new THREE.Mesh(wl.geo,mat),r=new THREE.Mesh(wr.geo,mat);
+    l.position.x=-.15;
+    r.position.x=.15;
+    g.add(l,r);
+    g.userData={
+      m:g,species:'gull',l,r,a:.55,rad:10*worldScale(this.expansion),
+      y:7.6,sp:.18,cx:-1.5,cz:1,
+    };
+    g.scale.setScalar(1.22);
+    this.scene.add(g);
+    this.gulls=[g];
   }
 
-  actorMesh(v,scale=1,shadow=true){
-    const m=this.meshOf(v,shadow),box=new THREE.Box3().setFromObject(m),center=box.getCenter(new THREE.Vector3());
+  actorMesh(v,scale=1,species){
+    const m=species&&species!=='person'?new THREE.Group():this.meshOf(v,false);
+    if(species&&species!=='person'){
+      const rigid=new THREE.Mesh(wildlifeGeometry(v,species),this.mat);
+      rigid.receiveShadow=true;
+      m.add(rigid);
+    }
+    const box=new THREE.Box3().setFromObject(m),center=box.getCenter(new THREE.Vector3());
     for(const child of m.children){child.position.x-=center.x;child.position.z-=center.z;child.position.y-=box.min.y;}
+    const body=m.children[0];
+    if(species){
+      if(species==='person')bindLimbGeometry(body.geometry);
+      m.gait={value:new THREE.Vector2()};
+      body.material=limbMaterial(this.mat,m.gait);
+    }
     m.scale.setScalar(scale);const size=box.getSize(new THREE.Vector3());m.userData.bodyRadius=Math.hypot(size.x,size.z)*scale/2;return m;
   }
   makeCritters(){this.crabs=[];this.landAnimals=[];this.turtles=[];this.updateWildlife({});}
   allActors(){return [...this.walkers,...this.landAnimals];}
+  makeActorShadows() {
+    const g=new THREE.PlaneGeometry(1,1);
+    g.rotateX(-Math.PI/2);
+    const m=new THREE.MeshBasicMaterial({color:0x29352e,map:this.puffTex,transparent:true,opacity:.23,depthWrite:false});
+    const mesh = new THREE.InstancedMesh(g,m,M.PEOPLE.length+WILDLIFE.length+1);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    mesh.frustumCulled=false;
+    mesh.count=0;
+    this.actorShadows={mesh,transform:new THREE.Object3D()};
+    this.scene.add(mesh);
+  }
+
+  updateActorShadows(actors) {
+    const {mesh,transform}=this.actorShadows;
+    mesh.count=actors.length;
+    for(let i=0;i<actors.length;i++){
+      const actor=actors[i], width=Math.max(.5,actor.radius*1.7);
+      transform.position.set(actor.x,this.ground(actor.x,actor.z)+.016,actor.z);
+      transform.scale.set(width,1,width*.82);
+      transform.updateMatrix();
+      mesh.setMatrixAt(i,transform.matrix);
+    }
+    mesh.instanceMatrix.needsUpdate=true;
+  }
+  makeTurtle(lane) {
+    const m=this.actorMesh(M.turtle(),.92);
+    const head=this.meshOf(M.turtleHead(),false);
+    head.position.set(-.05,.12,.39);
+    m.add(head);
+    const flippers=[];
+    for (const side of [-1,1])for(const rear of [false,true]){
+      const part=this.meshOf(M.turtleFlipper(side,rear),false);
+      part.position.set(side*.36-.05,.005,rear?-.31:.23);
+      flippers.push({part,side,rear});
+      m.add(part);
+    }
+    Object.assign(m.userData,{m,head,flippers,phase:lane*2.1,species:'turtle'});
+    return m;
+  }
   updateWildlife(stages){
-    // Keep the beach varied rather than filling it with identical crabs.
-    const crabCount=1+Math.floor(this.expansion/2);
-    for(let i=this.crabs.length;i<crabCount;i++){
-      const m=this.actorMesh(M.crab(),1.2,false),w={id:'crab-'+i,species:'crab',m,x:0,z:3+i*.7,route:[],wait:i*.3,ph:i,speed:1.35,radius:.44};
+    if(!this.crabs.length){
+      const m=this.actorMesh(M.crab(),.74,'crab'),w={id:'crab-0',species:'crab',m,x:0,z:3,route:[],wait:.3,ph:0,speed:1.35,radius:.44};
       w.radius=m.userData.bodyRadius;m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);this.crabs.push(m);
     }
-    for(const def of WILDLIFE)if(wildlifeUnlocked(def,stages))for(let i=0;i<def.count;i++){
-      const id=def.id+'-'+i;if(this.landAnimals.some(w=>w.id===id))continue;
-      const near=this.spots[def.requires[0]],m=this.actorMesh(M[def.id](),def.scale),w={id,species:def.id,m,x:near.x+2+i*.8,z:near.z+2,route:[],wait:i*.4,ph:i,speed:def.speed,radius:def.id==='deer'?.6:.46};
+    for(const def of WILDLIFE){
+      if(def===TURTLE||!wildlifeUnlocked(def,stages)||this.landAnimals.some(w=>w.species===def.id))continue;
+      const id=def.id+'-0';
+      const near=this.spots[def.requires[0]],m=this.actorMesh(M[def.id](),def.scale,def.id);
+      const radius=def.id==='parrot' ? m.userData.bodyRadius : def.id==='deer' ? .6 : .46;
+      const w={id,species:def.id,m,x:near.x+2,z:near.z+2,route:[],wait:Math.random(),ph:Math.random()*6,speed:def.speed,radius};
       m.userData=w;this.landAnimals.push(w);this.relocateWalker(w);w.y=this.ground(w.x,w.z);m.position.set(w.x,w.y,w.z);this.scene.add(m);
+      if(def.id==='parrot')this.parrot=m;
     }
-    const turtleCount=1+(this.expansion>=2?1:0)+(this.expansion>=5?1:0);
-    while(this.turtles.length<turtleCount){const m=this.actorMesh(M.turtle(),1.1,false);m.userData.phase=this.turtles.length*2.1;this.scene.add(m);this.turtles.push(m);}this.turtle=this.turtles[0];
+    if(!this.turtles.length&&wildlifeUnlocked(TURTLE,stages)){
+      const m=this.makeTurtle(0);this.scene.add(m);this.turtles.push(m);
+    }
+    this.turtle=this.turtles[0];
     this.population={people:this.walkers.length,animals:this.landAnimals.length+this.turtles.length};
   }
   swimPoint(angle,lane=0){
@@ -648,25 +1090,119 @@ export class Island {
   }
   faunaWalkable(x,z,pad=.6){return this.isLand(x,z,.025)&&!this.blocked(x,z,pad)&&Math.hypot(x-HILL.x,z-HILL.z)>HILL.r+.15;}
   // ---------- постройки ----------
+  projectArea(id,stage) {
+    const key=id+':'+stage;
+    if(!this.projectAreas.has(key)){
+      const site=this.spots[id],model=M.BUILD[id](stage);
+      const y=site.y+(id==='pier'?-.05:0);
+      this.projectAreas.set(key,{...footBox(model,site.x,site.z,site.rot),minY:y+model.minY*M.VS,maxY:y+(model.maxY+1)*M.VS});
+    }
+    return this.projectAreas.get(key);
+  }
   setStages(stages, animateId = null) {
     const peopleBefore=new Set(this.walkers.map(w=>w.id)),animalsBefore=new Set(this.landAnimals.map(w=>w.species));
+    if(this.turtles.length)animalsBefore.add(TURTLE.id);
+    let stored=0;
     for (const p of PROJECTS) {
-      if((p.tier||0)>this.expansion)continue;
+      if(!this.spots[p.id])continue;
       const s = stages[p.id] || 0;
       if (this.stages[p.id] === s && this.projObjs[p.id]) continue;
+      stored+=this.storeDecorForProject(p.id,s);
       this.stages[p.id] = s;
       this.placeProject(p, s, p.id === animateId);
     }
+    const beach=stages.beach||0;
+    if((this.stages.beach||0)!==beach){
+      this.stages.beach=beach;
+      this.refreshShore(beach);
+    }
+    this.builtAreas=Object.values(this.projObjs).map(p=>p.area).filter(Boolean);
+    this.invalidateNavigation();
+    this.maskGrass();
     this.updatePeople(stages);
     this.updateWildlife(stages);
-    this.lastArrivals=[...M.PEOPLE.filter(p=>this.walkers.some(w=>w.id===p.id)&&!peopleBefore.has(p.id)).map(p=>({ru:p.nameRU||'Новый житель',en:p.nameEN||'New neighbour'})),...WILDLIFE.filter(d=>this.landAnimals.some(w=>w.species===d.id)&&!animalsBefore.has(d.id)).map(d=>({ru:d.ru,en:d.en}))];
-    for(const w of this.allActors()){w.route=[];this.relocateWalker(w);w.wait=.3;}
+    const animalsAfter=new Set(this.landAnimals.map(w=>w.species));
+    if(this.turtles.length)animalsAfter.add(TURTLE.id);
+    this.lastArrivals=[...M.PEOPLE.filter(p=>this.walkers.some(w=>w.id===p.id)&&!peopleBefore.has(p.id)).map(p=>({ru:p.nameRU||'Новый житель',en:p.nameEN||'New neighbour'})),...WILDLIFE.filter(d=>animalsAfter.has(d.id)&&!animalsBefore.has(d.id)).map(d=>({ru:d.ru,en:d.en}))];
+    for(const w of this.allActors()){
+      endResidentActivity(this,w);
+      w.route=[];w.celebration=null;w.social=null;
+      this.relocateWalker(w);
+      w.wait=.2+Math.random()*.85;
+    }
+    if (animateId && this.spots[animateId]) this.gatherForBuild(animateId);
+    return stored;
+  }
+  gatherForBuild(id) {
+    const site = this.spots[id];
+    const distance = actor => Math.hypot(actor.x - site.x, actor.z - site.z);
+    const residents = [...this.walkers].sort((a, b) => distance(a) - distance(b)).slice(0, 4);
+    if(!residents.length)return;
+    const actors = this.allActors();
+    const claimed = [];
+    const grid=this.navigation(residents[0]);
+    for (const resident of residents) {
+      const options = [];
+      for (let z = -8; z <= 8; z += .5) {
+        for (let x = -8; x <= 8; x += .5) {
+          const point = {x: site.x + x, z: site.z + z};
+          if (Math.hypot(x, z) > 8 || !grid.has(point.x,point.z) ||
+              claimed.some(p => Math.hypot(p.x - point.x, p.z - point.z) < 1.1) ||
+              actors.some(a => a !== resident && Math.hypot(a.x - point.x, a.z - point.z) < .85)) continue;
+          // Prefer the near edge of the lot, with a short approach for the resident.
+          options.push({point, score: Math.hypot(x, z) * 2 + Math.hypot(point.x - resident.x, point.z - resident.z)});
+        }
+      }
+      options.sort((a, b) => a.score - b.score);
+      for (const {point} of options.slice(0, 8)) {
+        const route = grid.route(resident,point);
+        if (!route.length || route.length > 43) continue;
+        resident.celebration = {site, point: route.at(-1), deadline: this.time + 9, started: null};
+        resident.route = route;
+        resident.wait = 0;
+        claimed.push(resident.celebration.point);
+        break;
+      }
+    }
+  }
+  updateCelebration(w, dt) {
+    const event = w.celebration;
+    if (!event) return false;
+    const {site, point, started} = event;
+    const arrived = Math.hypot(w.x - point.x, w.z - point.z) < .15;
+    if (started === null && this.time < event.deadline && !arrived) {
+      if (!w.route.length && w.wait <= 0) {
+        w.route = this.navigation(w).route(w,point);
+        if (!w.route.length) w.celebration = null;
+      }
+      return false;
+    }
+    if ((started === null && !arrived) || (started !== null && this.time - started >= 1.8)) {
+      w.celebration = null;
+      w.route = [];
+      w.wait = .5;
+      return false;
+    }
+    if (started === null) event.started = this.time;
+    const phase = (this.time - event.started) * Math.PI * 2.3;
+    const angle = Math.atan2(site.x - w.x, site.z - w.z);
+    const delta = Math.atan2(Math.sin(angle - w.m.rotation.y), Math.cos(angle - w.m.rotation.y));
+    w.m.rotation.y += delta * Math.min(1, dt * 9);
+    w.m.gait.value.set(.6*Math.sin(phase),0);
+    w.m.rotation.x = -.13 * Math.abs(Math.sin(phase));
+    w.m.rotation.z = Math.sin(phase) * .15;
+    w.m.position.set(w.x, this.ground(w.x, w.z) + Math.abs(Math.sin(phase)) * .4, w.z);
+    return true;
   }
   placeProject(p, s, anim) {
     const old = this.projObjs[p.id];
     if (old) {
       this.scene.remove(old.grp);
-      old.grp.traverse((c) => c.geometry && c.geometry !== this.markerGeo && c.geometry.dispose && c.geometry.dispose());
+      old.grp.traverse(c=>{
+        if(c.geometry!==this.markerGeo)c.geometry?.dispose();
+        if(c.isSprite||c.userData.ownedMaterial)c.material.dispose();
+        if(c.isInstancedMesh)c.dispose();
+      });
     }
     const sp = this.spots[p.id];
     const grp = new THREE.Group();
@@ -675,11 +1211,16 @@ export class Island {
     const o = { grp, glows: [], s };
     if (s === 0) {
       // разметка: колышки с верёвкой и табличка
-      grp.add(this.meshOf(this.markerVox(p)));
+      const marker=this.markerVox(p);
+      o.lot=footBox(marker,sp.x,sp.z,sp.rot);
+      o.model=this.meshOf(marker);
+      grp.add(o.model);
     } else {
-      const m = this.meshOf(M.BUILD[p.id](s));
+      const m = this.meshOf(M.BUILD[p.id](s,true));
       if (p.id === 'pier') m.position.y = -0.05;
       grp.add(m);
+      o.model=m;
+      o.area=this.projectArea(p.id,s);
       // огоньки
       const addGlow = (x, y, z, c, size) => {
         const g = this.glow(c, size);
@@ -690,26 +1231,21 @@ export class Island {
       if(['kiln','market','pavilion','museum','tea'].includes(p.kind)&&s===3)addGlow(0,1.3,1,0xffcf80,1.5);
       if (p.id === 'fire') addGlow(0, 0.35, 0, 0xffa040, 2.4);
       if (p.id === 'beacon' && s === 1) addGlow(0, 0.9, 0, 0xffa040, 2);
-      if (p.id === 'beacon' && s === 3) {
-        addGlow(0, 4.0, 0, 0xfff0b0, 3.4);
-        const beam = new THREE.Mesh(new THREE.ConeGeometry(1.4, 14, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff6c8, transparent: true, opacity: 0.16, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }));
-        beam.rotation.z = Math.PI / 2;
-        beam.position.x = 7;
-        const piv = new THREE.Group();
-        piv.position.y = 4.0;
-        piv.add(beam);
-        grp.add(piv);
-        o.beam = piv;
-      }
+      if (p.id === 'beacon' && s === 3) addGlow(.05,5.37,.05,0xffe9ae,1.8);
+      o.animate=animateBuilding(this,p,o);
 
     }
     if (anim) {
       grp.scale.setScalar(0.01);
-      this.anims.push({ t: 0, d: 0.9, fn: (k) => grp.scale.setScalar(Math.max(0.01, easeOutBack(k))) });
+      this.anims.push({ t: 0, d: 0.9, fn: (k) => {
+        grp.scale.setScalar(Math.max(0.01,easeOutBack(k)));
+        if(k>=1)this.sun.shadow.needsUpdate=true;
+      } });
       this.puff(sp.x, sp.y + 0.3, sp.z, p.r);
     }
     this.scene.add(grp);
     this.projObjs[p.id] = o;
+    this.sun.shadow.needsUpdate=true;
   }
   markerVox(p) {
     const v = new Vox();
@@ -747,88 +1283,316 @@ export class Island {
   // ---------- жители ----------
   updatePeople(stages) {
     const built = Object.values(stages).reduce((a, b) => a + b, 0);
-    for (const def of M.PEOPLE) {
-      if ((def.requires && (stages[def.requires[0]]||0)<def.requires[1]) || built < def.from || this.walkers.some((w) => w.id === def.id)) continue;
-      const m = this.actorMesh(M.person(def.look));
-      m.scale.setScalar(0.78);
-      const sp = this.spots.hut;
-      const w = { id: def.id, m, radius:m.userData.bodyRadius*.78, x: sp.x + 1.5 + this.walkers.length, z: sp.z + 2.2, tx: 0, tz: 0, wait: 1 + this.walkers.length, ph: Math.random() * 6 };
-      w.tx = w.x;
-      w.tz = w.z;
-      w.route=[];this.relocateWalker(w);w.y=this.ground(w.x,w.z);
+    const eligible=M.PEOPLE.filter(def=>built>=def.from&&(!def.requires||(stages[def.requires[0]]||0)>=def.requires[1]));
+    let changed=false;
+    this.walkers=this.walkers.filter(w=>{
+      if(eligible.some(def=>def.id===w.id))return true;
+      endResidentActivity(this,w);
+      this.scene.remove(w.m);
+      w.m.traverse(mesh=>{mesh.geometry?.dispose();if(mesh.material!==this.glowMat)mesh.material?.dispose();});
+      changed=true;
+      return false;
+    });
+    for (const def of eligible) {
+      if(this.walkers.some(w=>w.id===def.id))continue;
+      const scale=(def.child ? .44 : .64)*(def.size??1);
+      const m = this.actorMesh(M.person(def.look),scale,'person');
+      const index=this.walkers.length;
+      const pace=def.pace??(def.child?1.14:.88+hash(index,16)*.17);
+      const w={id:def.id,m,child:!!def.child,lines:residentLines(def),radius:m.userData.bodyRadius,space:def.child ? .23 : .31,
+        order:M.PEOPLE.indexOf(def),
+        nextActivity:this.time+.45+hash(index,24)*.8,
+        pace,speed:pace,runner:def.runner??!!def.child,running:false,wait:.5+hash(index,24)*2,ph:Math.random()*6,route:[]};
+      const sp=this.spots[def.requires?.[0]];
+      const angle = index===0 ? 2.15 : index===1 ? .78 : index*2.39996;
+      const home=sp ? {x:sp.x,z:sp.z} :
+        {x:Math.cos(angle)*this.rx*.67,z:Math.sin(angle)*this.rz*.67};
+      const points=this.navigation(w).points;
+      let best=Infinity, spawn=home;
+      for(const p of points){
+        const score=distance2(p,home);
+        if(score>=best||this.walkers.some(other=>distance2(p,other)<6.25))continue;
+        spawn=p;best=score;
+      }
+      Object.assign(w,spawn);
+      this.relocateWalker(w);
+      w.y=this.ground(w.x,w.z);
       m.position.set(w.x,w.y,w.z);
       this.scene.add(m);
       this.walkers.push(w);
+      changed=true;
     }
+    if(!changed)return;
+    if(this.walkers.length>=16)this.buildResidentBatch();
+    else if(this.residentBatch){
+      this.disposeResidentBatch();
+      for(const w of this.walkers)w.m.visible=true;
+    }
+  }
+
+  buildResidentBatch() {
+    const sources=this.walkers.map(({m})=>m.children[0]);
+    const vertices=sources.reduce((total,m)=>total+m.geometry.getAttribute('position').count,0);
+    const indices=sources.reduce((total,m)=>total+m.geometry.index.count,0);
+    const strides=new Float32Array(sources.length*2);
+    const texture=new THREE.DataTexture(strides,sources.length,1,THREE.RGFormat,THREE.FloatType);
+    texture.needsUpdate=true;
+    const mesh=new THREE.BatchedMesh(sources.length,vertices,indices,limbMaterial(this.mat,{value:texture},true));
+    mesh.frustumCulled=false;
+    mesh.sortObjects=false;
+    const entries=sources.map((source,i)=>{
+      source.updateMatrix();
+      const id=mesh.addInstance(mesh.addGeometry(source.geometry));
+      const actor=this.walkers[i].m;
+      actor.visible=false;
+      return {actor,local:source.matrix,id,pose:new Float64Array(6).fill(NaN)};
+    });
+    this.disposeResidentBatch();
+    this.residentBatch={mesh,entries,matrix:new THREE.Matrix4(),texture,strides};
+    this.scene.add(mesh);
+  }
+
+  disposeResidentBatch(){
+    if(!this.residentBatch)return;
+    const {mesh,texture}=this.residentBatch;
+    this.scene.remove(mesh);
+    mesh.material.dispose();
+    mesh.dispose();
+    texture.dispose();
+    this.residentBatch=null;
+  }
+
+  updateResidentBatch() {
+    if(!this.residentBatch)return;
+    const {mesh,entries,matrix,texture,strides}=this.residentBatch;
+    let animated=false;
+    for(const {actor,local,id,pose} of entries){
+      const stride=Math.fround(actor.gait.value.x),work=Math.fround(actor.gait.value.y);
+      if(strides[id*2]!==stride||strides[id*2+1]!==work){
+        strides[id*2]=stride;strides[id*2+1]=work;animated=true;
+      }
+      const p=actor.position,r=actor.rotation;
+      if(pose[0]===p.x&&pose[1]===p.y&&pose[2]===p.z&&pose[3]===r.x&&pose[4]===r.y&&pose[5]===r.z)continue;
+      pose[0]=p.x;pose[1]=p.y;pose[2]=p.z;pose[3]=r.x;pose[4]=r.y;pose[5]=r.z;
+      actor.updateMatrix();
+      mesh.setMatrixAt(id,matrix.multiplyMatrices(actor.matrix,local));
+    }
+    if(animated)texture.needsUpdate=true;
   }
   walkable(x,z) {
     return this.isLand(x,z,.07) && !this.blocked(x,z,.42) && Math.hypot(x-HILL.x,z-HILL.z)>HILL.r+.1 && !this.palmPos?.some(p=>Math.hypot(x-p[0],z-p[1])<.5);
   }
-  actorRegion(w){
-    this.navCache ||= new Map();const fauna=!!w.species,pad=fauna?w.radius+.06:.42,key=(fauna?'animal':'person')+pad.toFixed(3);
-    if(this.navCache.has(key))return this.navCache.get(key);
-    const valid=(x,z)=>fauna?this.faunaWalkable(x,z,pad):this.walkable(x,z),all=new Set();
-    const code=(x,z)=>x+','+z;
-    for(let x=-45;x<=45;x++)for(let z=-35;z<=35;z++)if(valid(x*.5,z*.5))all.add(code(x,z));
-    const seen=new Set();let largest=new Set();
-    for(const start of all){if(seen.has(start))continue;const group=new Set([start]),q=[start.split(',').map(Number)];seen.add(start);
-      for(let i=0;i<q.length;i++){const [x,z]=q[i];for(const[dx,dz]of[[1,0],[-1,0],[0,1],[0,-1]]){const next=code(x+dx,z+dz);if(seen.has(next)||!all.has(next)||!valid((x+dx*.5)*.5,(z+dz*.5)*.5))continue;seen.add(next);group.add(next);q.push([x+dx,z+dz]);}}
-      if(group.size>largest.size)largest=group;
+  navigationTerrain(x,z) {
+    const index=(z*4+NZ*2)*NAV_SAMPLES_X+x*4+NX*2;
+    let mask=this.navTerrain[index];
+    if(mask)return mask;
+    mask=1;
+    if(this.ground(x,z)>.4){
+      const land=this.shapeF(x,z), hill=Math.hypot(x-HILL.x,z-HILL.z);
+      if(land>.025&&hill>HILL.r+.15)mask|=4;
+      if(land>.07&&hill>HILL.r+.1&&!this.palmPos.some(p=>(p[0]-x)**2+(p[1]-z)**2<.25))mask|=2;
     }
-    this.navCache.set(key,largest);return largest;
+    this.navTerrain[index]=mask;
+    return mask;
   }
-  actorRegionHas(w,x,z){return this.actorRegion(w).has(Math.round(x*2)+','+Math.round(z*2));}
+
+  navigation(w) {
+    const fauna=!!w.species, clearance=fauna ? Math.ceil((w.radius+.06)*5)/5 : .42;
+    let grid=this.navCache.get(clearance);
+    if(!grid){
+      const terrain=fauna ? 4 : 2;
+      grid=new NavigationGrid((x,z)=>!!(this.navigationTerrain(x,z)&terrain)&&!this.blocked(x,z,clearance));
+      this.navCache.set(clearance,grid);
+    }
+    return grid;
+  }
+
   relocateWalker(w) {
-    const free=(x,z)=>(w.species?this.faunaWalkable(x,z,w.radius+.06):this.walkable(x,z))&&this.actorRegionHas(w,x,z)&&!this.allActors().some(v=>v!==w&&Math.hypot(v.x-x,v.z-z)<(w.radius||.24)+(v.radius||.24)+.2);
-    if(free(w.x,w.z) && free(Math.round(w.x*2)/2,Math.round(w.z*2)/2))return;
-    for(let r=.5;r<25;r+=.5) for(let a=0;a<Math.PI*2;a+=.24){
-      const x=Math.round((w.x+Math.cos(a)*r)*2)/2,z=Math.round((w.z+Math.sin(a)*r)*2)/2;
-      if(free(x,z)){w.x=x;w.z=z;w.tx=x;w.tz=z;w.route=[];return;}
+    const grid=this.navigation(w);
+    const valid=w.species ? this.faunaWalkable(w.x,w.z,w.radius+.06) : this.walkable(w.x,w.z);
+    if(valid&&grid.has(w.x,w.z)&&(w.species||!this.nearResident(w)))return;
+    let best=Infinity, nearest;
+    for(const point of grid.points){
+      const score=distance2(w,point);
+      if(score<best&&(w.species||!this.nearResident(w,point))){best=score;nearest=point;}
+    }
+    if(!nearest)return;
+    Object.assign(w,nearest);
+    w.route=[];
+    w.y=this.ground(w.x,w.z);
+    w.m.position.set(w.x,w.y,w.z);
+  }
+
+  nearResident(w,point=w){
+    for(const other of this.walkers){
+      if(other!==w&&distance2(point,other)<(w.space+other.space)**2)return other;
     }
   }
-  tryYield(w){
-    const valid=(x,z)=>w.species?this.faunaWalkable(x,z,w.radius+.06):this.walkable(x,z),others=this.allActors().filter(v=>v!==w);
-    const start=Math.random()*Math.PI*2;
-    for(const distance of[.75,1.25,1.75])for(let i=0;i<16;i++){
-      const angle=start+i*Math.PI/8,x=Math.round((w.x+Math.cos(angle)*distance)*2)/2,z=Math.round((w.z+Math.sin(angle)*distance)*2)/2;
-      if(Math.hypot(x-w.x,z-w.z)<.4||!this.actorRegionHas(w,x,z))continue;
+
+  residentStep(w,angle,step,dt,separating=false){
+    if(step<=0)return 0;
+    const angles=separating?SEPARATION_ANGLES:WALK_ANGLES;
+    for(const offset of angles){
+      const x=w.x+Math.sin(angle+offset)*step,z=w.z+Math.cos(angle+offset)*step;
       let clear=true;
-      for(let k=1;k<=12&&clear;k++){const xx=w.x+(x-w.x)*k/12,zz=w.z+(z-w.z)*k/12;if(!valid(xx,zz)){clear=false;break;}for(const v of others){const distance=Math.hypot(v.x-xx,v.z-zz),before=Math.hypot(v.x-w.x,v.z-w.z),gap=(w.radius||.24)+(v.radius||.24)+.05;if(distance<Math.min(before,gap)-.001){clear=false;break;}}}
-      if(clear){w.route=[{x,z}];w.wait=0;return true;}
-    }
-    return false;
-  }
-  pickTarget(w) {
-    // интересные места: перед постройками, пляж, у костра
-    const keys = Object.keys(this.spots).filter((k) => k !== 'ship' && k !== 'beacon');
-    for (let i = 0; i < 30; i++) {
-      let x;
-      let z;
-      if (!w.species && Math.random() < 0.55) {
-        const s = this.spots[keys[Math.floor(Math.random() * keys.length)]];
-        const a = Math.random() * Math.PI * 2;
-        x = s.x + Math.cos(a) * (s.r + 0.9);
-        z = s.z + Math.sin(a) * (s.r + 0.9);
-      } else {
-        const a = Math.random() * Math.PI * 2;
-        const rr = (w.species?.length ? .2 : .3) + Math.random() * (w.species?.length ? .76 : .55);
-        x = Math.cos(a) * this.rx * rr;
-        z = Math.sin(a) * this.rz * rr;
+      for(const other of this.walkers){
+        if(other===w)continue;
+        const dx=x-other.x,dz=z-other.z,d=dx*dx+dz*dz;
+        if(d>=(w.space+other.space)**2)continue;
+        if(!separating||d<=distance2(w,other)+1e-6){clear=false;break;}
       }
-      if (!this.isLand(x, z, 0.05)) continue;
-      if (this.blocked(x, z)) continue;
-      if (Math.hypot(x - HILL.x, z - HILL.z) < HILL.r - 0.5) continue;
-      const valid=(x,z)=>w.species?this.faunaWalkable(x,z,w.radius+.06):this.walkable(x,z);
-      if(!valid(x,z)||!this.actorRegionHas(w,x,z)||this.allActors().some(v=>v!==w&&Math.hypot(v.x-x,v.z-z)<.9))continue;
-      const route=findRoute(w,{x,z},(x,z)=>valid(x,z)&&(Math.hypot(x-w.x,z-w.z)<.85||!this.allActors().some(v=>v!==w&&Math.hypot(v.x-x,v.z-z)<(w.radius||.24)+(v.radius||.24)+.1)));
+      if(!clear||!this.walkable(x,z))continue;
+      this.lookAtActor(w,x,z,dt);
+      w.x=x;w.z=z;
+      return step;
+    }
+    return 0;
+  }
+
+  reconnectToGrid(w,grid,away){
+    let nearest,best=Infinity;
+    for(const point of grid.points){
+      const gap=distance2(w,point);
+      if(gap>2.25||(!w.species&&this.nearResident(w,point)))continue;
+      if(away&&(gap<.35||distance2(point,away)<=distance2(w,away)))continue;
+      const score=away?Math.abs(gap-1.2):gap;
+      if(score>=best)continue;
+      const repeats=Math.ceil(Math.sqrt(gap)/.12);
+      let clear=true;
+      for(let i=1;i<=repeats;i++){
+        const x=w.x+(point.x-w.x)*i/repeats,z=w.z+(point.z-w.z)*i/repeats;
+        if(w.species ? !this.faunaWalkable(x,z,w.radius+.06) : !this.walkable(x,z)||this.nearResident(w,{x,z})){
+          clear=false;break;
+        }
+      }
+      if(clear){nearest=point;best=score;}
+    }
+    if(nearest)w.route=[nearest];
+  }
+
+  pickTarget(w,actors) {
+    const grid=this.navigation(w), points=grid.points;
+    if(!points.length)return;
+    if(!grid.has(w.x,w.z)){
+      this.reconnectToGrid(w,grid);
+      return;
+    }
+    if(!w.species&&planResidentActivity(this,w,grid)){
+      w.running=false;
+      w.speed=w.pace;
+      return;
+    }
+    const radius=w.species==='crab' ? 18 : w.species ? 8 : 10;
+    for (let i = 0; i < 30; i++) {
+      const point=points[Math.floor(Math.random()*points.length)], length=distance2(w,point);
+      if(length<2.25||length>radius**2||actors.some(v=>v!==w&&
+        (distance2(v,point)<.81||distance2(v.activity?.point??v.route.at(-1)??v,point)<.81)))continue;
+      const route=grid.route(w,point);
       if(route.length<3)continue;
-      w.route=route;w.tx=route.at(-1).x;w.tz=route.at(-1).z;
+      if(!w.species){
+        w.running=w.runner&&Math.random()<.72;
+        w.speed=w.pace*(w.running?1.38:1);
+      }
+      w.route=route;
       return;
     }
   }
+
+  indexObstacles() {
+    const buckets=new Map();
+    const record=(area,building)=>{
+      const xMin=Math.floor((area.minX-OBSTACLE_PAD)/OBSTACLE_BUCKET),xMax=Math.floor((area.maxX+OBSTACLE_PAD)/OBSTACLE_BUCKET);
+      const zMin=Math.floor((area.minZ-OBSTACLE_PAD)/OBSTACLE_BUCKET),zMax=Math.floor((area.maxZ+OBSTACLE_PAD)/OBSTACLE_BUCKET);
+      for(let i=xMin;i<=xMax;i++)for(let j=zMin;j<=zMax;j++){
+        const key=i*128+j;
+        let bucket=buckets.get(key);
+        if(!bucket){bucket=[];buckets.set(key,bucket);}
+        bucket.push({area,building});
+      }
+    };
+    for(const area of this.builtAreas)record(area,true);
+    for(const item of this.staticEntries)if(!item.water&&item.blocks!==false)record(item.nav,false);
+    this.obstacleBuckets=buckets;
+  }
+
   blocked(x,z,pad=.22) {
-    for(const id in this.spots)if(contains(this.spots[id].box,x,z,pad))return true;
-    return this.staticEntries.some(b=>!b.water&&contains(b.nav,x,z,pad));
+    if(pad>OBSTACLE_PAD)return this.builtAreas.some(a=>contains(a,x,z,pad)&&a.minY<this.ground(x,z)+1)||
+      this.staticEntries.some(b=>!b.water&&b.blocks!==false&&contains(b.nav,x,z,pad));
+    if(!this.obstacleBuckets)this.indexObstacles();
+    const key=Math.floor(x/OBSTACLE_BUCKET)*128+Math.floor(z/OBSTACLE_BUCKET);
+    const nearby=this.obstacleBuckets.get(key);
+    return !!nearby?.some(({area,building})=>contains(area,x,z,pad)&&(!building||area.minY<this.ground(x,z)+1));
+  }
+
+  lookAtActor(w,x,z,dt) {
+    const angle=Math.atan2(x-w.x,z-w.z)+(w.species==='crab'?Math.PI/2:0);
+    const delta=Math.atan2(Math.sin(angle-w.m.rotation.y),Math.cos(angle-w.m.rotation.y));
+    w.m.rotation.y+=delta*Math.min(1,dt*7);
+  }
+  startSocial() {
+    if(this.mode!=='island'||this.time<(this.nextSocial??3))return;
+    this.nextSocial=this.time+2.1;
+    for(const person of this.walkers){
+      if(person.celebration||person.social||person.activity)continue;
+      const animal=this.landAnimals.find(w=>{
+        const d=Math.hypot(person.x-w.x,person.z-w.z);
+        return !w.social && w.species!=='crab' && d>=.9 && d<=2.4;
+      });
+      if(!animal)continue;
+      person.route=[];
+      animal.route=[];
+      person.social={partner:animal,start:this.time};
+      animal.social={partner:person,start:this.time};
+      this.socialHeart(animal.x,animal.m.position.y+.8,animal.z);
+      this.nextSocial=this.time+6;
+      return;
+    }
+  }
+  socialHeart(x,y,z) {
+    if(!this.heartTexture){
+      const canvas=document.createElement('canvas');
+      canvas.width=canvas.height=48;
+      const ctx=canvas.getContext('2d');
+      ctx.fillStyle='#ff7698';
+      ctx.strokeStyle='#fff4e3';
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      ctx.moveTo(24,41);
+      ctx.bezierCurveTo(-8,22,8,1,24,14);
+      ctx.bezierCurveTo(40,1,56,22,24,41);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      this.heartTexture=new THREE.CanvasTexture(canvas);
+      this.heartTexture.colorSpace=THREE.SRGBColorSpace;
+    }
+    const m=new THREE.Sprite(new THREE.SpriteMaterial({map:this.heartTexture,transparent:true,depthWrite:false}));
+    m.position.set(x,y,z);
+    m.scale.setScalar(.48);
+    m.userData={vx:0,vy:.55,vz:0,life:0,max:1.7,heart:true};
+    this.scene.add(m);
+    this.fx.push(m);
+  }
+  animateActorReaction(w,dt) {
+    const elapsed=this.time-(w.tapped??-Infinity);
+    const social=w.social;
+    if(!social&&elapsed>=.68)return false;
+    const phase=social?this.time-social.start:elapsed;
+    if(social&&phase>=1.6){
+      w.social=null;
+      w.wait=.35;
+      w.m.rotation.x=0;
+      return false;
+    }
+    if(social)this.lookAtActor(w,social.partner.x,social.partner.z,dt);
+    const parrot=w.species==='parrot';
+    const sway=Math.sin(phase*(parrot ? 4.5 : 9));
+    const bounce=Math.abs(sway)*(parrot ? .055 : w.species ? .19 : .08);
+    w.m.gait.value.set(sway*(w.species ? .16 : .3),0);
+    w.m.rotation.x=social&&!w.species?Math.sin(phase*5)*.23:0;
+    w.m.rotation.z=sway*(parrot ? .07 : .14);
+    w.m.position.set(w.x,this.ground(w.x,w.z)+bounce,w.z);
+    return true;
   }
 
   // ---------- камера ----------
@@ -843,28 +1607,58 @@ export class Island {
     const a = this.camera.aspect;
     return (a < 1 ? 34 / Math.max(0.5, a) ** 0.85 : 34)*worldScale(this.expansion);
   }
+  applyRenderQuality() {
+    const background = this.mode === 'table' && this.quality !== 'high';
+    const ratio = Math.min(window.devicePixelRatio || 1,
+      background ? 1 : this.quality === 'high' ? 2 : this.quality === 'mid' ? 1.5 : 1);
+    if (this.renderer.getPixelRatio() !== ratio) this.renderer.setPixelRatio(ratio);
+    const shadows = this.quality !== 'low' && !background;
+    if (this.renderer.shadowMap.enabled !== shadows) {
+      this.renderer.shadowMap.enabled = shadows;
+      if(shadows)this.sun.shadow.needsUpdate=true;
+      this.scene.traverse(object => {
+        if (object.material) object.material.needsUpdate = true;
+      });
+    }
+    this.sun.castShadow = this.quality !== 'low';
+  }
   setMode(mode) {
+    if (mode === 'island' && this.mode === 'table') {
+      this.applyCam();
+      const {x, y, z} = this.camera.position;
+      const ty = .6;
+      this.cam = {tx: 0, ty, tz: 0, yaw: Math.atan2(x, z),
+        pitch: Math.atan2(y - ty, Math.hypot(x, z)), dist: Math.hypot(x, y - ty, z)};
+    }
     this.mode = mode;
+    this.applyRenderQuality();
     if (mode === 'island') this.flyTo({ yaw: 0.25, pitch: 0.82, dist: this.baseDist(), tx: 0, ty: 0.6, tz: 0.5 }, 1.2);
   }
   flyTo(c, dur = 1) {
     const from = { ...this.cam };
-    this.camT = { from, to: { ...from, ...c }, t: 0, d: dur };
+    const to = { ...from, ...c };
+    const delta = to.yaw - from.yaw;
+    to.yaw = from.yaw + Math.atan2(Math.sin(delta), Math.cos(delta));
+    this.camT = { from, to, t: 0, d: dur };
   }
   focus(id) {
     const s = this.spots[id];
+    if(id==='beach'){
+      this.flyTo({yaw:.32,tx:0,ty:.55,tz:0,dist:this.baseDist()*1.09,pitch:.93},1.1);
+      return;
+    }
     const big = id === 'lookout' || id === 'beacon' || id === 'ship';
-    this.flyTo({ tx: s.x, ty: s.y + (big ? 1.6 : 0.5), tz: s.z, dist: (big ? 20 : 15) * Math.max(1, this.baseDist() / 34) * 0.9, pitch: 0.62 }, 1.1);
+    this.flyTo({ yaw: 0.25, tx: s.x, ty: s.y + (id==='beacon' ? 2.65 : big ? 1.6 : .5), tz: s.z, dist: (big ? 20 : 15) * Math.max(1, this.baseDist() / 34) * 0.9, pitch: 0.62 }, 1.1);
   }
   applyCam() {
     const c = this.cam;
     if(this.mode==='table'){
-      // Begin at the original sea view, then slowly orbit outside every coast.
+      // Frame the full coast from a 45-degree downward angle.
       const moving=document.documentElement.dataset.motion!=='off';
-      const t=moving?this.time:0,a=this.camera.aspect,d=a<1?40:30,scale=worldScale(this.expansion);
-      const angle=Math.atan2(7,d)+this.tableOrbit,radius=Math.hypot(7,d)*scale;
-      this.camera.position.set(Math.sin(angle)*radius,(5.5+Math.sin(t*.5)*.12)*scale,Math.cos(angle)*radius);
-      this.camera.lookAt(0,a<1?3.5:2.6,0);return;
+      const angle = .25 + (moving ? this.tableOrbit : 0);
+      const radius = this.baseDist() * (this.camera.aspect < 1 ? 1.03 : .83);
+      this.camera.position.set(Math.sin(angle)*radius,.6 + radius,Math.cos(angle)*radius);
+      this.camera.lookAt(0,.6,0);return;
     }
     const cp = Math.cos(c.pitch);
     this.camera.position.set(c.tx + Math.sin(c.yaw) * cp * c.dist, c.ty + Math.sin(c.pitch) * c.dist, c.tz + Math.cos(c.yaw) * cp * c.dist);
@@ -896,25 +1690,47 @@ export class Island {
     const v = new THREE.Vector3(x, y, z).project(this.camera);
     return { x: (v.x * 0.5 + 0.5) * this.w, y: (-v.y * 0.5 + 0.5) * this.h, vis: v.z < 1 };
   }
-  // какая постройка под пальцем
-  pickAt(px, py) {
-    const ndc = new THREE.Vector2((px / this.w) * 2 - 1, -(py / this.h) * 2 + 1);
+  rayAt(px,py) {
     const ray = new THREE.Raycaster();
-    ray.setFromCamera(ndc, this.camera);
-    let best = null;
-    let bd = 1e9;
-    for (const p of PROJECTS) {
-      if((p.tier||0)>this.expansion)continue;
-      const s = this.spots[p.id];
-      const center = new THREE.Vector3(s.x, s.y + 0.8, s.z);
-      const d = ray.ray.distanceToPoint(center);
-      const rr = p.r + 0.6;
-      if (d < rr && d < bd) {
-        bd = d;
-        best = p.id;
-      }
+    ray.setFromCamera(new THREE.Vector2(px/this.w*2-1,1-py/this.h*2),this.camera);
+    return ray;
+  }
+  pickIsland(px,py) {
+    const ray=this.rayAt(px,py);
+    const targets=new Map(Object.entries(this.projObjs).map(([id,p])=>[p.model,{id}]));
+    for(const w of this.allActors()) targets.set(w.m,{actor:w});
+    for(const m of this.turtles) targets.set(m,{actor:m.userData});
+    for(const m of this.gulls) targets.set(m,{actor:m.userData});
+    const ground=ray.intersectObject(this.terrain)[0];
+    const [nearest]=ray.intersectObjects([...targets.keys()]);
+    if(nearest&&nearest.distance<=(ground?.distance??Infinity)+.01){
+      let object=nearest.object;
+      while(object&&!targets.has(object))object=object.parent;
+      return targets.get(object)??null;
     }
-    return best;
+    let best=null, radius=11;
+    for(const [mesh,target] of targets){
+      const actor=target.actor;
+      if(!actor)continue;
+      const head=mesh.position.clone().add(new THREE.Vector3(0,actor.species ? .26 : actor.child ? .42 : .68,0));
+      if(head.distanceTo(this.camera.position)>(ground?.distance??Infinity)+.4)continue;
+      const p=this.project(head.x,head.y,head.z),d=Math.hypot(px-p.x,py-p.y);
+      if(p.vis&&d<radius){best=target;radius=d;}
+    }
+    if(best||!ground)return best;
+    const {x,y,z}=ground.point;
+    const empty=Object.entries(this.projObjs).find(([id,p])=>p.lot&&Math.abs(this.spots[id].y-y)<.6&&contains(p.lot,x,z));
+    return empty?{id:empty[0]}:null;
+  }
+  pickAt(px,py) {
+    return this.pickIsland(px,py)?.id??null;
+  }
+  pickGround(px, py) {
+    const ray = this.rayAt(px,py);
+    const {point} = ray.intersectObject(this.terrain)[0] || {};
+    if (!point) return null;
+    const snap = value => (Math.floor(value / TS) + .5) * TS;
+    return {x:snap(point.x), z:snap(point.z)};
   }
 
   // ---------- кадр ----------
@@ -947,7 +1763,7 @@ export class Island {
       m.position.z += u.vz * dt;
       m.position.y += u.vy * dt;
       if (u.conf) u.vy -= 7 * dt;
-      else {
+      else if(!u.heart) {
         u.vx *= 0.94;
         u.vz *= 0.94;
         m.scale.setScalar(0.8 + u.life * 1.6);
@@ -972,67 +1788,118 @@ export class Island {
       const z = u.cz + Math.sin(u.a) * u.rad;
       g.position.set(x, u.y + Math.sin(u.a * 3) * 0.6, z);
       g.rotation.y = -u.a;
-      const f = Math.sin(t * 6 + u.a * 10) * 0.6;
-      u.l.rotation.z = f;
-      u.r.rotation.z = -f;
-    }
-    // попугай
-    {
-      const s = this.spots.hut;
-      const a = t * 0.5;
-      this.parrot.position.set(s.x + Math.cos(a) * 3.2, Math.max(8.8,s.y+3)+Math.sin(t*1.3)*.25, s.z + Math.sin(a) * 3.2);
-      this.parrot.rotation.y = -a;
-      this.parrot.rotation.z = Math.sin(t * 9) * 0.15;
+      const effort=Math.max(0,Math.sin(t*.76+u.a))**.65;
+      const f = Math.sin(t*8.8+u.a*3)*(.055+.61*effort);
+      g.rotation.z=.14+Math.sin(u.a*2)*.1;
+      g.rotation.x=.07*Math.cos(u.a*3);
+      u.l.rotation.z = -.08+f;
+      u.r.rotation.z = .08-f*.94;
+      u.l.rotation.y = f*.12;
+      u.r.rotation.y = -f*.12;
     }
     // Turtle models face +Z. Heading follows the actual ellipse tangent.
     for(const [lane,turtle]of this.turtles.entries()){
-      const angle=t*.06+2+turtle.userData.phase,p=this.swimPoint(angle,lane),next=this.swimPoint(angle+.0001,lane);
-      turtle.position.set(p.x,WL-.1+Math.sin(t*1.2+turtle.userData.phase)*.025,p.z);
-      const previous=turtle.userData.lastPoint;
-      turtle.rotation.y=previous?Math.atan2(p.x-previous.x,p.z-previous.z):Math.atan2(next.x-p.x,next.z-p.z);
-      turtle.userData.lastPoint=p;
-      turtle.rotation.z=Math.sin(t*2+turtle.userData.phase)*.035;
+      const u=turtle.userData;
+      const angle=t*.06+2+u.phase+Math.sin(t*1.6+u.phase)*.006;
+      const p=this.swimPoint(angle,lane),next=this.swimPoint(angle+.0001,lane);
+      const stroke=t*4.2+u.phase,reacting=t-(u.tapped??-Infinity)<.75;
+      turtle.position.set(p.x,WL-.045+Math.sin(t*1.25+u.phase)*.09+(reacting ? .12 : 0),p.z);
+      const previous=u.lastPoint;
+      const moved=previous&&Math.hypot(p.x-previous.x,p.z-previous.z)>1e-6;
+      turtle.rotation.y=moved?Math.atan2(p.x-previous.x,p.z-previous.z):Math.atan2(next.x-p.x,next.z-p.z);
+      u.lastPoint=p;
+      const glide=.58+.42*Math.sin(t*.9+u.phase)**2;
+      turtle.rotation.x=(Math.cos(stroke)*.06+.027*Math.sin(t*.8))*glide;
+      turtle.rotation.z=Math.sin(stroke*.5)*.085;
+      u.head.rotation.x=.18*Math.sin(stroke*.55)-(reacting ? .32 : 0);
+      u.head.rotation.y=Math.sin(t*.85+u.phase)*.14;
+      for(const {part,side,rear} of u.flippers){
+        const phase=stroke+(rear?1.55:0)+side*.16;
+        part.rotation.y=side*(.19+Math.sin(phase)*(rear ? .24 : .53)*glide);
+        part.rotation.z=side*Math.cos(phase)*(rear ? .19 : .43)*glide;
+        part.rotation.x=Math.sin(phase-.55)*(rear ? .1 : .22)*glide;
+      }
     }
     // Residents follow connected dry routes; movement never projects through buildings.
-    for (const w of this.allActors()) {
-      let moving=false;
+    const actors = this.allActors();
+    this.startSocial();
+    const townBusy=this.walkers.length>=16;
+    let routePlanned=false;
+    const first=this.actorTurn??0;
+    this.actorTurn=(first+1)%Math.max(1,actors.length);
+    for (let offset=0;offset<actors.length;offset++) {
+      const w=actors[(first+offset)%actors.length];
+      const neighbour=!w.species&&this.nearResident(w);
+      if(neighbour&&dt){
+        const angle=distance2(w,neighbour)>1e-6?Math.atan2(w.x-neighbour.x,w.z-neighbour.z):w.order*2.39996;
+        const step=this.residentStep(w,angle,w.speed*dt,dt,true);
+        if(step){
+          if(w.activity){endResidentActivity(this,w);w.route=[];}
+          moveActor(w,this.ground(w.x,w.z),dt,step);
+          continue;
+        }
+      }
+      if(this.updateCelebration(w,dt)||updateResidentActivity(this,w,dt)||this.animateActorReaction(w,dt))continue;
+      let distance=0;
       if(w.wait>0) w.wait-=dt;
-      else if(!w.route?.length){this.pickTarget(w);if(!w.route?.length&&!this.tryYield(w))w.wait=.6;}
+      else if(!w.route.length){
+        if(!routePlanned){
+          this.pickTarget(w,actors);
+          routePlanned=true;
+          if(!w.route.length)w.wait=.6;
+        }
+      }
       else {
         const target=w.route[0],dx=target.x-w.x,dz=target.z-w.z,d=Math.hypot(dx,dz);
-        if(d<.045){w.route.shift();if(!w.route.length)w.wait=w.species?.length ? .3+Math.random()*1.2 : 2+Math.random()*4;}
-        else {
-          const step=Math.min((w.speed||.9)*dt,d),nx=w.x+dx/d*step,nz=w.z+dz/d*step;
-          if(!(w.species?this.faunaWalkable(nx,nz,w.radius+.06):this.walkable(nx,nz))){w.route=[];w.wait=.4;}
+        if(d<.045){
+          w.route.shift();
+          w.traffic=0;
+          if(!w.route.length&&!w.celebration){
+            const pause=w.species ? .3 : townBusy ? .55 : 1.6;
+            const variety=w.species ? 1.2 : townBusy ? 1.5 : 2.4;
+            w.wait=pause+Math.random()*variety;
+          }
+        }
+        else if(!w.species){
+          const step=Math.min((w.celebration?2.5:w.speed)*dt,d);
+          distance=this.residentStep(w,Math.atan2(dx,dz),step,dt);
+          const progress=d-Math.hypot(target.x-w.x,target.z-w.z);
+          w.traffic=distance&&progress>distance*.36?0:(w.traffic||0)+dt;
+          if(w.traffic>.45){
+            w.traffic=0;w.route=[];
+            endResidentActivity(this,w);
+            if(!w.celebration)this.reconnectToGrid(w,this.navigation(w),target);
+            if(!w.route.length)w.wait=.16+Math.random()*.32;
+          }
+        }else {
+          const step=Math.min((w.celebration ? 2.5 : w.speed || .9)*dt,d),nx=w.x+dx/d*step,nz=w.z+dz/d*step;
+          if(!this.faunaWalkable(nx,nz,w.radius+.06)){w.route=[];w.wait=.4;}
           else {
-            // Let nearby residents pass without overlapping or shoving each other.
-            const near=this.allActors().some(v=>v!==w && Math.hypot(v.x-nx,v.z-nz)<(w.radius||.24)+(v.radius||.24)+.04 && Math.hypot(v.x-nx,v.z-nz)<Math.hypot(v.x-w.x,v.z-w.z)-.001);
-            if(!near){w.x=nx;w.z=nz;moving=true;w.blockTime=0;}
-            else {w.blockTime=(w.blockTime||0)+dt;if(w.blockTime>1.25){w.route=[];w.blockTime=0;if(!this.tryYield(w))w.wait=.3+Math.random()*.3;}}
-            const angle=Math.atan2(dx,dz)+(w.species==='crab'?Math.PI/2:0),delta=Math.atan2(Math.sin(angle-w.m.rotation.y),Math.cos(angle-w.m.rotation.y));
-            w.m.rotation.y+=delta*Math.min(1,dt*7);
+            this.lookAtActor(w,target.x,target.z,dt);
+            w.x=nx;w.z=nz;distance=step;
           }
         }
       }
-      w.ph+=dt*(moving?9:1.5);
-      const ground=this.ground(w.x,w.z);w.y=Math.max(ground,(w.y??ground)+(ground-(w.y??ground))*Math.min(1,dt*12));
-      w.m.rotation.z=moving?Math.sin(w.ph)*.035:0;
-      w.m.position.set(w.x,w.y+(moving?Math.abs(Math.sin(w.ph))*.045:0),w.z);
+      moveActor(w,this.ground(w.x,w.z),dt,distance);
     }
-    // огни, маяк, звери
+    this.updateActorShadows(actors);
+    // Огни и постройки с подвижными деталями.
     for (const k in this.projObjs) {
       const o = this.projObjs[k];
       for (const g of o.glows) g.material.opacity = 0.65 + Math.sin(t * 9 + g.id) * 0.12 + Math.sin(t * 23) * 0.06;
-      if (o.beam) o.beam.rotation.y = t * 0.8;
-
+      o.animate?.(t);
     }
   }
   dispose() {
-    const geometries=new Set(),materials=new Set(),textures=new Set([this.glowTex,this.puffTex,this.oceanU.distTex.value]);
+    this.disposeResidentBatch();
+    for(const w of this.walkers)endResidentActivity(this,w);
+    for(const model of this.activityModels?.values()||[])model.dispose();
+    const geometries=new Set(),materials=new Set(),textures=new Set([this.glowTex,this.puffTex,this.oceanU.distTex.value,this.heartTexture]);
     this.scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);for(const m of (Array.isArray(o.material)?o.material:[o.material]))if(m){materials.add(m);if(m.map)textures.add(m.map);}});
     for(const g of geometries)g.dispose();for(const m of materials)m.dispose();for(const t of textures)t?.dispose();this.renderer.dispose();
   }
   render() {
+    this.updateResidentBatch();
     this.renderer.render(this.scene, this.camera);
   }
 }

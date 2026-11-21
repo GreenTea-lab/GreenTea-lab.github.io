@@ -412,7 +412,7 @@
     "preview": {
       "path": "games/castaway-solitaire/preview/index.html",
       "originalPath": "games/castaway-solitaire/dist",
-      "origin": "Sanitized cloud source snapshot; rebuild from source for validation.",
+      "origin": "Source version 2.6.0. Rebuild from source for the playable preview.",
       "modified": "2026-11-16T18:13:19.547Z",
       "generated": false
     },

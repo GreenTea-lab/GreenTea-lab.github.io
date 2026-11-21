@@ -1,4 +1,4 @@
-import {WORLD_PROJECTS,STAGE_NAMES} from './world-data.js';
+import {WORLD_PROJECTS} from './world-data.js';
 // Тексты RU/EN
 const RU = {
   title: 'Пасьянс Робинзона',
@@ -61,6 +61,7 @@ const RU = {
   buildT: 'Стройка на острове',
   buildBtn: 'Построить',
   needStars: 'Нужно звёзд: {n}',
+  starBalance: 'Баланс звёзд: {n}',
   stage: 'Этап {a} из {b}',
   done: 'Готово!',
   allDone: 'Остров обустроен! Можно играть дальше ради рекордов.',
@@ -113,7 +114,10 @@ const RU = {
   newFriend: 'На остров приплыл новый друг!',
   shipDone: 'Корабль готов! Остров стал настоящим домом.',
   // обучение и механики
-  tut1: 'Нажмите на карту, которая на 1 больше или меньше открытой карты внизу. Масть не важна.',
+  tut1: 'Кладите на открытую карту внизу, карты на один ранг выше или ниже. Масть не важна.',
+  tutExample: 'Например, на 7 можно положить 6 или 8.',
+  firstBuild: 'К стройке: {name}',
+  firstBuildHint: 'Звёзды за победу идут на стройку. Уже можно построить: {name}.',
   tut2: 'Нет подходящих карт? Нажмите на колоду и возьмите новую.',
   tutKA: 'После короля можно класть туза, а после туза — короля или двойку.',
   m_lockT: 'Замки',
@@ -202,6 +206,7 @@ const EN = {
   buildT: 'Island construction',
   buildBtn: 'Build',
   needStars: 'Stars needed: {n}',
+  starBalance: 'Star balance: {n}',
   stage: 'Stage {a} of {b}',
   done: 'Done!',
   allDone: 'The island is all set! Keep playing for records.',
@@ -253,7 +258,10 @@ const EN = {
   p_ship_3: 'Sailing ship',
   newFriend: 'A new friend has arrived on the island!',
   shipDone: 'The ship is ready! The island is a true home now.',
-  tut1: 'Tap a card that is 1 higher or 1 lower than the open card below. Suits do not matter.',
+  tut1: 'Play a card one rank higher or lower than the open card below. Suits do not matter.',
+  tutExample: 'For example, play a 6 or an 8 on a 7.',
+  firstBuild: 'Build: {name}',
+  firstBuildHint: 'Use your stars to build on the island. You can now build: {name}.',
   tut2: 'No matching cards? Tap the deck to draw a new one.',
   tutKA: 'An Ace can go on a King, and a King or a Two on an Ace.',
   m_lockT: 'Locks',
@@ -282,7 +290,15 @@ const EN = {
   endless: 'Endless mode',
 };
 
-for(const p of WORLD_PROJECTS){RU['p_'+p.id]=p.ru;EN['p_'+p.id]=p.en;for(let st=1;st<=3;st++){RU['p_'+p.id+'_'+st]=STAGE_NAMES.ru[st-1];EN['p_'+p.id+'_'+st]=STAGE_NAMES.en[st-1];}}
+for(const p of WORLD_PROJECTS){
+  RU['p_'+p.id]=p.ru;EN['p_'+p.id]=p.en;
+  for(let st=1;st<=3;st++){
+    RU['p_'+p.id+'_'+st]=p.stages.ru[st-1];
+    EN['p_'+p.id+'_'+st]=p.stages.en[st-1];
+  }
+}
+Object.assign(RU,{p_beach:'Пляж',p_beach_1:'Настилы и раздевалки',p_beach_2:'Зоны с лежаками',p_beach_3:'Павильоны у воды',beachHint:'Улучшение охватывает весь берег. Песчаная полоса расширяется, а настилы и места отдыха появляются в разных частях острова.'});
+Object.assign(EN,{p_beach:'Beach',p_beach_1:'Boardwalks and changing huts',p_beach_2:'Lounger areas',p_beach_3:'Beach pavilions',beachHint:'Upgrade the entire shoreline. The beach grows wider and new boardwalks and seating appear around the island.'});
 let D = RU;
 export let LANG = 'ru';
 export function setLang(l) {

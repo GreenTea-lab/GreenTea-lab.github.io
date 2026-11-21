@@ -12,7 +12,7 @@
 @font-face{font-family:Lobster;font-weight:400;font-display:block;src:url(lobster-cyr.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
 @font-face{font-family:Lobster;font-weight:400;font-display:block;src:url(lobster-lat.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2212,U+2215,U+FEFF,U+FFFD}
 /* Тропическая «бумага и дерево»: песочные панели, бирюза, коралл, тёмно-коричневый контур */
-:root{--ink:#3a2a1e;--ink2:#6b4f3a;--muted:#9b8166;--paper:#fff9ec;--paper2:#f8ecd2;--line:#ead8b6;--coral:#ff7a59;--coralD:#e05d3e;--sea:#22a7c9;--seaD:#1784a3;--leaf:#55b84a;--leafD:#3f9a36;--sun:#ffcf3f;--wood:#c98b55;
+:root{--ink:#3a2a1e;--ink2:#6b4f3a;--muted:#9b8166;--paper:#fff9ec;--paper2:#f8ecd2;--line:#ead8b6;--coral:#ff7a59;--coralD:#e05d3e;--sea:#22a7c9;--seaD:#1784a3;--leaf:#55b84a;--leafD:#3f9a36;--sun:#ffcf3f;--wood:#c98b55;--lagoon-art:url(backgrounds/lagoon.webp);--lagoon-portrait:url(backgrounds/lagoon-phone.webp);
 --logo:Lobster,Georgia,serif;--body:Nunito,"Arial Rounded MT Bold",Arial,sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;overflow:hidden;-webkit-touch-callout:none;background:#8fd6ef;font-family:var(--body);font-weight:800;color:var(--ink);-webkit-user-select:none;user-select:none;touch-action:none;overscroll-behavior:none}
@@ -171,55 +171,84 @@ svg{display:block}
 .lbr.me{background:#fff1a8}
 .lbr .rk{width:36px;text-align:center;color:var(--ink2)}
 .lbr .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* лоадер */
-#loader{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:linear-gradient(180deg,#7fd0f2 0%,#bfeafa 55%,#2fb3d8 56%,#1e8cc0 100%);font-family:var(--body)}
-#loader svg{width:min(300px,70vw);height:auto}
-#lt{font-family:var(--logo);font-size:42px;color:#fff;text-shadow:0 3px 0 #1d7fa0}
-.ld{display:flex;gap:10px}
-.ld i{width:14px;height:14px;border-radius:50%;background:#fff;animation:bob .9s ease-in-out infinite}
-.ld i:nth-child(2){animation-delay:.15s}
-.ld i:nth-child(3){animation-delay:.3s}
-#loader .wave{animation:wv 2.4s ease-in-out infinite}
-@keyframes wv{0%,100%{transform:translateX(0)}50%{transform:translateX(-10px)}}
-#loader .palm{transform-origin:150px 150px;animation:sw 3s ease-in-out infinite}
-@keyframes sw{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+/* Loading screen */
+#loader{position:fixed;inset:0;z-index:10;display:grid;align-items:center;justify-items:center;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;padding:calc(18px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(18px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));background:#12565b var(--lagoon-art) 50% 50%/cover no-repeat;color:#fff5d7;isolation:isolate;transition:opacity .25s ease}
+#loader::before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 52%,#082e37e6 0%,#103d46b3 33%,#04272830 70%),linear-gradient(0deg,#062e3680,transparent 45%)}
+#loader.loaded{opacity:0;pointer-events:none}
+.load-content{width:min(100%,560px);display:grid;justify-items:center;text-align:center;gap:clamp(13px,3vh,24px);padding:12px 0;filter:drop-shadow(0 9px 12px #0315145c)}
+.load-cards{position:relative;width:164px;height:112px;transform-origin:50% 60%;animation:load-breath 5.5s ease-in-out infinite}
+.load-card{position:absolute;top:9px;left:49px;display:grid;place-items:center;width:70px;height:96px;border-radius:11px;border:1px solid #ffe5a6;background:#fff1ce;color:#af423a;box-shadow:0 4px 0 #b58952,0 8px 20px #071e24a0;transform:rotate(-8deg)}
+.load-card::before{content:"";position:absolute;inset:5px;border:1px solid #c99c665e;border-radius:6px}
+.load-card i{font:700 13px Georgia,serif;position:absolute;top:10px;left:11px;font-style:normal}
+.load-card b{font:400 38px Georgia,serif;text-shadow:0 1px #fff7dd}
+.load-card.left{transform:translate(-34px,4px) rotate(-22deg);background:repeating-linear-gradient(45deg,#162f42 0 6px,#224858 6px 10px)}
+.load-card.left::before{border-color:#dca96e}
+.load-card.right{transform:translate(29px,7px) rotate(16deg);color:#194a52;background:linear-gradient(135deg,#fff7db,#dec698)}
+.load-card.face{background:linear-gradient(145deg,#fff7dd,#efd299 90%)}
+.load-card.face::after{content:"";position:absolute;width:5px;height:5px;bottom:10px;right:11px;transform:rotate(45deg);background:#af423a}
+.load-heading{max-width:100%;margin:0;font:400 clamp(34px,7.4vw,68px)/1.04 var(--logo);text-wrap:balance;text-shadow:0 3px #22575b,0 5px 12px #03272c}
+.load-state{width:min(100%,335px);display:grid;gap:10px;padding:15px 17px 13px;border:1px solid #f1dca28c;border-radius:15px;background:linear-gradient(150deg,#143c44f7,#0a3139f5);box-shadow:0 4px 0 #062a308c,inset 0 1px 0 #fff2c12b}
+.load-progress{height:9px;overflow:hidden;border-radius:12px;background:#04262b;border:1px solid #23494f;box-shadow:inset 0 1px 2px #04171b}
+.load-fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,#d8904d,#efbd70 70%,#fff0ad);box-shadow:0 0 9px #f0c17894;transition:width .32s ease-out}
+.load-status{margin:0;font-size:14px;line-height:1.35;color:#fff0cb;overflow-wrap:anywhere}
+#loader[data-error] .load-progress{display:none}
+#load-retry{justify-self:center;border:1px solid #d3ae68;border-radius:10px;background:#ffe4a5;color:#2b271b;font:900 14px var(--body);padding:8px 15px;box-shadow:0 2px #9a7239;cursor:pointer}
+#load-retry[hidden]{display:none}
+#load-retry:focus-visible{outline:2px solid #fff4cd;outline-offset:3px}
+@keyframes load-breath{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@media (orientation:portrait){#loader{background-image:var(--lagoon-portrait)}#loader::before{background:radial-gradient(ellipse at 50% 53%,#082e37db 0%,#103d46a9 39%,#04272819 78%)}}
+@media(max-height:450px){.load-content{gap:9px}.load-cards{height:82px;scale:.76;transform-origin:50% 10%}.load-heading{font-size:clamp(31px,8vh,47px)}.load-state{padding:10px 14px;gap:7px}}
+@media(prefers-reduced-motion:reduce){#loader,.load-fill{transition:none}.load-cards{animation:none}}
 @media (max-height:560px){.hud-c{flex-direction:row;gap:10px;padding:3px 14px;border-radius:14px}.hud-c b{font-size:18px}.hud-c .hs svg{width:20px;height:20px}.top .round{width:48px;height:48px}.top .round svg{width:26px;height:26px}.chip{height:42px;font-size:19px}.chip svg{width:28px;height:28px}.tip{top:calc(62px + var(--safe-top, env(safe-area-inset-top)));font-size:17px;padding:6px 12px}.big{height:54px;font-size:21px;min-width:140px}.side .round{width:58px;height:58px}.logo{display:none}.boost .round{width:58px;height:58px}}
 @media (max-width:420px){.big{min-width:150px;padding:0 18px;font-size:23px}.chip{font-size:20px;height:44px}.chip svg{width:30px;height:30px}.ph h2{font-size:24px}}
 </style>
 </head>
 <body oncontextmenu="return false">
-<div id="loader">
-<svg viewBox="0 0 300 220" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="232" cy="52" r="28" fill="#ffd86b"/>
-  <ellipse cx="150" cy="168" rx="120" ry="26" fill="#f3dca0" stroke="#3a2a1e" stroke-width="4"/>
-  <ellipse cx="150" cy="160" rx="96" ry="16" fill="#86cf62"/>
-  <g class="palm">
-    <path d="M150 158c-2-34 2-62 18-88" fill="none" stroke="#3a2a1e" stroke-width="13" stroke-linecap="round"/>
-    <path d="M150 158c-2-34 2-62 18-88" fill="none" stroke="#a77b52" stroke-width="7" stroke-linecap="round"/>
-    <g fill="#5fbf4a" stroke="#3a2a1e" stroke-width="4" stroke-linejoin="round">
-      <path d="M168 70c-20-18-48-16-66-2 18 0 34 4 46 14z"/>
-      <path d="M168 70c6-24 30-34 52-30-16 6-28 16-34 32z"/>
-      <path d="M168 70c22-4 40 6 48 24-14-8-30-12-44-10z"/>
-      <path d="M168 70c-14 6-22 20-22 38 6-14 14-24 26-30z"/>
-    </g>
-    <circle cx="164" cy="80" r="7" fill="#7a5232" stroke="#3a2a1e" stroke-width="3"/>
-    <circle cx="176" cy="78" r="6" fill="#7a5232" stroke="#3a2a1e" stroke-width="3"/>
-  </g>
-  <g transform="translate(70 128) rotate(-12)"><rect width="34" height="46" rx="6" fill="#fff" stroke="#3a2a1e" stroke-width="4"/><text x="9" y="24" font-family="Arial" font-weight="900" font-size="18" fill="#d8343f">A</text></g>
-  <g transform="translate(206 122) rotate(14)"><rect width="34" height="46" rx="6" fill="#fff" stroke="#3a2a1e" stroke-width="4"/><text x="8" y="24" font-family="Arial" font-weight="900" font-size="18" fill="#262b40">K</text></g>
-  <path class="wave" d="M0 196q20-10 40 0t40 0 40 0 40 0 40 0 40 0 40 0 40 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".8"/>
-</svg>
-<div id="lt">Пасьянс Робинзона</div>
-<div class="ld"><i></i><i></i><i></i></div>
+<div id="loader" aria-labelledby="lt" aria-busy="true">
+  <div class="load-content">
+    <div class="load-cards" aria-hidden="true">
+      <span class="load-card left"></span>
+      <span class="load-card right"><i>7</i><b>♠</b></span>
+      <span class="load-card face"><i>A</i><b>♥</b></span>
+    </div>
+    <h1 id="lt" class="load-heading">Пасьянс Робинзона</h1>
+    <div class="load-state">
+      <div class="load-progress" role="progressbar" aria-labelledby="lt" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="load-fill"></div></div>
+      <p class="load-status" id="load-status" role="status">Запускаем игру…</p>
+      <button id="load-retry" type="button" hidden>Попробовать снова</button>
+    </div>
+  </div>
 </div>
 <canvas id="c"></canvas>
 <div id="shade"></div>
 <canvas id="t"></canvas>
 <div id="ui"></div>
 <script>
-(function(){var l=(navigator.language||'ru').slice(0,2);if(['ru','be','kk','uk','uz','ky','tg','hy','az','ka'].indexOf(l)<0){document.getElementById('lt').textContent='Castaway Solitaire';document.title='Castaway Solitaire';document.documentElement.lang='en';}})();
+(() => {
+  const requested = new URLSearchParams(location.search).get('vk_language') || navigator.language || 'ru';
+  const english = !['ru','be','kk','uk','uz','ky','tg','hy','az','ka'].includes(requested.slice(0,2));
+  const title = document.getElementById('lt');
+  const status = document.getElementById('load-status');
+  const retry = document.getElementById('load-retry');
+  if (english) {
+    document.documentElement.lang = 'en';
+    document.title = title.textContent = 'Castaway Solitaire';
+    status.textContent = 'Starting the game…';
+    retry.textContent = 'Try again';
+  }
+  retry.addEventListener('click', () => location.reload());
+  document.addEventListener('error', event => {
+    if (event.target.id !== 'castaway-entry') return;
+    const loader = document.getElementById('loader');
+    if (!loader) return;
+    loader.dataset.error = '';
+    loader.setAttribute('aria-busy','false');
+    status.textContent = english ? 'The game could not load.' : 'Не удалось загрузить игру.';
+    retry.hidden = false;
+  }, true);
+})();
 </script>
 <!--SDK-->
-<script src="game.js"></script>
+<script id="castaway-entry" src="game.js"></script>
 </body>
 </html>
