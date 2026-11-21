@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
 <base href="./postcard-mahjong/">
-<meta name="postcard-mahjong-revision" content="postcard-mira-pose-crossfade-v31">
+<meta name="postcard-mahjong-revision" content="postcard-new-year-full-clears-v34">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Маджонг с открытками</title>
@@ -927,6 +927,93 @@ button:disabled{cursor:default}
 @media(prefers-reduced-motion: reduce) {
   .mira-backdrop { transition: none; }
 }
+
+.new-year-menu,
+#loader[data-season="new-year"],
+.new-year-launch {
+  background: #172638 url(ui/new-year-office.webp) center / cover no-repeat;
+}
+.new-year-menu::before,
+#loader[data-season="new-year"]::before {
+  background: linear-gradient(155deg,#10182d48,#141f32a8);
+}
+.new-year-menu .menu-layout {
+  background: linear-gradient(140deg,#14283ad9,#21394cbb 63%,#322536db);
+  border-color: #f2cf99b8;
+}
+.new-year-menu .brand::after { background: #532f43; }
+.new-year-banner {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  gap: clamp(8px,2vw,16px);
+  align-items: center;
+  width: 100%;
+  padding: 10px clamp(12px,2.5vw,22px);
+  text-align: left;
+  background: linear-gradient(105deg,#842b47,#60213b 62%,#493048);
+  color: #fff3d8;
+  border: 1px solid #ffdf9d;
+  border-radius: 14px;
+  box-shadow: 0 5px 20px #0d152777,inset 0 0 0 3px #fddd9c23;
+}
+.new-year-banner svg { width: clamp(24px,4vw,38px); height: auto; }
+.new-year-banner b { display: block; font: 400 clamp(17px,3vw,29px)/1.05 var(--head); }
+.new-year-banner small { display: block; margin-top: 4px; font: 600 11px/1.3 var(--body); color: #f3d3a8; }
+.new-year-banner em { color: #ffdc9b; font: 800 clamp(12px,2.5vw,17px)/1 var(--body); font-style: normal; white-space: nowrap; }
+.new-year-banner:focus-visible,.new-year-stops button:focus-visible { outline: 3px solid #ffd58a; outline-offset: 3px; }
+
+.loader-tiles .loader-season-art { display: none; }
+#loader[data-season="new-year"] .loader-panel { background: linear-gradient(145deg,#192d44e8,#37273ed4); }
+#loader[data-season="new-year"] .loader-tiles img:not(.loader-season-art) { display: none; }
+#loader[data-season="new-year"] .loader-season-art {
+  display: block;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  animation: none;
+}
+.new-year-launch { isolation: isolate; }
+.new-year-launch::before { content: ''; position: absolute; inset: 0; background: #111b31ad; z-index: -1; }
+.new-year-launch .mpanel {
+  width: min(94vw,700px);
+  border: 1px solid #e6c28e;
+  background: linear-gradient(145deg,#23394be8,#382942ee);
+  color: #fff2db;
+  box-shadow: 0 22px 64px #0c172ba6;
+  overflow: hidden;
+}
+.new-year-launch-body { display: grid; grid-template-columns: minmax(110px,42%) 1fr; gap: 17px; align-items: center; padding: 22px 26px 0 9px; }
+.new-year-launch-body img { width: 100%; max-height: min(45vh,290px); object-fit: contain; object-position: center bottom; align-self: end; }
+.new-year-launch-body > div { text-align: center; padding-bottom: 20px; }
+.new-year-launch-body h2 { font: 400 clamp(21px,4vw,38px)/1.07 var(--head); margin: 0 0 16px; }
+.new-year-launch-body p { margin: 0; color: #f4dab1; font: 600 clamp(12px,2.5vw,15px)/1.4 var(--body); }
+
+.new-year-map .mpanel { width: min(820px,95vw); }
+.new-year-map .mbody { align-items: stretch; }
+.new-year-map .bigbtn { width: 100%; min-height: 54px; }
+.new-year-progress { display: grid; grid-template-columns: 1fr auto; gap: 7px 10px; width: 100%; }
+.new-year-progress progress { grid-column: 1 / -1; width: 100%; height: 13px; accent-color: #8b4252; }
+.new-year-chapters { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,190px),1fr)); width: 100%; gap: 12px; }
+.new-year-chapter { border: 1px solid #d8c7a8; background: #fff7e9; border-radius: 12px; overflow: hidden; }
+.new-year-chapter img { display: block; width: 100%; aspect-ratio: 2; object-fit: cover; background: #27364c; }
+.new-year-chapter.is-locked img { filter: saturate(.65) brightness(.72); }
+.new-year-chapter h3 { margin: 8px 9px 6px; font: 400 19px/1.15 var(--head); }
+.new-year-stops { display: grid; grid-template-columns: repeat(7, minmax(0,1fr)); gap: 3px; padding: 0 7px 8px; }
+.new-year-stops button { height: 38px; min-width: 0; padding: 0; border: 1px solid #c58782; border-radius: 6px; background: #fff2da; color: #65413e; font: 800 12px/1 var(--body); }
+.new-year-stops button.done { background: #335e51; color: #fff4d8; border-color: #335e51; }
+.new-year-stops button:disabled { color: #7c7163; background: #f0e9dd; border-color: #ded2bc; opacity: 1; }
+.new-year-result .bigbtn { width: 100%; }
+.new-year-city { color: #7e4f4c; font: 800 13px/1.3 var(--body); }
+.new-year-letter { width: 100%; margin: 0; color: #4e362e; background: #fbf1dc; border: 1px solid #e0c899; border-radius: 10px; padding: 15px; font: 400 20px/1.5 var(--head); }
+.new-year-card { transform: none; }
+@media(max-width: 430px) {
+  .new-year-launch-body { grid-template-columns: 36% 1fr; padding: 16px 12px 0 4px; gap: 6px; }
+  .new-year-launch-body > div { padding-bottom: 12px; }
+}
 </style>
 <template id="third-party-notices"><pre>
 NUNITO-OFL.TXT
@@ -1239,7 +1326,7 @@ Wind, waves and typing sounds are synthesized from original code.
   <img class="loader-emblem" src="ui/emblem.webp" alt="" fetchpriority="high">
   <h1 id="ls">Маджонг с открытками</h1>
   <p class="loader-tagline" id="loader-tagline">Находите пары. Собирайте впечатления.</p>
-  <div class="loader-tiles" aria-hidden="true"><img src="ui/loader-apple.webp" alt=""><img src="ui/loader-bamboo.webp" alt=""><img src="ui/loader-flower.webp" alt=""></div>
+  <div class="loader-tiles" aria-hidden="true"><img src="ui/loader-apple.webp" alt=""><img src="ui/loader-bamboo.webp" alt=""><img src="ui/loader-flower.webp" alt=""><img class="loader-season-art" data-src="ui/new-year-mira-greeting.webp" alt=""></div>
   <div class="loader-journey"><span id="loader-cities">20 городов</span><i aria-hidden="true">✦</i><span id="loader-levels">1000 уровней</span></div>
   <div class="loader-progress" id="boot-progress" role="progressbar" aria-label="Загрузка игры"><span></span></div>
   <div id="lt" role="status" aria-live="polite">Открываем альбом…</div>
@@ -1247,11 +1334,24 @@ Wind, waves and typing sounds are synthesized from original code.
   <div id="boot-actions" hidden><button id="boot-retry">Повторить</button><button id="boot-offline">Открыть без сети</button></div>
   <noscript>Для игры нужен JavaScript. Откройте автономный HTML в браузере Chrome, Edge или Firefox.</noscript>
 </section></div>
+<script>window.__PM_NEW_YEAR_SEASON=function newYearSeason(date = new Date()) {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  if (month === 0 && year > 2026) return year - 1;
+  if (year >= 2026 && (month === 11 || (month === 10 && date.getDate() >= 20))) return year;
+  return null;
+}</script>
 <script>(function(){
   var language='ru',phase='opening',strings={
     ru:{title:'Маджонг с открытками',edition:'Коллекция путешествий',tagline:'Находите пары. Собирайте впечатления.',cities:'20 городов',levels:'1000 уровней',note:'Ваше путешествие скоро начнётся',retry:'Повторить',offline:'Открыть без сети',loading:'Загрузка игры',opening:'Открываем альбом…',art:'Готовим плитки и украшения…',save:'Находим ваше путешествие…',city:'Открываем вид на город…',ready:'Путешествие готово',failed:'Не удалось открыть игру. Попробуйте ещё раз.',files:'Не удалось загрузить файлы игры. Распакуйте весь ZIP или откройте автономный HTML.',slow:'Загрузка задержалась. Попробуйте ещё раз или откройте игру без сети.'},
     en:{title:'Postcard Mahjong',edition:'A collection of journeys',tagline:'Find pairs. Collect memories.',cities:'20 cities',levels:'1000 levels',note:'Your journey is about to begin',retry:'Try again',offline:'Open offline',loading:'Loading game',opening:'Opening your album…',art:'Preparing tiles and ornaments…',save:'Finding your journey…',city:'Opening a view of the city…',ready:'Your journey is ready',failed:'Unable to open the game. Please try again.',files:'Unable to load game files. Extract the full ZIP or open the standalone HTML.',slow:'Loading is taking longer. Try again or open the game offline.'}
   },loader=document.getElementById('loader');
+  if(window.__PM_NEW_YEAR_SEASON&&window.__PM_NEW_YEAR_SEASON()){
+    loader.setAttribute('data-season','new-year');
+    var mira=loader.querySelector('.loader-season-art');mira.src=mira.getAttribute('data-src');
+    Object.assign(strings.ru,{title:'Последний рейс новогодней почты',edition:'Новогодний сезон',tagline:'Письма ждут полуночи',cities:'9 городов',levels:'70 раскладов',note:'20 ноября — 31 января',opening:'Открываем почту…'});
+    Object.assign(strings.en,{title:'The Last Run of the New Year Post',edition:'New Year season',tagline:'Letters waiting for midnight',cities:'9 cities',levels:'70 boards',note:'20 November to 31 January',opening:'Opening the post office…'});
+  }
   function text(key){return strings[language][key]}
   function stage(key){phase=key;if(!loader||loader.classList.contains('is-error'))return;loader.setAttribute('data-stage',key);document.getElementById('lt').textContent=text(key)||text('opening')}
   window.__PM_BOOT_STAGE=stage;
@@ -1274,7 +1374,7 @@ Wind, waves and typing sounds are synthesized from original code.
   setTimeout(function(){if(!window.__PM_BOOT_DONE)window.__PM_BOOT_ERROR(text('slow'))},12000);
 })()</script>
 
-<script>window.__CITY_ART__={"amsterdam":"cities/amsterdam.webp","barcelona":"cities/barcelona.webp","cairo":"cities/cairo.webp","istanbul":"cities/istanbul.webp","kyoto":"cities/kyoto.webp","lisbon":"cities/lisbon.webp","london":"cities/london.webp","marrakesh":"cities/marrakesh.webp","moscow":"cities/moscow.webp","newyork":"cities/newyork.webp","paris":"cities/paris.webp","prague":"cities/prague.webp","rio":"cities/rio.webp","rome":"cities/rome.webp","santorini":"cities/santorini.webp","singapore":"cities/singapore.webp","spb":"cities/spb.webp","sydney":"cities/sydney.webp","venice":"cities/venice.webp","vienna":"cities/vienna.webp"};window.__CITY_VARIANTS__={"landscape":{"amsterdam":"cities/formats/landscape/amsterdam.webp","barcelona":"cities/formats/landscape/barcelona.webp","cairo":"cities/formats/landscape/cairo.webp","istanbul":"cities/formats/landscape/istanbul.webp","kyoto":"cities/formats/landscape/kyoto.webp","lisbon":"cities/formats/landscape/lisbon.webp","london":"cities/formats/landscape/london.webp","marrakesh":"cities/formats/landscape/marrakesh.webp","moscow":"cities/formats/landscape/moscow.webp","newyork":"cities/formats/landscape/newyork.webp","paris":"cities/formats/landscape/paris.webp","prague":"cities/formats/landscape/prague.webp","rio":"cities/formats/landscape/rio.webp","rome":"cities/formats/landscape/rome.webp","santorini":"cities/formats/landscape/santorini.webp","singapore":"cities/formats/landscape/singapore.webp","spb":"cities/formats/landscape/spb.webp","sydney":"cities/formats/landscape/sydney.webp","venice":"cities/formats/landscape/venice.webp","vienna":"cities/formats/landscape/vienna.webp"},"wide":{"amsterdam":"cities/formats/wide/amsterdam.webp","barcelona":"cities/formats/wide/barcelona.webp","cairo":"cities/formats/wide/cairo.webp","istanbul":"cities/formats/wide/istanbul.webp","kyoto":"cities/formats/wide/kyoto.webp","lisbon":"cities/formats/wide/lisbon.webp","london":"cities/formats/wide/london.webp","marrakesh":"cities/formats/wide/marrakesh.webp","moscow":"cities/formats/wide/moscow.webp","newyork":"cities/formats/wide/newyork.webp","paris":"cities/formats/wide/paris.webp","prague":"cities/formats/wide/prague.webp","rio":"cities/formats/wide/rio.webp","rome":"cities/formats/wide/rome.webp","santorini":"cities/formats/wide/santorini.webp","singapore":"cities/formats/wide/singapore.webp","spb":"cities/formats/wide/spb.webp","sydney":"cities/formats/wide/sydney.webp","venice":"cities/formats/wide/venice.webp","vienna":"cities/formats/wide/vienna.webp"},"portrait":{"amsterdam":"cities/formats/portrait/amsterdam.webp","barcelona":"cities/formats/portrait/barcelona.webp","cairo":"cities/formats/portrait/cairo.webp","istanbul":"cities/formats/portrait/istanbul.webp","kyoto":"cities/formats/portrait/kyoto.webp","lisbon":"cities/formats/portrait/lisbon.webp","london":"cities/formats/portrait/london.webp","marrakesh":"cities/formats/portrait/marrakesh.webp","moscow":"cities/formats/portrait/moscow.webp","newyork":"cities/formats/portrait/newyork.webp","paris":"cities/formats/portrait/paris.webp","prague":"cities/formats/portrait/prague.webp","rio":"cities/formats/portrait/rio.webp","rome":"cities/formats/portrait/rome.webp","santorini":"cities/formats/portrait/santorini.webp","singapore":"cities/formats/portrait/singapore.webp","spb":"cities/formats/portrait/spb.webp","sydney":"cities/formats/portrait/sydney.webp","venice":"cities/formats/portrait/venice.webp","vienna":"cities/formats/portrait/vienna.webp"}};window.__UI_ART__={"emblem":"ui/emblem.webp","mira":"ui/mira.webp","miraPoses":{"point":"ui/mira-point.webp","read":"ui/mira-read.webp","celebrate":"ui/mira-celebrate.webp"}};window.__TILE_ART__={"fruits":"tiles/fruits.webp","flowers":"tiles/flowers.webp","gems-a":"tiles/gems-a.webp","gems-b":"tiles/gems-b.webp","stamps-a":"tiles/stamps-a.webp","stamps-b":"tiles/stamps-b.webp","skins-front":"tiles/skins-front.webp","skins-back":"tiles/skins-back.webp"};window.__POSTCARD_ART__={"amsterdam":"postcards/amsterdam.webp","barcelona":"postcards/barcelona.webp","cairo":"postcards/cairo.webp","events":"postcards/events.webp","istanbul":"postcards/istanbul.webp","kyoto":"postcards/kyoto.webp","lisbon":"postcards/lisbon.webp","london":"postcards/london.webp","marrakesh":"postcards/marrakesh.webp","moscow":"postcards/moscow.webp","newyork":"postcards/newyork.webp","paris":"postcards/paris.webp","prague":"postcards/prague.webp","rio":"postcards/rio.webp","rome":"postcards/rome.webp","santorini":"postcards/santorini.webp","singapore":"postcards/singapore.webp","spb":"postcards/spb.webp","sydney":"postcards/sydney.webp","venice":"postcards/venice.webp","vienna":"postcards/vienna.webp","weekly":"postcards/weekly.webp"}</script>
+<script>window.__CITY_ART__={"amsterdam":"cities/amsterdam.webp","barcelona":"cities/barcelona.webp","cairo":"cities/cairo.webp","istanbul":"cities/istanbul.webp","kyoto":"cities/kyoto.webp","lisbon":"cities/lisbon.webp","london":"cities/london.webp","marrakesh":"cities/marrakesh.webp","moscow":"cities/moscow.webp","newyork":"cities/newyork.webp","paris":"cities/paris.webp","prague":"cities/prague.webp","rio":"cities/rio.webp","rome":"cities/rome.webp","santorini":"cities/santorini.webp","singapore":"cities/singapore.webp","spb":"cities/spb.webp","sydney":"cities/sydney.webp","venice":"cities/venice.webp","vienna":"cities/vienna.webp"};window.__CITY_VARIANTS__={"landscape":{"amsterdam":"cities/formats/landscape/amsterdam.webp","barcelona":"cities/formats/landscape/barcelona.webp","cairo":"cities/formats/landscape/cairo.webp","istanbul":"cities/formats/landscape/istanbul.webp","kyoto":"cities/formats/landscape/kyoto.webp","lisbon":"cities/formats/landscape/lisbon.webp","london":"cities/formats/landscape/london.webp","marrakesh":"cities/formats/landscape/marrakesh.webp","moscow":"cities/formats/landscape/moscow.webp","newyork":"cities/formats/landscape/newyork.webp","paris":"cities/formats/landscape/paris.webp","prague":"cities/formats/landscape/prague.webp","rio":"cities/formats/landscape/rio.webp","rome":"cities/formats/landscape/rome.webp","santorini":"cities/formats/landscape/santorini.webp","singapore":"cities/formats/landscape/singapore.webp","spb":"cities/formats/landscape/spb.webp","sydney":"cities/formats/landscape/sydney.webp","venice":"cities/formats/landscape/venice.webp","vienna":"cities/formats/landscape/vienna.webp"},"wide":{"amsterdam":"cities/formats/wide/amsterdam.webp","barcelona":"cities/formats/wide/barcelona.webp","cairo":"cities/formats/wide/cairo.webp","istanbul":"cities/formats/wide/istanbul.webp","kyoto":"cities/formats/wide/kyoto.webp","lisbon":"cities/formats/wide/lisbon.webp","london":"cities/formats/wide/london.webp","marrakesh":"cities/formats/wide/marrakesh.webp","moscow":"cities/formats/wide/moscow.webp","newyork":"cities/formats/wide/newyork.webp","paris":"cities/formats/wide/paris.webp","prague":"cities/formats/wide/prague.webp","rio":"cities/formats/wide/rio.webp","rome":"cities/formats/wide/rome.webp","santorini":"cities/formats/wide/santorini.webp","singapore":"cities/formats/wide/singapore.webp","spb":"cities/formats/wide/spb.webp","sydney":"cities/formats/wide/sydney.webp","venice":"cities/formats/wide/venice.webp","vienna":"cities/formats/wide/vienna.webp"},"portrait":{"amsterdam":"cities/formats/portrait/amsterdam.webp","barcelona":"cities/formats/portrait/barcelona.webp","cairo":"cities/formats/portrait/cairo.webp","istanbul":"cities/formats/portrait/istanbul.webp","kyoto":"cities/formats/portrait/kyoto.webp","lisbon":"cities/formats/portrait/lisbon.webp","london":"cities/formats/portrait/london.webp","marrakesh":"cities/formats/portrait/marrakesh.webp","moscow":"cities/formats/portrait/moscow.webp","newyork":"cities/formats/portrait/newyork.webp","paris":"cities/formats/portrait/paris.webp","prague":"cities/formats/portrait/prague.webp","rio":"cities/formats/portrait/rio.webp","rome":"cities/formats/portrait/rome.webp","santorini":"cities/formats/portrait/santorini.webp","singapore":"cities/formats/portrait/singapore.webp","spb":"cities/formats/portrait/spb.webp","sydney":"cities/formats/portrait/sydney.webp","venice":"cities/formats/portrait/venice.webp","vienna":"cities/formats/portrait/vienna.webp"}};window.__UI_ART__={"emblem":"ui/emblem.webp","mira":"ui/mira.webp","miraPoses":{"point":"ui/mira-point.webp","read":"ui/mira-read.webp","celebrate":"ui/mira-celebrate.webp"}};window.__TILE_ART__={"fruits":"tiles/fruits.webp","flowers":"tiles/flowers.webp","gems-a":"tiles/gems-a.webp","gems-b":"tiles/gems-b.webp","stamps-a":"tiles/stamps-a.webp","stamps-b":"tiles/stamps-b.webp","skins-front":"tiles/skins-front.webp","skins-back":"tiles/skins-back.webp"};window.__POSTCARD_ART__={"amsterdam":"postcards/amsterdam.webp","barcelona":"postcards/barcelona.webp","cairo":"postcards/cairo.webp","events":"postcards/events.webp","istanbul":"postcards/istanbul.webp","kyoto":"postcards/kyoto.webp","lisbon":"postcards/lisbon.webp","london":"postcards/london.webp","marrakesh":"postcards/marrakesh.webp","moscow":"postcards/moscow.webp","newyork":"postcards/newyork.webp","paris":"postcards/paris.webp","prague":"postcards/prague.webp","rio":"postcards/rio.webp","rome":"postcards/rome.webp","santorini":"postcards/santorini.webp","singapore":"postcards/singapore.webp","spb":"postcards/spb.webp","sydney":"postcards/sydney.webp","venice":"postcards/venice.webp","vienna":"postcards/vienna.webp","weekly":"postcards/weekly.webp"};window.__NEW_YEAR_ART__={"sydney":"ui/new-year-sydney.webp","kyoto":"ui/new-year-kyoto.webp","singapore":"ui/new-year-singapore.webp","moscow":"ui/new-year-moscow.webp","cairo":"ui/new-year-cairo.webp","vienna":"ui/new-year-vienna.webp","lisbon":"ui/new-year-lisbon.webp","rio":"ui/new-year-rio.webp","newyork":"ui/new-year-newyork.webp","office":"ui/new-year-office.webp","mira-greeting":"ui/new-year-mira-greeting.webp","mira-letter":"ui/new-year-mira-letter.webp","panorama":"ui/new-year-panorama.webp"}</script>
 <script src="game.js"></script>
 </body>
 </html>
