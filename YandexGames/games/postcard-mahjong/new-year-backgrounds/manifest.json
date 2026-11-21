@@ -1,0 +1,112 @@
+[
+  {
+    "id": "sydney",
+    "source": "art/new-year/backgrounds/sydney.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/sydney.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1611198,
+    "sha256": "d597499737296ebd9135f8467258347c1c8c7372d7b282b4249cff25e624c928"
+  },
+  {
+    "id": "kyoto",
+    "source": "art/new-year/backgrounds/kyoto.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/kyoto.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1599362,
+    "sha256": "8aaea9a251c956947a1fd70b6478b8e151b861d952aa9ee367a2020ba7b20d6d"
+  },
+  {
+    "id": "singapore",
+    "source": "art/new-year/backgrounds/singapore.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/singapore.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1536074,
+    "sha256": "571c74750ebb8c588bb2f86a6af79476b0a4562c5597d755495f11e953665c90"
+  },
+  {
+    "id": "moscow",
+    "source": "art/new-year/backgrounds/moscow.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/moscow.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1689728,
+    "sha256": "3576dd24adea90700716bf4090f2fc08f871f61a705a5ef8472fe979e02b36f8"
+  },
+  {
+    "id": "cairo",
+    "source": "art/new-year/backgrounds/cairo.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/cairo.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1560400,
+    "sha256": "aee33ec10fd656725ec13cc1e1943629f67b0ee25b1359c905a10ad3f00e1c16"
+  },
+  {
+    "id": "vienna",
+    "source": "art/new-year/backgrounds/vienna.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/vienna.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1577692,
+    "sha256": "0d066aafebcbe5a69572aa1eabd51a7c77d87709cfeb79812a8cc1f8d990b5cc"
+  },
+  {
+    "id": "lisbon",
+    "source": "art/new-year/backgrounds/lisbon.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/lisbon.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1650368,
+    "sha256": "8ac59c19176d6cc60f47f12b9d07627b2e72a7025972d7da7aac10284676c0cb"
+  },
+  {
+    "id": "rio",
+    "source": "art/new-year/backgrounds/rio.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/rio.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1528848,
+    "sha256": "1d5f6d1408e659be69d594b0ceacc4f1723f7c9cd7dbcf6b72d5574558ceb3fa"
+  },
+  {
+    "id": "newyork",
+    "source": "art/new-year/newyork.png",
+    "sourceWidth": 1536,
+    "sourceHeight": 1024,
+    "file": "new-year-backgrounds/newyork.webp",
+    "width": 2560,
+    "height": 1706,
+    "bytes": 1530738,
+    "sha256": "c87d122c3f2770adcfde3648d42855de2ea7452b8ea4df736b630aeb82d96748"
+  },
+  {
+    "id": "office",
+    "source": "art/new-year/backgrounds/office.png",
+    "sourceWidth": 1254,
+    "sourceHeight": 1254,
+    "file": "new-year-backgrounds/office.webp",
+    "width": 2560,
+    "height": 2560,
+    "bytes": 1723560,
+    "sha256": "b2b2ab020bf84843872a930c1fa23b996d4323e6f00054ad45ffe5db10f468b4"
+  }
+]
